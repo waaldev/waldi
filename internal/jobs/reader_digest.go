@@ -114,7 +114,7 @@ func (j ReaderDigestJob) Run(ctx context.Context) error {
 			"List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
 			"Precedence":            "bulk",
 		}
-		if err := mailer.SendBulk(ctx, user.Email, subject, plain, htmlBody, headers); err != nil {
+		if err := mailer.SendBulk(ctx, user.Email, subject, plain, htmlBody, mail.BrandName(user.Locale), headers); err != nil {
 			logger.Error("sending reader digest", "username", user.Username, "err", err)
 			continue
 		}
@@ -199,7 +199,7 @@ func (j ReaderDigestJob) runForCapturedEmails(ctx context.Context, mailer mail.M
 			"List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
 			"Precedence":            "bulk",
 		}
-		if err := mailer.SendBulk(ctx, addr.Email, subject, plain, htmlBody, headers); err != nil {
+		if err := mailer.SendBulk(ctx, addr.Email, subject, plain, htmlBody, mail.BrandName(lang), headers); err != nil {
 			logger.Error("sending email capture digest", "email", addr.Email, "err", err)
 			continue
 		}

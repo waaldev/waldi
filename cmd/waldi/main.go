@@ -38,6 +38,7 @@ type Config struct {
 	SMTPUsername     string
 	SMTPPassword     string
 	SMTPFrom         string
+	SMTPDigestFrom   string
 	S3Endpoint       string
 	S3AccessKey      string
 	S3SecretKey      string
@@ -206,7 +207,7 @@ func runDigest(args []string) error {
 	return jobs.DigestJob{
 		Store:   st,
 		Logger:  logger,
-		Mailer:  newMailer(cfg, logger),
+		Mailer:  newMailer(cfg, logger, cfg.SMTPDigestFrom),
 		BaseURL: appURL(cfg),
 	}.Run(ctx)
 }
@@ -234,7 +235,7 @@ func runReaderDigest(args []string) error {
 	return jobs.ReaderDigestJob{
 		Store:      st,
 		Logger:     logger,
-		Mailer:     newMailer(cfg, logger),
+		Mailer:     newMailer(cfg, logger, cfg.SMTPDigestFrom),
 		BaseURL:    appURL(cfg),
 		BaseDomain: cfg.BaseDomain,
 	}.Run(ctx)
@@ -277,7 +278,7 @@ func appURL(cfg Config) string {
 	return "https://" + cfg.BaseDomain
 }
 
-func newMailer(cfg Config, logger *slog.Logger) mail.Mailer {
+func newMailer(cfg Config, logger *slog.Logger, from string) mail.Mailer {
 	if cfg.SMTPHost == "" {
 		return mail.NoopMailer{Logger: logger}
 	}
@@ -286,7 +287,7 @@ func newMailer(cfg Config, logger *slog.Logger) mail.Mailer {
 		Port:     cfg.SMTPPort,
 		Username: cfg.SMTPUsername,
 		Password: cfg.SMTPPassword,
-		From:     cfg.SMTPFrom,
+		From:     from,
 	})
 }
 
@@ -363,7 +364,7 @@ func serve(args []string) error {
 		DevMode:    cfg.Environment == "dev",
 		Logger:     logger,
 		Store:      st,
-		Mailer:     newMailer(cfg, logger),
+		Mailer:     newMailer(cfg, logger, cfg.SMTPFrom),
 		Images:     images,
 		S3Media:    s3media,
 		CDNPurger:  newCDNPurger(cfg),
@@ -513,7 +514,8 @@ func loadConfig() Config {
 		SMTPPort:         env("WALDI_SMTP_PORT", "587"),
 		SMTPUsername:     env("WALDI_SMTP_USERNAME", ""),
 		SMTPPassword:     env("WALDI_SMTP_PASSWORD", ""),
-		SMTPFrom:         env("WALDI_SMTP_FROM", "no-reply@waldi.blog"),
+		SMTPFrom:         env("WALDI_SMTP_FROM", "no-reply@email.waldi.blog"),
+		SMTPDigestFrom:   env("WALDI_SMTP_DIGEST_FROM", "digest@email.waldi.blog"),
 		S3Endpoint:       env("WALDI_S3_ENDPOINT", ""),
 		S3AccessKey:      env("WALDI_S3_ACCESS_KEY", ""),
 		S3SecretKey:      env("WALDI_S3_SECRET_KEY", ""),

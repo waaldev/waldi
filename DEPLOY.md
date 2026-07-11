@@ -2,7 +2,7 @@
 
 The reference deployment is a single **DigitalOcean Droplet** running Docker Compose. Nothing here is DigitalOcean-specific beyond the DNS step, so any VPS provider works the same way. (A managed-platform deploy, e.g. Heroku, is on the roadmap — see `ROADMAP.md` — but isn't supported yet since the app expects to own its own TLS/Caddy layer and a mounted volume for Caddy's certificate cache.)
 
-Production stack: **Caddy** (HTTPS) → **waldi** (HTTP on :8080) → **Postgres** + **Cloudflare R2** (S3-compatible object storage) + **Resend** (SMTP).
+Production stack: **Caddy** (HTTPS) → **waldi** (HTTP on :8080) → **Postgres** + **Cloudflare R2** (S3-compatible object storage) + SMTP (any provider).
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Production stack: **Caddy** (HTTPS) → **waldi** (HTTP on :8080) → **Postgres
 - Domain you control (e.g. `waldi.blog`)
 - [Cloudflare](https://cloudflare.com) account with the domain on Cloudflare DNS (required for `*.waldi.blog` wildcard TLS, and used for edge caching)
 - [Cloudflare R2](https://developers.cloudflare.com/r2/) bucket for image uploads and database backups (any S3-compatible store also works)
-- [Resend](https://resend.com) (or any SMTP provider) for transactional email
+- An SMTP provider (e.g. [AhaSend](https://ahasend.com), [Brevo](https://brevo.com), Amazon SES, Resend) for transactional and digest email
 
 ## DNS
 
@@ -51,7 +51,7 @@ Required for production:
 | `WALDI_BASE_DOMAIN` | Your domain, e.g. `waldi.blog` |
 | `WALDI_DATABASE_URL` | Postgres URL (default uses bundled `postgres` service) |
 | `POSTGRES_PASSWORD` | Password for bundled Postgres |
-| `WALDI_SMTP_*` | SMTP credentials for email verification and digests (Resend, or any SMTP provider) |
+| `WALDI_SMTP_*` | SMTP credentials, plus `WALDI_SMTP_FROM` (transactional: verification, password reset) and `WALDI_SMTP_DIGEST_FROM` (bulk: writer/reader digests) |
 | `WALDI_S3_*` | Object storage for image uploads (Cloudflare R2, or any S3-compatible store) |
 | `CLOUDFLARE_API_TOKEN` | API token with `Zone:DNS:Edit` (and `Zone:Cache Purge` if using CDN purge) |
 | `WALDI_CF_ZONE_ID` | Optional — enables Cloudflare cache purge on publish |

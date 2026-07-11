@@ -84,7 +84,7 @@ func (j DigestJob) Run(ctx context.Context) error {
 			"List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
 			"Precedence":            "bulk",
 		}
-		if err := mailer.SendBulk(ctx, user.Email, subject, plain, htmlBody, headers); err != nil {
+		if err := mailer.SendBulk(ctx, user.Email, subject, plain, htmlBody, mail.BrandName(user.Locale), headers); err != nil {
 			logger.Error("sending digest", "username", user.Username, "err", err)
 			continue
 		}

@@ -66,7 +66,7 @@ func (s *Server) queueVerificationEmail(user store.User, baseURL, token string, 
 		}
 
 		subject, plain, htmlBody := mail.VerificationEmail(locale, verifyURL)
-		if err := s.mailer.SendHTML(ctx, email, subject, plain, htmlBody); err != nil {
+		if err := s.mailer.SendHTML(ctx, email, subject, plain, htmlBody, mail.BrandName(locale)); err != nil {
 			s.logger.Error("sending verification email", "err", err, "user_id", userID, "email", email)
 		}
 	}()

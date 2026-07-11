@@ -283,7 +283,7 @@ func (s *Server) handleForgotPassword(w http.ResponseWriter, r *http.Request) {
 			} else if s.mailer != nil {
 				resetURL := passwordResetURL(r, s.baseDomain, token)
 				subject, plain, htmlBody := mail.PasswordResetEmail(user.Locale, resetURL)
-				if err := s.mailer.SendHTML(r.Context(), user.Email, subject, plain, htmlBody); err != nil {
+				if err := s.mailer.SendHTML(r.Context(), user.Email, subject, plain, htmlBody, mail.BrandName(user.Locale)); err != nil {
 					s.logger.Error("sending reset email", "err", err)
 				}
 			}

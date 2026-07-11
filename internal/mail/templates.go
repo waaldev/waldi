@@ -33,6 +33,12 @@ func htmlEmail(lang, title, bodyHTML, footer string) string {
 		html.EscapeString(lang), dir, styles, html.EscapeString(title), bodyHTML, footer)
 }
 
+// BrandName returns the From display name for the given locale (e.g. "Waldi"
+// or "والدی"), shown in the recipient's inbox next to the From address.
+func BrandName(lang string) string {
+	return i18n.T(lang, "brand")
+}
+
 func buttonLink(href, label string) string {
 	return fmt.Sprintf(`<p><a class="btn" href="%s">%s</a></p>`, html.EscapeString(href), html.EscapeString(label))
 }

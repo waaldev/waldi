@@ -66,7 +66,7 @@ Postgres, `migrations/00N_*.sql`. Core tables: `users`, `sessions`, `posts` (`do
 | Object storage | Cloudflare R2 (S3-compatible; any S3-compatible store works) — images are resized and converted to WebP on upload |
 | Edge cache | Cloudflare — anonymous HTML pages are served `Cache-Control: public`, cached at the edge, and purged on publish/settings/domain changes via the Cloudflare API |
 | TLS + custom domains | Caddy — wildcard cert via Cloudflare DNS challenge for `*.<base-domain>`, on-demand per-domain Let's Encrypt certs for verified user custom domains (gated by an internal `/internal/caddy-ask` endpoint) |
-| Email | Resend (or any SMTP provider) — transactional (verification) and digest email |
+| Email | Any SMTP provider — separate From addresses for transactional (verification, password reset) and bulk digest email |
 | Deploy | Docker Compose on a single VM (reference target: a DigitalOcean Droplet). A managed-platform deploy (e.g. Heroku) is on the roadmap but not yet supported, since the app currently owns its own TLS/Caddy layer |
 | CI/CD | GitHub Actions — lint → test → build on every push/PR, then deploy over SSH on merge to `main` |
 | Backups | Daily cron dumps Postgres and uploads the gzip'd archive to R2 |
