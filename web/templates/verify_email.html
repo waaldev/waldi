@@ -1,0 +1,28 @@
+{{define "verify_email.html"}}
+{{template "layout-start" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    <a href="/write">{{.T "nav.write"}}</a>
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<main class="form-page">
+  <span class="mark-big" role="presentation">※</span>
+  <h1 class="form-title">{{.Auth.Heading}}</h1>
+  {{if .Auth.Message}}
+    <p class="form-note">{{.Auth.Message}}</p>
+  {{else}}
+    <p class="form-note">{{.T "auth.verify.body"}}</p>
+  {{end}}
+
+  {{if .Auth.CanResend}}
+    <form method="post" action="/verify-email/resend">
+      <button class="btn-primary" type="submit">{{.T "auth.verify.resend"}}</button>
+    </form>
+  {{end}}
+</main>
+{{template "layout-end" .}}
+{{end}}

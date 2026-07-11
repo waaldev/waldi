@@ -1,0 +1,52 @@
+{{define "write.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+{{if .Write.Error}}
+  <p class="form-error">{{.Write.Error}}</p>
+{{end}}
+
+<section class="write-hero">
+  <form method="post" action="/write/drafts">
+    <button class="btn-follow" type="submit">{{.T "write.new.submit"}}</button>
+  </form>
+</section>
+
+{{if .Write.Drafts}}
+  <p class="daylabel">{{.T "write.drafts.label"}}</p>
+  <ul class="feed postlist">
+    {{range .Write.Drafts}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <a class="feed-item" href="/write/{{.ID}}">
+          <h2 class="feed-title">{{.Title}}</h2>
+          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          <p class="post-meta">{{.WriteMeta}}</p>
+        </a>
+      </li>
+    {{end}}
+  </ul>
+{{end}}
+
+{{if .Write.Published}}
+  <p class="daylabel">{{.T "write.published.label"}}</p>
+  <ul class="feed postlist">
+    {{range .Write.Published}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <a class="feed-item" href="/write/{{.ID}}">
+          <h2 class="feed-title">{{.Title}}</h2>
+          <p class="post-meta">{{.WriteMeta}}</p>
+        </a>
+      </li>
+    {{end}}
+  </ul>
+  {{if .Write.PublishedOlderURL}}
+    <p class="feed-more"><a class="quiet-link" href="{{.Write.PublishedOlderURL}}">{{.T "pagination.older"}}</a></p>
+  {{end}}
+{{end}}
+
+<footer class="finish">
+  <p>※</p>
+  <small>{{.T "write.finish.sub"}}</small>
+</footer>
+{{template "layout-end" .}}
+{{end}}

@@ -1,0 +1,57 @@
+{{define "you.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<section class="blog-head">
+  <h1 class="blog-name">{{.Blog.DisplayName}}</h1>
+  {{if .Blog.Bio}}
+    <p class="blog-bio">{{.Blog.Bio}}</p>
+  {{end}}
+
+  <p class="owner-row">
+    <a href="{{.Blog.PublicURL}}" target="_blank" rel="noopener">{{.T "you.owner.badge"}}</a>
+    <span class="sep">·</span>&nbsp;<a href="/settings">{{.T "nav.settings"}}</a>
+    <span class="sep">·</span>&nbsp;<a href="/write">{{.T "you.owner.drafts"}}</a>
+  </p>
+
+  {{if .Blog.Pages}}
+    <nav class="blog-nav">
+      {{range .Blog.Pages}}
+        <a href="{{.URL}}">{{.Title}}</a>
+      {{end}}
+    </nav>
+  {{end}}
+</section>
+
+{{if .Blog.Archives}}
+  {{range .Blog.Archives}}
+    <p class="archive-year" lang="{{$.Blog.Lang}}">{{.Year}}</p>
+    <ul class="feed">
+      {{range .Posts}}
+        <li lang="{{.Lang}}" dir="{{.Dir}}">
+          <a class="feed-item" href="{{.URL}}">
+            <p class="feed-writer">{{.FeedDate}}</p>
+            <h2 class="feed-title">{{.Title}}</h2>
+            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          </a>
+        </li>
+      {{end}}
+    </ul>
+  {{end}}
+  {{if .Blog.OlderURL}}
+    <p class="feed-more"><a class="quiet-link" href="{{.Blog.OlderURL}}">{{.T "pagination.older"}}</a></p>
+  {{end}}
+{{else}}
+  <div class="empty-state">
+    <h2>{{.T "profile.empty.heading"}}</h2>
+    <p>{{.T "profile.empty.body"}}</p>
+  </div>
+{{end}}
+
+<footer class="finish">
+  <p>{{.T "profile.finish"}}</p>
+  <small lang="{{.Lang}}">{{.T "profile.finish.line" .Blog.AuthorName (.T "brand")}}</small>
+</footer>
+
+{{template "layout-end" .}}
+{{end}}

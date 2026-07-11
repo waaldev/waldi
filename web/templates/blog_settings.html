@@ -1,0 +1,223 @@
+{{define "blog_settings.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<main>
+  <section class="settings-section">
+    <h1 class="settings-title">{{.T "blog.settings.heading"}}</h1>
+    <p class="settings-sub">{{.T "blog.settings.lead"}}</p>
+
+    {{if .BlogSettings.Error}}
+      <p class="form-error">{{.BlogSettings.Error}}</p>
+    {{else if .BlogSettings.Saved}}
+      <p class="form-note">{{.T "blog.settings.saved"}}</p>
+    {{end}}
+
+    <form method="post" action="/settings">
+      <div class="field">
+        <label for="display_name">{{.T "blog.settings.display_name"}}</label>
+        <input id="display_name" name="display_name" value="{{.BlogSettings.DisplayName}}" maxlength="80" autocomplete="organization">
+        <p class="hint">{{.T "blog.settings.display_name.help"}}</p>
+      </div>
+
+      <div class="field">
+        <label for="author_name">{{.T "blog.settings.author_name"}}</label>
+        <input id="author_name" name="author_name" value="{{.BlogSettings.AuthorName}}" maxlength="80" autocomplete="name">
+        <p class="hint">{{.T "blog.settings.author_name.help"}}</p>
+      </div>
+
+      <div class="field">
+        <label for="bio">{{.T "blog.settings.bio"}}</label>
+        <textarea id="bio" name="bio" rows="3" maxlength="500">{{.BlogSettings.Bio}}</textarea>
+        <p class="hint">{{.T "blog.settings.bio.help"}}</p>
+      </div>
+
+      <div class="field">
+        <label for="blog_lang">{{.T "blog.settings.lang"}}</label>
+        <select id="blog_lang" name="blog_lang">
+          <option value="fa" {{if eq .BlogSettings.BlogLang "fa"}}selected{{end}}>{{.T "blog.settings.lang.fa"}}</option>
+          <option value="en" {{if eq .BlogSettings.BlogLang "en"}}selected{{end}}>{{.T "blog.settings.lang.en"}}</option>
+        </select>
+        <p class="hint">{{.T "blog.settings.lang.help"}}</p>
+      </div>
+
+      <button class="btn-save" type="submit">{{.T "blog.settings.submit"}}</button>
+    </form>
+  </section>
+
+  <section class="settings-section">
+    <h2 class="settings-title">{{.T "blog.settings.pages.heading"}}</h2>
+    <p class="settings-sub">{{.T "blog.settings.pages.lead"}}</p>
+
+    {{if .BlogSettings.PagesError}}
+      <p class="form-error">{{.BlogSettings.PagesError}}</p>
+    {{end}}
+
+    {{if .BlogSettings.Pages}}
+      <ul class="pages-list">
+        {{range $p := .BlogSettings.Pages}}
+          <li class="page-row">
+            <span class="ptitle">{{$p.Title}}</span>
+            <span class="pslug" dir="ltr">{{$p.URL}}</span>
+            <form class="inline-form" method="post" action="/settings/pages/{{$p.ID}}/move">
+              <input type="hidden" name="direction" value="up">
+              <button class="pact" type="submit" {{if $p.IsFirst}}disabled{{end}}>{{$.T "blog.settings.pages.move.up"}}</button>
+            </form>
+            <form class="inline-form" method="post" action="/settings/pages/{{$p.ID}}/move">
+              <input type="hidden" name="direction" value="down">
+              <button class="pact" type="submit" {{if $p.IsLast}}disabled{{end}}>{{$.T "blog.settings.pages.move.down"}}</button>
+            </form>
+            <details class="page-slug-edit">
+              <summary class="pact">{{$.T "blog.settings.pages.edit_slug"}}</summary>
+              <form class="inline-form" method="post" action="/settings/pages/{{$p.ID}}/slug">
+                <input name="slug" value="{{$p.Slug}}" maxlength="80" dir="ltr">
+                <button class="pact" type="submit">{{$.T "blog.settings.pages.save_slug"}}</button>
+              </form>
+            </details>
+            <a class="pact" href="/write/{{$p.ID}}">{{$.T "blog.settings.pages.write"}}</a>
+            <form class="inline-form" method="post" action="/settings/pages/{{$p.ID}}/delete">
+              <button class="pact" type="submit">{{$.T "blog.settings.pages.delete"}}</button>
+            </form>
+          </li>
+        {{end}}
+      </ul>
+    {{end}}
+
+    {{if lt (len .BlogSettings.Pages) .BlogSettings.MaxPages}}
+      <details class="add-page">
+        <summary class="add-quiet">{{.T "blog.settings.pages.add"}}</summary>
+        <form method="post" action="/settings/pages">
+          <div class="field">
+            <label for="page_title">{{.T "blog.settings.pages.title_label"}}</label>
+            <input id="page_title" name="title" maxlength="80">
+          </div>
+          <div class="field">
+            <label for="page_slug">{{.T "blog.settings.pages.slug_label"}}</label>
+            <input id="page_slug" name="slug" maxlength="80" dir="ltr" placeholder="{{.T "blog.settings.pages.slug_placeholder"}}">
+          </div>
+          <button class="btn-save" type="submit">{{.T "blog.settings.pages.create"}}</button>
+        </form>
+      </details>
+    {{end}}
+    <p class="hint">{{.T "blog.settings.pages.hint" .BlogSettings.MaxPages}}</p>
+  </section>
+
+  <section class="settings-section">
+    <h2 class="settings-title">{{.T "blog.settings.domain.heading"}}</h2>
+    <p class="settings-sub">{{.T "blog.settings.domain.lead"}}</p>
+
+    {{if .BlogSettings.DomainError}}
+      <p class="form-error">{{.BlogSettings.DomainError}}</p>
+    {{else if .BlogSettings.DomainNotice}}
+      <p class="form-note">{{.BlogSettings.DomainNotice}}</p>
+    {{end}}
+
+    {{if and .BlogSettings.CustomDomain (not .BlogSettings.CustomDomainVerified)}}
+      <section class="domain-panel domain-panel--pending" aria-labelledby="domain-pending-title">
+        <div class="domain-panel__head">
+          <h3 class="domain-panel__name" id="domain-pending-title" dir="ltr">{{.BlogSettings.CustomDomain}}</h3>
+          <p class="domain-badge domain-badge--pending">{{.T "blog.settings.domain.status.unverified"}}</p>
+        </div>
+
+        <p class="domain-panel__intro">{{.T "blog.settings.domain.verify.intro"}}</p>
+
+        <dl class="domain-records">
+          <div class="domain-record">
+            <dt>{{.T "blog.settings.domain.record.txt"}}</dt>
+            <dd>
+              <span class="domain-record__label">{{.T "blog.settings.domain.record.host"}}</span>
+              <code class="domain-record__value" dir="ltr">{{.BlogSettings.ChallengeHost}}</code>
+              <span class="domain-record__label">{{.T "blog.settings.domain.record.value"}}</span>
+              <code class="domain-record__value" dir="ltr">{{.BlogSettings.ChallengeToken}}</code>
+            </dd>
+          </div>
+          <div class="domain-record">
+            <dt>{{.T "blog.settings.domain.record.cname"}}</dt>
+            <dd>
+              <span class="domain-record__label">{{.T "blog.settings.domain.record.host"}}</span>
+              <code class="domain-record__value" dir="ltr">{{.BlogSettings.CustomDomain}}</code>
+              <span class="domain-record__label">{{.T "blog.settings.domain.record.target"}}</span>
+              <code class="domain-record__value" dir="ltr">{{.BlogSettings.CNAMETarget}}</code>
+            </dd>
+          </div>
+        </dl>
+
+        <p class="domain-panel__note">{{.T "blog.settings.domain.instructions.apex"}}</p>
+
+        <div class="domain-actions">
+          <form method="post" action="/settings/domain/verify">
+            <button class="btn-primary" type="submit">{{.T "blog.settings.domain.verify"}}</button>
+          </form>
+          <form method="post" action="/settings/domain/remove">
+            <button class="btn-secondary" type="submit">{{.T "blog.settings.domain.remove"}}</button>
+          </form>
+        </div>
+      </section>
+    {{else if .BlogSettings.CustomDomainVerified}}
+      <div class="domain-row">
+        <span class="dname" dir="ltr">{{.BlogSettings.CustomDomain}}</span>
+        <span class="dstatus">{{.T "blog.settings.domain.status.verified" .BlogSettings.CustomDomain}}</span>
+        <form class="inline-form" method="post" action="/settings/domain/remove">
+          <button class="pact" type="submit">{{.T "blog.settings.domain.remove"}}</button>
+        </form>
+      </div>
+    {{else}}
+      <form method="post" action="/settings/domain">
+        <div class="field">
+          <label for="custom_domain">{{.T "blog.settings.domain.label"}}</label>
+          <input id="custom_domain" name="custom_domain" value="{{.BlogSettings.CustomDomain}}" placeholder="{{.T "blog.settings.domain.placeholder"}}" maxlength="253" autocomplete="off" dir="ltr" required>
+          <p class="hint">{{.T "blog.settings.domain.help"}}</p>
+        </div>
+        <button class="btn-save" type="submit">{{.T "blog.settings.domain.submit"}}</button>
+      </form>
+    {{end}}
+  </section>
+
+  <section class="settings-section">
+    <h2 class="settings-title">{{.T "blog.settings.account.heading"}}</h2>
+    <p class="settings-sub">{{.T "blog.settings.account.lead"}}</p>
+
+    <div class="field">
+      <label for="email">{{.T "blog.settings.account.email"}}</label>
+      <input id="email" type="email" value="{{.CurrentUser.Email}}" disabled>
+    </div>
+
+    <form method="post" action="/settings/locale">
+      <div class="field">
+        <label for="ui_lang">{{.T "blog.settings.account.ui_lang"}} {{if eq .Lang "fa"}}<span class="label-alt" lang="en" dir="ltr">{{.T "blog.settings.account.ui_lang.alt"}}</span>{{else}}<span class="label-alt" lang="fa" dir="rtl">{{.T "blog.settings.account.ui_lang.alt"}}</span>{{end}}</label>
+        <select id="ui_lang" name="locale" onchange="this.form.submit()">
+          <option value="fa" {{if eq .BlogSettings.Locale "fa"}}selected{{end}}>{{.T "blog.settings.ui_lang.fa"}}</option>
+          <option value="en" lang="en" {{if eq .BlogSettings.Locale "en"}}selected{{end}}>{{.T "blog.settings.ui_lang.en"}}</option>
+        </select>
+        <p class="hint">{{.T "blog.settings.account.ui_lang.help"}}</p>
+      </div>
+    </form>
+
+    {{if .BlogSettings.PasswordError}}
+      <p class="form-error">{{.BlogSettings.PasswordError}}</p>
+    {{else if .BlogSettings.PasswordSaved}}
+      <p class="form-note">{{.T "blog.settings.password.saved"}}</p>
+    {{end}}
+
+    <details class="change-password">
+      <summary><a href="#">{{.T "blog.settings.password.link"}}</a></summary>
+      <form method="post" action="/settings/password">
+        <div class="field">
+          <label for="current_password">{{.T "blog.settings.password.current"}}</label>
+          <input id="current_password" name="current_password" type="password" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label for="new_password">{{.T "blog.settings.password.new"}}</label>
+          <input id="new_password" name="new_password" type="password" autocomplete="new-password">
+        </div>
+        <button class="btn-save" type="submit">{{.T "blog.settings.password.submit"}}</button>
+      </form>
+    </details>
+
+    <div class="danger-zone">
+      <p><a href="/settings/export">{{.T "blog.settings.account.export"}}</a> {{.T "blog.settings.account.export.body"}}</p>
+    </div>
+  </section>
+</main>
+{{template "layout-end" .}}
+{{end}}

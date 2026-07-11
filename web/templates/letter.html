@@ -1,0 +1,13 @@
+{{define "letter.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<article class="prose" lang="{{.Lang}}" dir="{{.Dir}}">
+  <header class="article-head">
+    <h1 class="article-title">{{.T "letter.view.heading" .Inbox.Letter.PostTitle}}</h1>
+    <p class="article-meta">{{.T "letter.view.from.prefix"}} <a href="{{.Inbox.Letter.FromBlogURL}}" target="_blank" rel="noopener">{{.Inbox.Letter.FromWriterLabel}}</a> · {{.Inbox.Letter.CreatedAt}}</p>
+  </header>
+  <p class="letter-body">{{.Inbox.Letter.Body}}</p>
+</article>
+{{template "layout-end" .}}
+{{end}}

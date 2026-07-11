@@ -1,0 +1,53 @@
+services:
+  caddy:
+    build: ./deploy/caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      WALDI_BASE_DOMAIN: ${WALDI_BASE_DOMAIN}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CADDY_EMAIL: ${CADDY_EMAIL}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      waldi:
+        condition: service_started
+    restart: unless-stopped
+
+  waldi:
+    build: .
+    expose:
+      - "8080"
+    env_file: .env
+    environment:
+      WALDI_ADDR: :8080
+      WALDI_TLS_ENABLE: "false"
+      WALDI_DATABASE_URL: ${WALDI_DATABASE_URL:-postgres://waldi:${POSTGRES_PASSWORD}@postgres:5432/waldi?sslmode=disable}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: waldi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: waldi
+    volumes:
+      - waldi-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U waldi -d waldi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:
+  waldi-postgres-data:

@@ -1,0 +1,106 @@
+{{define "layout-start"}}
+<!doctype html>
+<html lang="{{.Lang}}" dir="{{.Dir}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="icon" href="/static/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <title>{{if .SEO}}{{if .SEO.Title}}{{.SEO.Title}}{{else}}{{.Title}}{{end}}{{else}}{{.Title}}{{end}}</title>
+  {{if .SEO}}
+    {{if .SEO.Description}}<meta name="description" content="{{.SEO.Description}}">{{end}}
+    {{if .SEO.Author}}<meta name="author" content="{{.SEO.Author}}">{{end}}
+    {{if .SEO.Robots}}<meta name="robots" content="{{.SEO.Robots}}">{{end}}
+    {{if .SEO.CanonicalURL}}<link rel="canonical" href="{{.SEO.CanonicalURL}}">{{end}}
+    {{if .SEO.RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SEO.RSSTitle}}" href="{{.SEO.RSSURL}}">{{end}}
+    {{if .SEO.OGTitle}}<meta property="og:title" content="{{.SEO.OGTitle}}">{{end}}
+    {{if .SEO.OGDescription}}<meta property="og:description" content="{{.SEO.OGDescription}}">{{end}}
+    {{if .SEO.OGURL}}<meta property="og:url" content="{{.SEO.OGURL}}">{{end}}
+    {{if .SEO.OGType}}<meta property="og:type" content="{{.SEO.OGType}}">{{end}}
+    {{if .SEO.SiteName}}<meta property="og:site_name" content="{{.SEO.SiteName}}">{{end}}
+    {{if .SEO.OGLocale}}<meta property="og:locale" content="{{.SEO.OGLocale}}">{{end}}
+    {{if .SEO.OGImage}}<meta property="og:image" content="{{.SEO.OGImage}}">{{end}}
+    {{if .SEO.ArticlePublished}}<meta property="article:published_time" content="{{.SEO.ArticlePublished}}">{{end}}
+    {{if .SEO.ArticleModified}}<meta property="article:modified_time" content="{{.SEO.ArticleModified}}">{{end}}
+    {{if .SEO.Author}}<meta property="article:author" content="{{.SEO.Author}}">{{end}}
+    <meta name="twitter:card" content="{{if .SEO.TwitterCard}}{{.SEO.TwitterCard}}{{else}}summary{{end}}">
+    {{if .SEO.OGTitle}}<meta name="twitter:title" content="{{.SEO.OGTitle}}">{{end}}
+    {{if .SEO.OGDescription}}<meta name="twitter:description" content="{{.SEO.OGDescription}}">{{end}}
+    {{if .SEO.OGImage}}<meta name="twitter:image" content="{{.SEO.OGImage}}">{{end}}
+    {{if .SEO.JSONLD}}<script type="application/ld+json">{{.SEO.JSONLD}}</script>{{end}}
+  {{end}}
+  <link rel="preload" href="/static/fonts/irmitra.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="/static/css/fonts.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <script src="/static/js/theme.js"></script>
+  {{if not .CurrentUser}}<script src="/static/js/locale.js"></script>{{end}}
+</head>
+<body>
+<div class="page">
+{{end}}
+
+{{define "app-bar"}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    <a href="/write" {{if eq .NavActive "write"}}class="current"{{end}}>{{.T "nav.write"}}</a>
+    <a href="/inbox" {{if eq .NavActive "inbox"}}class="current"{{end}}>{{.T "nav.inbox"}}</a>
+    <a href="/you" {{if eq .NavActive "you"}}class="current"{{end}}>{{.T "nav.you"}}</a>
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
+{{define "public-blog-bar"}}
+<header class="bar bar-minimal" aria-label="{{.T "nav.aria"}}">
+  <nav>
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
+{{define "public-blog-bar-post"}}
+<header class="bar bar-minimal" aria-label="{{.T "nav.aria"}}">
+  <nav>
+    <a href="/">{{.T "nav.home"}}</a>
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
+{{define "public-blog-finish"}}
+<footer class="finish">
+  <p>{{.T "profile.finish"}}</p>
+  <small class="profile-finish-sub">{{.T "profile.finish.sub.before" .Blog.AuthorName}}<a href="{{.AppBaseURL}}/">{{.T "brand"}}</a>{{.T "profile.finish.sub.after"}}{{if .SEO}}{{if .SEO.RSSURL}} · <a href="{{.SEO.RSSURL}}" dir="ltr">{{.T "profile.finish.rss"}}</a>{{end}}{{end}}</small>
+</footer>
+{{end}}
+
+{{define "static-page-bar"}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{if .Blog}}
+    <a class="wordmark" href="/"><span class="wordmark-back" aria-hidden="true">←</span>{{.Blog.DisplayName}} <span class="mark">※</span></a>
+  {{else}}
+    <a class="wordmark" href="/"><span class="wordmark-back" aria-hidden="true">←</span>{{.T "brand"}} <span class="mark">※</span></a>
+  {{end}}
+  <nav>
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
+{{define "static-article-end"}}
+<p class="endmark" role="presentation"></p>
+{{end}}
+
+{{define "wordmark"}}<a class="wordmark" href="/">{{.T "brand"}} <span class="mark">※</span></a>{{end}}
+
+{{define "theme-toggle"}}<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="{{.T "theme.toggle"}}">☾</button>{{end}}
+
+{{define "lang-toggle"}}<form class="inline-form lang-toggle" method="post" action="/lang/{{.T "lang.switch.code"}}"><button type="submit">{{.T "lang.switch.label"}}</button></form>{{end}}
+
+{{define "layout-end"}}
+</div>
+</body>
+</html>
+{{end}}

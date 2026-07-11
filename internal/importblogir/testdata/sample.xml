@@ -1,0 +1,29 @@
+<BLOG>
+	<BLOG_INFO>
+		<DOMAIN>
+			example.blog.ir
+		</DOMAIN>
+		<TITLE>
+			Example Blog
+		</TITLE>
+	</BLOG_INFO>
+	<POSTS>
+		<POST>
+			<TITLE>
+					Hello World
+				</TITLE>
+			<NUMBER>1</NUMBER>
+			<URL>hello-world</URL>
+			<LINK>http://example.blog.ir/post/1</LINK>
+			<CONTENT><![CDATA[<p>hi there</p>]]></CONTENT>
+			<LAST_MODIFIED_DATE>
+				2025-01-02 03:04:05.000000
+			</LAST_MODIFIED_DATE>
+			<CREATED_DATE>
+				2025-01-01 03:04:05.000000
+			</CREATED_DATE>
+			<AUTHOR>
+			</AUTHOR>
+		</POST>
+	</POSTS>
+</BLOG>

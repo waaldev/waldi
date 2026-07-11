@@ -1,0 +1,5 @@
+/waldi
+tmp/
+web/editor/node_modules/
+web/static/uploads/
+/.env

@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "build": "esbuild main.ts --bundle --format=iife --target=es2020 --outfile=../static/js/editor.js",
+    "watch": "esbuild main.ts --bundle --format=iife --target=es2020 --outfile=../static/js/editor.js --watch"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.14.0",
+    "@tiptap/extension-blockquote": "^3.14.0",
+    "@tiptap/extension-bold": "^3.14.0",
+    "@tiptap/extension-bubble-menu": "^3.27.1",
+    "@tiptap/extension-document": "^3.14.0",
+    "@tiptap/extension-dropcursor": "^3.14.0",
+    "@tiptap/extension-gapcursor": "^3.14.0",
+    "@tiptap/extension-heading": "^3.14.0",
+    "@tiptap/extension-history": "^3.14.0",
+    "@tiptap/extension-horizontal-rule": "^3.14.0",
+    "@tiptap/extension-image": "^3.14.0",
+    "@tiptap/extension-italic": "^3.14.0",
+    "@tiptap/extension-link": "^3.14.0",
+    "@tiptap/extension-paragraph": "^3.14.0",
+    "@tiptap/extension-text": "^3.14.0",
+    "@tiptap/extension-typography": "^3.14.0",
+    "esbuild": "^0.25.0"
+  }
+}

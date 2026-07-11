@@ -1,0 +1,109 @@
+{{define "home.html"}}
+{{template "layout-start" .}}
+{{if .CurrentUser}}
+  {{template "app-bar" .}}
+{{else}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    <a href="/login">{{.T "nav.login"}}</a>
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
+{{if .CurrentUser}}
+  {{if .Feed.Wildcard}}
+    <section class="wildcard">
+      <p class="wildcard-label">{{.T "home.wildcard.kicker"}}</p>
+      <p class="feed-writer"><a href="{{.Feed.Wildcard.BlogURL}}">{{.Feed.Wildcard.WriterLabel}}</a></p>
+      <a class="feed-item" href="{{.Feed.Wildcard.URL}}" target="_blank" rel="noopener" lang="{{.Feed.Wildcard.Lang}}" dir="{{.Feed.Wildcard.Dir}}">
+        <h2 class="feed-title">{{.Feed.Wildcard.Title}}</h2>
+        {{if .Feed.Wildcard.Excerpt}}<p class="feed-excerpt">{{.Feed.Wildcard.Excerpt}}</p>{{end}}
+      </a>
+      <form class="inline-form" method="post" action="/wildcard/skip">
+        <button class="skip" type="submit">{{.T "home.wildcard.skip"}}</button>
+      </form>
+    </section>
+  {{end}}
+
+  {{if .Feed.Days}}
+    {{range .Feed.Days}}
+      <p class="daylabel">{{.Label}}</p>
+      <ul class="feed">
+        {{range .Posts}}
+          <li lang="{{.Lang}}" dir="{{.Dir}}">
+            <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+            <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
+              <h2 class="feed-title">{{.Title}}</h2>
+              {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+            </a>
+          </li>
+        {{end}}
+      </ul>
+    {{end}}
+  {{else}}
+    <div class="empty-state">
+      <h2>{{.T "home.empty.following.heading"}}</h2>
+      <p>{{.T "home.empty.following.body"}}</p>
+    </div>
+  {{end}}
+
+  <footer class="finish">
+    <p>{{.T "home.finish"}}</p>
+    <small>{{.T "home.finish.sub"}}</small>
+  </footer>
+{{else}}
+  <section class="hero">
+    <span class="mark-big" role="presentation">※</span>
+    <h1>{{.T "landing.hero.heading"}}</h1>
+    <p class="sub">{{.T "landing.hero.sub"}}</p>
+    <div class="hero-actions">
+      <a class="btn-follow" href="/login">{{.T "landing.hero.start"}}</a>
+      <a class="quiet-link" href="/signup">{{.T "landing.hero.read"}}</a>
+    </div>
+  </section>
+
+  <section class="landing-points">
+    <div class="point">
+      <h2>{{.T "landing.point1.heading"}}</h2>
+      <p>{{.T "landing.point1.body"}}</p>
+    </div>
+    <div class="point">
+      <h2>{{.T "landing.point2.heading"}}</h2>
+      <p>{{.T "landing.point2.body"}}</p>
+    </div>
+    <div class="point">
+      <h2>{{.T "landing.point3.heading"}}</h2>
+      <p>{{.T "landing.point3.body"}}</p>
+    </div>
+    <div class="point">
+      <h2>{{.T "landing.point4.heading"}}</h2>
+      <p>{{.T "landing.point4.body"}}</p>
+    </div>
+  </section>
+
+  {{if .Feed.Sample}}
+    <section class="landing-sample" id="sample">
+      <p class="caption">{{.T "landing.sample.caption"}}</p>
+      <ul class="feed">
+        {{range .Feed.Sample}}
+          <li lang="{{.Lang}}" dir="{{.Dir}}">
+            <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+            <a class="feed-item" href="{{.URL}}">
+              <h2 class="feed-title">{{.Title}}</h2>
+            </a>
+          </li>
+        {{end}}
+      </ul>
+    </section>
+  {{end}}
+
+  <footer class="finish">
+    <p>{{.T "brand"}} ※</p>
+    <small>{{.T "landing.finish.sub"}} · <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a></small>
+  </footer>
+{{end}}
+{{template "layout-end" .}}
+{{end}}

@@ -1,0 +1,13 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o tmp/waldi ./cmd/waldi"
+bin = "tmp/waldi"
+args_bin = ["serve"]
+include_ext = ["go", "html"]
+exclude_dir = ["tmp", "web/editor/node_modules", "web/static/js"]
+delay = 200
+
+[log]
+time = false

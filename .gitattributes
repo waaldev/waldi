@@ -1,0 +1,4 @@
+web/static/js/editor.js linguist-generated
+web/static/js/*.js.map linguist-generated
+
+web/static/js/vendor/** linguist-vendored

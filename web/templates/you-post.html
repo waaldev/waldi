@@ -1,0 +1,36 @@
+{{define "you-post.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<article lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
+  <header class="article-head">
+    <h1 class="article-title">{{.Post.Title}}</h1>
+    <p class="article-meta">{{if .Post.PublishedAtISO}}<time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{else}}{{.Post.PublishedAt}}{{end}}</p>
+
+    <div class="owner-row">
+      <a href="{{.Post.URL}}" target="_blank" rel="noopener">{{.T "post.owner.badge"}}</a>
+      <span class="sep">·</span>&nbsp;<a href="/write/{{.Post.ID}}">{{.T "post.owner.edit"}}</a>
+      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.date-edit').classList.toggle('open')">{{.T "you.post.edit_date"}}</button>
+      <span class="sep">·</span>&nbsp;<form class="inline-form" method="post" action="/write/{{.Post.ID}}/delete" onsubmit="return confirm('{{.T "post.owner.delete_confirm"}}')"><button class="quiet-danger" type="submit">{{.T "post.owner.delete"}}</button></form>
+    </div>
+
+    <form class="date-edit{{if .Post.DateError}} open{{end}}" method="post" action="/write/{{.Post.ID}}/published-at">
+      <label for="pubdate" class="note">{{.T "you.post.date_label"}}</label>
+      <input id="pubdate" name="published_at" type="text" value="{{.Post.PublishedAtInput}}">
+      <input type="hidden" name="slug" value="{{.Post.Slug}}">
+      <input type="hidden" name="lang" value="{{.Post.Lang}}">
+      <button class="apply" type="submit">{{.T "you.post.date_apply"}}</button>
+      <button class="cancel" type="button" onclick="this.closest('.date-edit').classList.remove('open')">{{.T "you.post.date_cancel"}}</button>
+      <span class="note">{{if .Post.DateError}}{{.T "you.post.date_error"}}{{else}}{{.T "you.post.date_note"}}{{end}}</span>
+    </form>
+  </header>
+
+  <div class="prose">
+    {{.Post.HTML}}
+  </div>
+
+  <p class="endmark" role="presentation"></p>
+</article>
+
+{{template "layout-end" .}}
+{{end}}

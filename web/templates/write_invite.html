@@ -1,0 +1,47 @@
+{{define "write_invite.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<main>
+  <section class="hero">
+    <span class="mark-big" role="presentation">※</span>
+    <h1>{{.T "write.invite.heading"}}</h1>
+    <p class="sub">{{.T "write.invite.sub"}}</p>
+  </section>
+
+  {{if .WriteInvite.Error}}
+    <p class="form-error">{{.WriteInvite.Error}}</p>
+  {{end}}
+  {{if .WriteInvite.Message}}
+    <p class="form-note">{{.WriteInvite.Message}}</p>
+  {{end}}
+
+  <section class="settings-section" style="max-width: 24rem; margin-inline: auto;">
+    <h2 class="settings-title">{{.T "write.invite.code.heading"}}</h2>
+    <form class="capture-form" method="post" action="/write/invite/redeem" style="max-width: none;">
+      <input name="code" type="text" dir="ltr" placeholder="{{.T "write.invite.code.placeholder"}}" aria-label="{{.T "write.invite.code.label"}}" required>
+      <button type="submit">{{.T "write.invite.code.submit"}}</button>
+    </form>
+  </section>
+
+  <section class="settings-section" style="max-width: 24rem; margin-inline: auto;">
+    <h2 class="settings-title">{{.T "write.invite.request.heading"}}</h2>
+    <p class="settings-sub">{{.T "write.invite.request.sub"}}</p>
+    <form method="post" action="/write/invite/request">
+      <div class="field">
+        <label for="blog_link">{{.T "write.invite.request.link.label"}}</label>
+        <input id="blog_link" name="blog_link" type="url" dir="ltr" placeholder="{{.T "write.invite.request.link.placeholder"}}">
+        <p class="hint">{{.T "write.invite.request.link.hint"}}</p>
+      </div>
+      <div class="field">
+        <label for="note">{{.T "write.invite.request.note.label"}}</label>
+        <textarea id="note" name="note" rows="2" placeholder="{{.T "write.invite.request.note.placeholder"}}" required></textarea>
+      </div>
+      <button class="btn-save" type="submit">{{.T "write.invite.request.submit"}}</button>
+      <p class="hint" style="margin-block-start: var(--s3)">{{.T "write.invite.request.hint"}}</p>
+    </form>
+  </section>
+</main>
+
+{{template "layout-end" .}}
+{{end}}

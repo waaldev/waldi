@@ -1,0 +1,28 @@
+{{define "404.html"}}
+{{template "layout-start" .}}
+{{template "static-page-bar" .}}
+
+<article>
+  <header class="article-head">
+    <h1 class="article-title">{{if .Gone}}{{.T "error.gone.heading"}}{{else}}{{.T "error.not_found.heading"}}{{end}}</h1>
+    <p class="article-meta">{{if .Blog}}{{.T "error.not_found.meta" .Blog.DisplayName}}{{else}}{{.T "error.not_found.meta" (.T "brand.meta")}}{{end}}</p>
+  </header>
+
+  <div class="prose">
+    <p>{{if .Gone}}{{.T "error.gone.body"}}{{else}}{{.T "error.not_found.body"}}{{end}}</p>
+    <p>
+      {{.T "error.not_found.closing.before"}}
+      <a href="/">{{.T "error.not_found.home_link"}}</a>{{if .Blog}}{{.T "error.not_found.closing.after"}}{{else if .CurrentUser}}{{.T "error.not_found.closing.mid"}}<a href="/write">{{.T "error.not_found.write_link"}}</a>{{.T "error.not_found.closing.after"}}{{else}}{{.T "error.not_found.closing.mid"}}<a href="/login">{{.T "error.not_found.login_link"}}</a>{{.T "error.not_found.closing.after"}}{{end}}
+    </p>
+  </div>
+
+  {{template "static-article-end" .}}
+</article>
+
+{{if .Blog}}
+  {{if .BridgeSession}}
+  <script src="/static/js/session.js" defer data-app-base="{{.AppBaseURL}}"></script>
+  {{end}}
+{{end}}
+{{template "layout-end" .}}
+{{end}}

@@ -1,0 +1,9 @@
+.git
+.github
+tmp/
+waldi
+.air.toml
+.env
+web/editor/node_modules/
+web/static/uploads/
+**/*_test.go

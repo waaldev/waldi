@@ -1,0 +1,27 @@
+{{define "unsubscribe.html"}}
+{{template "layout-start" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<main class="form-page">
+  <span class="mark-big" role="presentation">※</span>
+  <h1 class="form-title">{{.Auth.Heading}}</h1>
+
+  {{if .Auth.Message}}
+    <p class="form-note">{{.Auth.Message}}</p>
+  {{else if .Auth.Error}}
+    <p class="form-note">{{.Auth.Error}}</p>
+  {{else}}
+    <p class="form-note">{{.T "unsubscribe.confirm"}}</p>
+    <form method="post" action="/unsubscribe/digest?token={{.Auth.ResetToken}}">
+      <button class="btn-primary" type="submit">{{.T "unsubscribe.button"}}</button>
+    </form>
+  {{end}}
+</main>
+{{template "layout-end" .}}
+{{end}}

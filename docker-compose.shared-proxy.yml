@@ -1,0 +1,54 @@
+# For hosts that already run their own reverse proxy / TLS terminator on
+# ports 80/443 (serving other apps too), and you don't want waldi's own
+# Caddy container competing for those ports. This starts only waldi +
+# Postgres, on an external Docker network your existing proxy also joins.
+#
+# You're responsible for pointing your existing proxy at the `waldi`
+# service on port 8080 and for TLS (including on-demand certs for verified
+# custom domains via `POST /internal/caddy-ask` — see DEPLOY.md).
+#
+# docker network create proxy_network   # once, if it doesn't exist yet
+
+services:
+  waldi:
+    build: .
+    expose:
+      - "8080"
+    env_file: .env
+    environment:
+      WALDI_ADDR: :8080
+      WALDI_TLS_ENABLE: "false"
+      WALDI_DATABASE_URL: ${WALDI_DATABASE_URL:-postgres://waldi:${POSTGRES_PASSWORD}@postgres:5432/waldi?sslmode=disable}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - proxy_network
+      - waldi_internal
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: waldi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: waldi
+    volumes:
+      - waldi-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U waldi -d waldi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - waldi_internal
+    restart: unless-stopped
+
+networks:
+  proxy_network:
+    external: true
+  waldi_internal:
+    driver: bridge
+
+volumes:
+  waldi-postgres-data:

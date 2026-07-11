@@ -1,0 +1,91 @@
+{{define "auth.html"}}
+{{template "layout-start" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    {{if eq .Auth.Mode "login"}}
+      <a href="/signup">{{.T "nav.signup"}}</a>
+    {{else if ne .Auth.Mode "reset"}}
+      <a href="/login">{{.T "nav.login"}}</a>
+    {{end}}
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<main class="form-page">
+  <h1 class="form-title">{{.Auth.Heading}}</h1>
+  {{if .Auth.Error}}
+    <p class="form-error">{{.Auth.Error}}</p>
+  {{end}}
+  {{if .Auth.Message}}
+    <p class="form-note">{{.Auth.Message}}</p>
+  {{end}}
+
+  {{if eq .Auth.Mode "forgot"}}
+    <form method="post" action="/forgot-password">
+      <div class="field">
+        <label for="email">{{.T "auth.field.email"}}</label>
+        <input id="email" name="email" type="email" dir="ltr" autocomplete="email" required>
+        <p class="field-help">{{.T "auth.field.email.forgot.help"}}</p>
+      </div>
+      <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
+    </form>
+    <p class="form-alt"><a href="/login">{{.T "auth.login.alt.link"}}</a></p>
+  {{else if eq .Auth.Mode "reset"}}
+    <form method="post" action="/reset-password">
+      <input type="hidden" name="token" value="{{.Auth.ResetToken}}">
+      <div class="field">
+        <label for="password">{{.T "auth.field.password"}}</label>
+        <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" required minlength="8">
+        <p class="field-help">{{.T "auth.field.password.help"}}</p>
+      </div>
+      <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
+    </form>
+  {{else}}
+    <form method="post" action="/{{.Auth.Mode}}">
+      {{if and (eq .Auth.Mode "login") .Auth.NextURL}}
+        <input type="hidden" name="next" value="{{.Auth.NextURL}}">
+      {{end}}
+      {{if .Auth.InviteCode}}
+        <input type="hidden" name="invite" value="{{.Auth.InviteCode}}">
+      {{end}}
+      {{if eq .Auth.Mode "signup"}}
+        <div class="field">
+          <label for="username">{{.T "auth.field.username"}}</label>
+          <input id="username" name="username" dir="ltr" autocomplete="username" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32">
+          <p class="field-help">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
+        </div>
+      {{end}}
+
+      <div class="field">
+        <label for="email">{{.T "auth.field.email"}}</label>
+        <input id="email" name="email" type="email" dir="ltr" autocomplete="email" required>
+        {{if eq .Auth.Mode "signup"}}
+          <p class="field-help">{{.T "auth.field.email.help"}}</p>
+        {{end}}
+      </div>
+
+      <div class="field">
+        <label for="password">{{.T "auth.field.password"}}</label>
+        <input id="password" name="password" type="password" dir="ltr" autocomplete="{{if eq .Auth.Mode "signup"}}new-password{{else}}current-password{{end}}" required minlength="8">
+        {{if eq .Auth.Mode "signup"}}
+          <p class="field-help">{{.T "auth.field.password.help"}}</p>
+        {{end}}
+      </div>
+
+      <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
+    </form>
+
+    <p class="form-alt">
+      {{if eq .Auth.Mode "signup"}}
+        {{.T "auth.signup.alt.prompt"}} <a href="/login">{{.T "auth.login.alt.link"}}</a>
+      {{else}}
+        {{.T "auth.login.alt.prompt"}} <a href="/signup">{{.T "auth.signup.alt.link"}}</a><br>
+        <a href="/forgot-password">{{.T "auth.forgot.link"}}</a>
+      {{end}}
+    </p>
+  {{end}}
+</main>
+{{template "layout-end" .}}
+{{end}}

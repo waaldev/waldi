@@ -1,0 +1,40 @@
+{{define "inbox.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+{{if .Inbox.Error}}
+  <p class="form-error">{{.Inbox.Error}}</p>
+{{end}}
+
+<p class="daylabel">{{.T "inbox.daylabel"}}</p>
+
+{{if .Inbox.Letters}}
+  <ul class="feed">
+    {{range .Inbox.Letters}}
+      <li class="letter-item {{if not .Read}}letter-unread{{end}}">
+        <p class="feed-writer"><a href="{{.FromBlogURL}}" target="_blank" rel="noopener">{{.FromWriterLabel}}</a> <span class="re">· {{.CreatedAt}}</span></p>
+        <a class="feed-item" href="/inbox/{{.ID}}">
+          <h2 class="feed-title">{{$.T "inbox.letter.link" .PostTitle}}</h2>
+          <p class="feed-excerpt">{{.Body}}</p>
+        </a>
+      </li>
+    {{end}}
+  </ul>
+{{else}}
+  <p class="finish">{{.T "inbox.empty"}}</p>
+{{end}}
+
+{{if .Inbox.Stats}}
+  <p class="daylabel">{{.T "inbox.stats.daylabel"}}</p>
+  <div class="stats-narrative">
+    {{range .Inbox.Stats}}<p><strong>{{.PostTitle}}</strong> — {{.Sentence}}</p>{{end}}
+    <p class="caption">{{.T "inbox.stats.caption"}}</p>
+  </div>
+{{end}}
+
+<footer class="finish">
+  <p>{{.T "inbox.finish"}}</p>
+  <small>{{.T "inbox.finish.sub"}}</small>
+</footer>
+{{template "layout-end" .}}
+{{end}}
