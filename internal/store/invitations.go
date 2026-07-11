@@ -156,7 +156,7 @@ func (s *Store) RedeemInvitationForUser(ctx context.Context, code string, userID
 		return fmt.Errorf("redeeming invitation: %w", err)
 	}
 
-	_, err = tx.Exec(ctx, `update users set can_write = true where id = $1`, userID)
+	_, err = tx.Exec(ctx, `update users set can_write = true, blog_lang = locale where id = $1`, userID)
 	if err != nil {
 		return fmt.Errorf("granting write access: %w", err)
 	}
