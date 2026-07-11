@@ -91,10 +91,11 @@ Run daily jobs on the VPS (only once). Replace `/opt/waldi` with your install pa
 0 6 * * * cd /opt/waldi && docker compose -f docker-compose.prod.yml exec -T waldi /app/waldi wildcard
 10 6 * * * cd /opt/waldi && docker compose -f docker-compose.prod.yml exec -T waldi /app/waldi reader-digest
 0 7 * * * cd /opt/waldi && docker compose -f docker-compose.prod.yml exec -T waldi /app/waldi digest
+15 7 * * * cd /opt/waldi && docker compose -f docker-compose.prod.yml exec -T waldi /app/waldi reactivation
 0 21 * * 5 cd /opt/waldi && docker compose -f docker-compose.prod.yml exec -T waldi /app/waldi weekly-stats
 ```
 
-`digest` and `reader-digest` require SMTP to be configured. `reader-digest` must run after `wildcard` (it reads that day's wildcard assignment), which is why it's scheduled ten minutes behind it. `weekly-stats` requires `WALDI_TELEGRAM_BOT_TOKEN` and `WALDI_TELEGRAM_ADMIN_IDS`; it pushes the trailing-7-day growth summary to every configured Telegram admin (Friday 21:00, `5` = Friday).
+`digest` and `reader-digest` require SMTP to be configured. `reader-digest` must run after `wildcard` (it reads that day's wildcard assignment), which is why it's scheduled ten minutes behind it. `reactivation` pauses digests for accounts inactive ~30 days and sends a one-time re-permission email; it's scheduled after `digest` so a user's last digest before going quiet still sends normally. `weekly-stats` requires `WALDI_TELEGRAM_BOT_TOKEN` and `WALDI_TELEGRAM_ADMIN_IDS`; it pushes the trailing-7-day growth summary to every configured Telegram admin (Friday 21:00, `5` = Friday).
 
 Make the backup script executable after deploy:
 

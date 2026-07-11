@@ -38,6 +38,8 @@ type User struct {
 	DigestUnsubscribeToken *string
 	DigestUnsubscribedAt   *time.Time
 	CanWrite               bool
+	LastActiveAt           time.Time
+	DigestPausedAt         *time.Time
 }
 
 func (u User) EmailVerified() bool {
@@ -56,6 +58,12 @@ func (u User) ActiveCustomDomain() (string, bool) {
 		return "", false
 	}
 	return *u.CustomDomain, true
+}
+
+// DigestPaused reports whether digest emails are paused pending
+// re-permission after a period of inactivity (see ReactivationJob).
+func (u User) DigestPaused() bool {
+	return u.DigestPausedAt != nil
 }
 
 func scanUser(dest *User) []any {
@@ -81,6 +89,8 @@ func scanUser(dest *User) []any {
 		&dest.DigestUnsubscribeToken,
 		&dest.DigestUnsubscribedAt,
 		&dest.CanWrite,
+		&dest.LastActiveAt,
+		&dest.DigestPausedAt,
 	}
 }
 
@@ -90,7 +100,8 @@ const userColumns = `
 	email_verified_at, email_verify_token, email_verify_sent_at,
 	password_reset_token, password_reset_expires_at,
 	created_at, custom_domain, custom_domain_token, custom_domain_verified_at,
-	digest_unsubscribe_token, digest_unsubscribed_at, can_write`
+	digest_unsubscribe_token, digest_unsubscribed_at, can_write,
+	last_active_at, digest_paused_at`
 
 func (s *Store) CreateUser(ctx context.Context, username, email, passwordHash, locale, verifyToken string) (User, error) {
 	var user User
@@ -182,7 +193,8 @@ func (s *Store) UserBySessionToken(ctx context.Context, token string) (User, err
 		       u.email_verified_at, u.email_verify_token, u.email_verify_sent_at,
 		       u.password_reset_token, u.password_reset_expires_at,
 		       u.created_at, u.custom_domain, u.custom_domain_token, u.custom_domain_verified_at,
-		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write
+		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
+		       u.last_active_at, u.digest_paused_at
 		from sessions s
 		join users u on u.id = s.user_id
 		where s.token = $1 and s.expires_at > now()
@@ -206,6 +218,7 @@ func (s *Store) UserAndSessionByBridgeToken(ctx context.Context, bridgeToken str
 		       u.password_reset_token, u.password_reset_expires_at,
 		       u.created_at, u.custom_domain, u.custom_domain_token, u.custom_domain_verified_at,
 		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
+		       u.last_active_at, u.digest_paused_at,
 		       s.token
 		from sessions s
 		join users u on u.id = s.user_id
@@ -432,4 +445,90 @@ func (s *Store) UnsubscribeFromDigestByToken(ctx context.Context, token string) 
 // the given host. Only verified (active) domains are matched.
 func (s *Store) UserByCustomDomain(ctx context.Context, domain string) (User, error) {
 	return s.userBy(ctx, `custom_domain = $1 and custom_domain_verified_at is not null`, domain)
+}
+
+// TouchLastActive stamps the user as active now, and lifts any digest pause
+// (re-permission is implied by the user actually using the site again).
+// Callers should throttle: this runs on every authenticated request, and the
+// `where` clause skips the write once a day so it doesn't cost a row update
+// per request for regularly-active users.
+func (s *Store) TouchLastActive(ctx context.Context, userID int64) error {
+	_, err := s.pool.Exec(ctx, `
+		update users
+		set last_active_at = now(), digest_paused_at = null
+		where id = $1 and (last_active_at < now() - interval '1 day' or digest_paused_at is not null)
+	`, userID)
+	if err != nil {
+		return fmt.Errorf("touching last active: %w", err)
+	}
+	return nil
+}
+
+// UsersInactiveForDigest returns verified, digest-subscribed users who have
+// not been active since the given cutoff and aren't already paused, for
+// ReactivationJob to send a re-permission email to.
+func (s *Store) UsersInactiveForDigest(ctx context.Context, cutoff time.Time, limit int) ([]User, error) {
+	if limit <= 0 {
+		limit = 1000
+	}
+	rows, err := s.pool.Query(ctx, `
+		select `+strings.TrimSpace(userColumns)+`
+		from users
+		where email_verified_at is not null
+		  and email <> ''
+		  and digest_unsubscribed_at is null
+		  and digest_paused_at is null
+		  and last_active_at < $1
+		order by id
+		limit $2
+	`, cutoff, limit)
+	if err != nil {
+		return nil, fmt.Errorf("loading inactive digest users: %w", err)
+	}
+	defer rows.Close()
+
+	var users []User
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(scanUser(&user)...); err != nil {
+			return nil, fmt.Errorf("scanning inactive digest user: %w", err)
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating inactive digest users: %w", err)
+	}
+	return users, nil
+}
+
+// PauseDigest marks the user's digest emails paused pending re-permission.
+func (s *Store) PauseDigest(ctx context.Context, userID int64, pausedAt time.Time) error {
+	_, err := s.pool.Exec(ctx, `
+		update users set digest_paused_at = $2 where id = $1
+	`, userID, pausedAt)
+	if err != nil {
+		return fmt.Errorf("pausing digest: %w", err)
+	}
+	return nil
+}
+
+// ResumeDigestByToken clears a digest pause for the user matching the given
+// (digest-unsubscribe) token, and counts as activity. It reuses the digest
+// unsubscribe token rather than minting a separate one, since both links are
+// the same "manage my digest subscription" secret.
+func (s *Store) ResumeDigestByToken(ctx context.Context, token string) (User, error) {
+	var user User
+	err := s.pool.QueryRow(ctx, `
+		update users
+		set digest_paused_at = null, last_active_at = now()
+		where digest_unsubscribe_token = $1
+		returning `+userColumns+`
+	`, token).Scan(scanUser(&user)...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return User{}, ErrNotFound
+	}
+	if err != nil {
+		return User{}, fmt.Errorf("resuming digest: %w", err)
+	}
+	return user, nil
 }

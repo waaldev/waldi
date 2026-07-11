@@ -77,6 +77,8 @@ func run() error {
 		return runReaderDigest(os.Args[2:])
 	case "weekly-stats":
 		return runWeeklyStats(os.Args[2:])
+	case "reactivation":
+		return runReactivation(os.Args[2:])
 	case "wildcard":
 		return runWildcard(os.Args[2:])
 	case "invite":
@@ -238,6 +240,34 @@ func runReaderDigest(args []string) error {
 		Mailer:     newMailer(cfg, logger, cfg.SMTPDigestFrom),
 		BaseURL:    appURL(cfg),
 		BaseDomain: cfg.BaseDomain,
+	}.Run(ctx)
+}
+
+func runReactivation(args []string) error {
+	cfg := loadConfig()
+
+	fs := flag.NewFlagSet("reactivation", flag.ContinueOnError)
+	fs.StringVar(&cfg.DatabaseURL, "database-url", cfg.DatabaseURL, "Postgres connection URL")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if cfg.DatabaseURL == "" {
+		return errors.New("WALDI_DATABASE_URL is required")
+	}
+
+	ctx := context.Background()
+	st, err := store.Open(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return fmt.Errorf("opening store: %w", err)
+	}
+	defer st.Close()
+
+	logger := newLogger(cfg.Environment)
+	return jobs.ReactivationJob{
+		Store:   st,
+		Logger:  logger,
+		Mailer:  newMailer(cfg, logger, cfg.SMTPDigestFrom),
+		BaseURL: appURL(cfg),
 	}.Run(ctx)
 }
 

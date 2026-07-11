@@ -120,7 +120,8 @@ func (s *Store) UsersWithDigestActivity(ctx context.Context, since time.Time, li
 		       u.email_verified_at, u.email_verify_token, u.email_verify_sent_at,
 		       u.password_reset_token, u.password_reset_expires_at,
 		       u.created_at, u.custom_domain, u.custom_domain_token, u.custom_domain_verified_at,
-		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write
+		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
+		       u.last_active_at, u.digest_paused_at
 		from users u
 		join posts p on p.user_id = u.id
 		left join impressions i on i.post_id = p.id
@@ -133,6 +134,7 @@ func (s *Store) UsersWithDigestActivity(ctx context.Context, since time.Time, li
 		  and u.email_verified_at is not null
 		  and u.email <> ''
 		  and u.digest_unsubscribed_at is null
+		  and u.digest_paused_at is null
 		order by u.id
 		limit $2
 	`, since, limit)
@@ -197,11 +199,13 @@ func (s *Store) VerifiedSubscribedUsers(ctx context.Context, limit int) ([]User,
 		       u.email_verified_at, u.email_verify_token, u.email_verify_sent_at,
 		       u.password_reset_token, u.password_reset_expires_at,
 		       u.created_at, u.custom_domain, u.custom_domain_token, u.custom_domain_verified_at,
-		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write
+		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
+		       u.last_active_at, u.digest_paused_at
 		from users u
 		where u.email_verified_at is not null
 		  and u.email <> ''
 		  and u.digest_unsubscribed_at is null
+		  and u.digest_paused_at is null
 		order by u.id
 		limit $1
 	`, limit)

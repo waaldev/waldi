@@ -151,3 +151,25 @@ func PasswordResetEmail(lang, resetURL string) (subject, plain, htmlBody string)
 	}
 	return subject, plain, htmlBody
 }
+
+// ReactivationEmail returns plain and HTML bodies for the re-permission
+// email sent once to accounts inactive ~30 days, asking whether they still
+// want digest email. Digests stay paused unless resumeURL is clicked —
+// silence is the safe default, not an assumption of continued interest.
+func ReactivationEmail(lang, resumeURL string) (subject, plain, htmlBody string) {
+	switch lang {
+	case "fa":
+		subject = "هنوز خلاصه‌های والدی را می‌خواهید؟"
+		plain = fmt.Sprintf("سلام.\n\nمدتی است سری به والدی نزده‌اید، برای همین فرستادن خلاصه‌های روزانه را موقتاً متوقف کردیم.\n\nاگر هنوز دلتان می‌خواهد این نامه‌ها را دریافت کنید، این پیوند را باز کنید:\n%s\n\nاگر کاری نکنید، دیگر برایتان ایمیلی نمی‌فرستیم.\n\nوالدی ※", resumeURL)
+		htmlBody = htmlEmail(lang, "هنوز می‌خواهید؟",
+			fmt.Sprintf(`<p>سلام.</p><p>مدتی است سری به والدی نزده‌اید، برای همین فرستادن خلاصه‌های روزانه را موقتاً متوقف کردیم.</p><p>اگر هنوز دلتان می‌خواهد این نامه‌ها را دریافت کنید:</p>%s<p>اگر کاری نکنید، دیگر برایتان ایمیلی نمی‌فرستیم.</p>`, buttonLink(resumeURL, "بله، ادامه بده")),
+			"والدی ※")
+	default:
+		subject = "Still want Waldi's digests?"
+		plain = fmt.Sprintf("Hello.\n\nYou haven't been by Waldi in a while, so we've paused your daily digests.\n\nIf you'd still like to receive them, open this link:\n%s\n\nIf you don't, we won't email you again.\n\nWaldi ※", resumeURL)
+		htmlBody = htmlEmail(lang, "Still want these?",
+			fmt.Sprintf(`<p>Hello.</p><p>You haven't been by Waldi in a while, so we've paused your daily digests.</p><p>If you'd still like to receive them:</p>%s<p>If you don't, we won't email you again.</p>`, buttonLink(resumeURL, "Yes, keep sending")),
+			"Waldi ※")
+	}
+	return subject, plain, htmlBody
+}

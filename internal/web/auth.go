@@ -50,6 +50,12 @@ func (s *Server) withSession(next http.Handler) http.Handler {
 			return
 		}
 
+		go func(userID int64) {
+			if err := s.store.TouchLastActive(context.Background(), userID); err != nil {
+				s.logger.Error("touching last active", "err", err, "user_id", userID)
+			}
+		}(user.ID)
+
 		ctx := context.WithValue(r.Context(), currentUserKey, &user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -105,6 +105,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /reset-password", s.handleResetPassword)
 	s.mux.HandleFunc("GET /unsubscribe/digest", s.handleUnsubscribeDigestPage)
 	s.mux.HandleFunc("POST /unsubscribe/digest", s.handleUnsubscribeDigest)
+	s.mux.HandleFunc("GET /resume-digest", s.handleResumeDigest)
 	s.mux.HandleFunc("GET /api/me", s.handleAPIMe)
 	s.mux.HandleFunc("OPTIONS /api/me", s.handleAPIMe)
 	s.mux.HandleFunc("GET /api/auth/bridge", s.handleAPIAuthBridge)

@@ -1,0 +1,17 @@
+{{define "resume.html"}}
+{{template "layout-start" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<main class="form-page">
+  <span class="mark-big" role="presentation">※</span>
+  <h1 class="form-title">{{.Auth.Heading}}</h1>
+  <p class="form-note">{{if .Auth.Message}}{{.Auth.Message}}{{else}}{{.Auth.Error}}{{end}}</p>
+</main>
+{{template "layout-end" .}}
+{{end}}

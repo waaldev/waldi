@@ -236,6 +236,11 @@
   "unsubscribe.done": "You're unsubscribed from digest emails.",
   "unsubscribe.invalid": "This unsubscribe link is invalid or has expired.",
 
+  "resume.title": "Resume digests",
+  "resume.heading": "Digest emails resumed",
+  "resume.done": "You're back on the list — Waldi's digests will keep coming.",
+  "resume.invalid": "This link is invalid or has expired.",
+
   "write.title": "Write",
   "write.heading": "Your posts",
   "write.error.db": "The database isn't configured.",

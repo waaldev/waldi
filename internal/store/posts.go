@@ -785,7 +785,8 @@ func (s *Store) UsersNeedingWildcard(ctx context.Context, day time.Time, limit i
 		       u.email_verified_at, u.email_verify_token, u.email_verify_sent_at,
 		       u.password_reset_token, u.password_reset_expires_at,
 		       u.created_at, u.custom_domain, u.custom_domain_token, u.custom_domain_verified_at,
-		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write
+		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
+		       u.last_active_at, u.digest_paused_at
 		from users u
 		where not exists (
 			select 1 from wildcards w
