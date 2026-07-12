@@ -293,7 +293,7 @@ func minifyCSS(css string) string {
 		switch {
 		case c == '/' && i+1 < n && runes[i+1] == '*':
 			i += 2
-			for i < n && !(runes[i] == '*' && i+1 < n && runes[i+1] == '/') {
+			for i < n && (runes[i] != '*' || i+1 >= n || runes[i+1] != '/') {
 				i++
 			}
 			i++ // skip trailing '/'
