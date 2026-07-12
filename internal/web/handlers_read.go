@@ -21,6 +21,9 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	user := currentUser(r)
 	pd := s.newPageData(r, user)
+	if user == nil {
+		pd.Inline = true
+	}
 	feed := &FeedView{Empty: true}
 	if user != nil && s.store != nil {
 		since := time.Now().Add(-feedWindow)

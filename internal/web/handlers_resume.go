@@ -14,6 +14,7 @@ import (
 func (s *Server) handleResumeDigest(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
 	pd := s.newPageData(r, currentUser(r))
+	pd.Inline = true
 	pd.Title = pd.T("resume.title")
 	pd.SEO = noindexSEO()
 	pd.Auth = &AuthView{

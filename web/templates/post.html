@@ -87,7 +87,11 @@
 {{if .Post.ImpressionID}}
   <script src="/static/js/reading.js" defer></script>
 {{end}}
+{{if .Inline}}
+<script>{{sitePostJS}}</script>
+{{else}}
 <script src="/static/js/post.js" defer></script>
+{{end}}
 {{if .BridgeSession}}
 <script src="/static/js/session.js" defer data-app-base="{{.AppBaseURL}}"></script>
 {{end}}

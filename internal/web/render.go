@@ -13,6 +13,49 @@ type Renderer struct {
 	templates *template.Template
 }
 
+// inlineAssets are small static files whose content is embedded directly
+// into public-page HTML (via the {{siteX}} template funcs below) so a cold
+// visit to a public page needs only one request. Read once at startup from
+// the same fs.FS the templates are parsed from.
+type inlineAssets struct {
+	mainCSS  template.CSS
+	fontsCSS template.CSS
+	themeJS  template.JS
+	postJS   template.JS
+}
+
+func loadInlineAssets(files fs.FS) (inlineAssets, error) {
+	read := func(name string) (string, error) {
+		b, err := fs.ReadFile(files, name)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+	mainCSS, err := read("web/static/css/main.css")
+	if err != nil {
+		return inlineAssets{}, err
+	}
+	fontsCSS, err := read("web/static/css/fonts.css")
+	if err != nil {
+		return inlineAssets{}, err
+	}
+	themeJS, err := read("web/static/js/theme.js")
+	if err != nil {
+		return inlineAssets{}, err
+	}
+	postJS, err := read("web/static/js/post.js")
+	if err != nil {
+		return inlineAssets{}, err
+	}
+	return inlineAssets{
+		mainCSS:  template.CSS(mainCSS),
+		fontsCSS: template.CSS(fontsCSS),
+		themeJS:  template.JS(themeJS),
+		postJS:   template.JS(postJS),
+	}, nil
+}
+
 type PageData struct {
 	Title            string
 	Lang             string
@@ -36,6 +79,13 @@ type PageData struct {
 	DevSessionBridge bool
 	NavActive        string
 	Gone             bool
+	// Inline marks a public, chrome-less page render (blog pages,
+	// unsubscribe/resume links) where CSS/JS is embedded directly into the
+	// HTML so the page needs only one request to load. App pages leave this
+	// false and keep cacheable external <link>/<script src> assets, since a
+	// logged-in session navigates many pages and benefits from disk-cache
+	// reuse of one shared main.css/theme.js.
+	Inline bool
 }
 
 type UserView struct {
@@ -223,7 +273,17 @@ type StatsView struct {
 }
 
 func NewRenderer(files fs.FS) (*Renderer, error) {
-	tmpl, err := template.ParseFS(files, "web/templates/*.html")
+	assets, err := loadInlineAssets(files)
+	if err != nil {
+		return nil, err
+	}
+	funcs := template.FuncMap{
+		"siteMainCSS":  func() template.CSS { return assets.mainCSS },
+		"siteFontsCSS": func() template.CSS { return assets.fontsCSS },
+		"siteThemeJS":  func() template.JS { return assets.themeJS },
+		"sitePostJS":   func() template.JS { return assets.postJS },
+	}
+	tmpl, err := template.New("").Funcs(funcs).ParseFS(files, "web/templates/*.html")
 	if err != nil {
 		return nil, err
 	}

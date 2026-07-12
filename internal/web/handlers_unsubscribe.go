@@ -13,6 +13,7 @@ import (
 func (s *Server) handleUnsubscribeDigestPage(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
 	pd := s.newPageData(r, currentUser(r))
+	pd.Inline = true
 	pd.Title = pd.T("unsubscribe.title")
 	pd.SEO = noindexSEO()
 	pd.Auth = &AuthView{
@@ -67,6 +68,7 @@ func (s *Server) handleUnsubscribeDigest(w http.ResponseWriter, r *http.Request)
 	}
 
 	pd := s.newPageData(r, currentUser(r))
+	pd.Inline = true
 	pd.Title = pd.T("unsubscribe.title")
 	pd.SEO = noindexSEO()
 	pd.Auth = &AuthView{
