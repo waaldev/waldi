@@ -36,10 +36,12 @@ func loadInlineAssets(files fs.FS) (inlineAssets, error) {
 	if err != nil {
 		return inlineAssets{}, err
 	}
+	mainCSS = minifyCSS(mainCSS)
 	fontsCSS, err := read("web/static/css/fonts.css")
 	if err != nil {
 		return inlineAssets{}, err
 	}
+	fontsCSS = minifyCSS(fontsCSS)
 	themeJS, err := read("web/static/js/theme.js")
 	if err != nil {
 		return inlineAssets{}, err
@@ -270,6 +272,71 @@ type LetterView struct {
 type StatsView struct {
 	PostTitle string
 	Sentence  string
+}
+
+// minifyCSS strips comments and non-essential whitespace before embedding
+// CSS in public-page HTML. It only drops whitespace immediately adjacent to
+// { } ; : , — never whitespace between two other tokens (which would
+// collapse a descendant-combinator space, e.g. ".a .b", into something
+// meaningless) — and never touches the contents of quoted strings (e.g.
+// content: " •"), so it's safe on hand-authored CSS without needing a real
+// parser.
+func minifyCSS(css string) string {
+	var out strings.Builder
+	out.Grow(len(css))
+	runes := []rune(css)
+	n := len(runes)
+	pendingSpace := false
+	afterPunct := true // true at start so leading whitespace is dropped
+	for i := 0; i < n; i++ {
+		c := runes[i]
+		switch {
+		case c == '/' && i+1 < n && runes[i+1] == '*':
+			i += 2
+			for i < n && !(runes[i] == '*' && i+1 < n && runes[i+1] == '/') {
+				i++
+			}
+			i++ // skip trailing '/'
+			if !afterPunct {
+				pendingSpace = true
+			}
+		case c == '"' || c == '\'':
+			if pendingSpace {
+				out.WriteByte(' ')
+				pendingSpace = false
+			}
+			quote := c
+			out.WriteRune(c)
+			i++
+			for i < n {
+				out.WriteRune(runes[i])
+				if runes[i] == '\\' && i+1 < n {
+					i++
+					out.WriteRune(runes[i])
+				} else if runes[i] == quote {
+					break
+				}
+				i++
+			}
+			afterPunct = false
+		case c == ' ' || c == '\t' || c == '\n' || c == '\r':
+			if !afterPunct {
+				pendingSpace = true
+			}
+		case c == '{' || c == '}' || c == ';' || c == ':' || c == ',':
+			pendingSpace = false
+			out.WriteRune(c)
+			afterPunct = true
+		default:
+			if pendingSpace {
+				out.WriteByte(' ')
+				pendingSpace = false
+			}
+			out.WriteRune(c)
+			afterPunct = false
+		}
+	}
+	return strings.TrimSpace(out.String())
 }
 
 func NewRenderer(files fs.FS) (*Renderer, error) {
