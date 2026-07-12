@@ -417,6 +417,13 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   margin: 1.6em 0 0.5em;
 }
 
+/* IRMitra has no bold face; force a synthetic embolden via text-stroke
+   so Persian h2 reads as bold instead of relying on browser
+   font-synthesis, which isn't reliable for this script. */
+.prose h2:lang(fa) {
+  -webkit-text-stroke: 0.4px currentColor;
+}
+
 .prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
 .fn-ref {
@@ -1383,6 +1390,10 @@ a.btn-secondary:hover {
   font-weight: 700;
   line-height: 1.3;
   margin: 1.6em 0 0.5em;
+}
+
+.editor-surface h2:lang(fa) {
+  -webkit-text-stroke: 0.4px currentColor;
 }
 
 .editor-surface blockquote {
