@@ -411,8 +411,8 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .prose p, .prose figure { margin: 0 0 0.75em; }
 
 .prose h2 {
-  font-size: 1.375rem;
-  font-weight: 500;
+  font-size: 1.625rem;
+  font-weight: 700;
   line-height: 1.3;
   margin: 1.6em 0 0.5em;
 }
@@ -1379,8 +1379,8 @@ a.btn-secondary:hover {
 .editor-surface p, .editor-surface figure { margin: 0 0 0.75em; }
 
 .editor-surface h2 {
-  font-size: 1.375rem;
-  font-weight: 500;
+  font-size: 1.625rem;
+  font-weight: 700;
   line-height: 1.3;
   margin: 1.6em 0 0.5em;
 }
