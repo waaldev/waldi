@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log/slog"
+	"mime/quotedprintable"
 	netmail "net/mail"
 	"net/smtp"
 	"strings"
@@ -87,14 +88,27 @@ func buildMessage(fromHeader, fromAddr, to, subject, plainBody, htmlBody string,
 	if htmlBody != "" {
 		boundary := "waldi-mail-boundary"
 		fmt.Fprintf(&b, "MIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=%q\r\n\r\n", boundary)
-		fmt.Fprintf(&b, "--%s\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n%s\r\n", boundary, plainBody)
-		fmt.Fprintf(&b, "--%s\r\nContent-Type: text/html; charset=utf-8\r\n\r\n%s\r\n", boundary, htmlBody)
+		fmt.Fprintf(&b, "--%s\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n%s\r\n", boundary, quotedPrintable(plainBody))
+		fmt.Fprintf(&b, "--%s\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n%s\r\n", boundary, quotedPrintable(htmlBody))
 		fmt.Fprintf(&b, "--%s--\r\n", boundary)
 	} else {
-		fmt.Fprintf(&b, "Content-Type: text/plain; charset=utf-8\r\n\r\n%s\r\n", plainBody)
+		fmt.Fprintf(&b, "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n%s\r\n", quotedPrintable(plainBody))
 	}
 
 	return []byte(b.String())
+}
+
+// quotedPrintable encodes body text so no line exceeds SMTP's 998-octet
+// hard limit (RFC 5321 §4.5.3.1.6). Our HTML bodies in particular
+// concatenate many tags on one line with no natural break, which an SMTP
+// relay is entitled to reject outright ("line too long") rather than fold
+// itself.
+func quotedPrintable(s string) string {
+	var buf strings.Builder
+	w := quotedprintable.NewWriter(&buf)
+	_, _ = w.Write([]byte(s))
+	_ = w.Close()
+	return buf.String()
 }
 
 func newMessageID(from string) string {
