@@ -40,6 +40,8 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	username := normalizeUsername(r.FormValue("username"))
 	email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 	password := r.FormValue("password")
+	blogName := strings.TrimSpace(r.FormValue("blog_name"))
+	blogDescription := strings.TrimSpace(r.FormValue("blog_description"))
 
 	if !validBlogUsername(username) {
 		s.renderAuthError(w, r, "signup", "auth.error.username")
@@ -51,6 +53,14 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(password) < 8 {
 		s.renderAuthError(w, r, "signup", "auth.error.password_len")
+		return
+	}
+	if blogName == "" || len(blogName) > maxDisplayNameLen {
+		s.renderAuthError(w, r, "signup", "auth.error.blog_name")
+		return
+	}
+	if len(blogDescription) > maxBioLen {
+		s.renderAuthError(w, r, "signup", "auth.error.blog_description")
 		return
 	}
 
@@ -72,13 +82,13 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	var user store.User
 	inviteCode := strings.TrimSpace(r.FormValue("invite"))
 	if inviteCode != "" {
-		user, err = s.store.CreateUserAndRedeemInvitation(r.Context(), inviteCode, username, email, hash, lang, verifyToken)
+		user, err = s.store.CreateUserAndRedeemInvitation(r.Context(), inviteCode, username, email, hash, lang, verifyToken, blogName, blogDescription)
 		if errors.Is(err, store.ErrInviteInvalid) {
 			s.renderAuthError(w, r, "signup", "auth.error.invite_invalid")
 			return
 		}
 	} else {
-		user, err = s.store.CreateUser(r.Context(), username, email, hash, lang, verifyToken)
+		user, err = s.store.CreateUser(r.Context(), username, email, hash, lang, verifyToken, blogName, blogDescription)
 	}
 	if err != nil {
 		var pgErr *pgconn.PgError

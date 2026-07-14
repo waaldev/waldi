@@ -103,13 +103,13 @@ const userColumns = `
 	digest_unsubscribe_token, digest_unsubscribed_at, can_write,
 	last_active_at, digest_paused_at`
 
-func (s *Store) CreateUser(ctx context.Context, username, email, passwordHash, locale, verifyToken string) (User, error) {
+func (s *Store) CreateUser(ctx context.Context, username, email, passwordHash, locale, verifyToken, displayName, bio string) (User, error) {
 	var user User
 	err := s.pool.QueryRow(ctx, `
-		insert into users (username, email, password_hash, locale, blog_lang, email_verify_token, email_verify_sent_at)
-		values ($1, $2, $3, $4, $4, $5, now())
+		insert into users (username, email, password_hash, locale, blog_lang, email_verify_token, email_verify_sent_at, display_name, bio)
+		values ($1, $2, $3, $4, $4, $5, now(), $6, $7)
 		returning `+userColumns+`
-	`, username, email, passwordHash, locale, verifyToken).Scan(scanUser(&user)...)
+	`, username, email, passwordHash, locale, verifyToken, displayName, bio).Scan(scanUser(&user)...)
 	if err != nil {
 		return User{}, fmt.Errorf("creating user: %w", err)
 	}

@@ -54,7 +54,34 @@
         <div class="field">
           <label for="username">{{.T "auth.field.username"}}</label>
           <input id="username" name="username" dir="ltr" autocomplete="username" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32">
-          <p class="field-help">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
+          <p class="field-help" id="username-help" data-base-domain="{{.BaseDomain}}">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
+        </div>
+        <script>
+          (function () {
+            var input = document.getElementById("username");
+            var help = document.getElementById("username-help");
+            if (!input || !help) return;
+            var baseDomain = help.dataset.baseDomain;
+            var currentHost = input.placeholder + "." + baseDomain;
+            input.addEventListener("input", function () {
+              var value = input.value.trim().toLowerCase() || input.placeholder;
+              var newHost = value + "." + baseDomain;
+              help.textContent = help.textContent.replace(currentHost, newHost);
+              currentHost = newHost;
+            });
+          })();
+        </script>
+
+        <div class="field">
+          <label for="blog_name">{{.T "auth.field.blog_name"}}</label>
+          <input id="blog_name" name="blog_name" autocomplete="off" placeholder="{{.T "auth.field.blog_name.example"}}" required maxlength="80">
+          <p class="field-help">{{.T "auth.field.blog_name.help"}}</p>
+        </div>
+
+        <div class="field">
+          <label for="blog_description">{{.T "auth.field.blog_description"}}</label>
+          <textarea id="blog_description" name="blog_description" rows="3" maxlength="500"></textarea>
+          <p class="field-help">{{.T "auth.field.blog_description.help"}}</p>
         </div>
       {{end}}
 

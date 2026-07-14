@@ -79,7 +79,7 @@ func (s *Store) InvitationAvailable(ctx context.Context, code string) (bool, err
 // CreateUserAndRedeemInvitation creates a new account and immediately
 // redeems an invite code for it in one transaction, granting write access
 // on creation — the `?invite=` signup shortcut.
-func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, username, email, passwordHash, locale, verifyToken string) (User, error) {
+func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, username, email, passwordHash, locale, verifyToken, displayName, bio string) (User, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return User{}, fmt.Errorf("beginning transaction: %w", err)
@@ -101,10 +101,10 @@ func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, u
 
 	var user User
 	err = tx.QueryRow(ctx, `
-		insert into users (username, email, password_hash, locale, blog_lang, email_verify_token, email_verify_sent_at, can_write)
-		values ($1, $2, $3, $4, $4, $5, now(), true)
+		insert into users (username, email, password_hash, locale, blog_lang, email_verify_token, email_verify_sent_at, can_write, display_name, bio)
+		values ($1, $2, $3, $4, $4, $5, now(), true, $6, $7)
 		returning `+userColumns+`
-	`, username, email, passwordHash, locale, verifyToken).Scan(scanUser(&user)...)
+	`, username, email, passwordHash, locale, verifyToken, displayName, bio).Scan(scanUser(&user)...)
 	if err != nil {
 		return User{}, fmt.Errorf("creating user: %w", err)
 	}
