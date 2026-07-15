@@ -17,6 +17,10 @@ const (
 	usersListLimit  = 50
 	postsListLimit  = 20
 	inviteCodeBytes = 16
+
+	// telegramMessageLimit stays under Telegram's hard 4096-char sendMessage
+	// cap, which /users and /posts can otherwise exceed once the list grows.
+	telegramMessageLimit = 4000
 )
 
 var reservedUsernames = map[string]bool{
@@ -289,7 +293,9 @@ func (b *Bot) cmdPosts(ctx context.Context, chatID int64) {
 	}
 
 	markup := &InlineKeyboardMarkup{InlineKeyboard: buttons}
-	_ = b.client.SendMessage(ctx, chatID, strings.Join(lines, "\n"), markup)
+	if err := b.sendChunked(ctx, chatID, strings.Join(lines, "\n"), markup); err != nil {
+		b.logger.Error("telegram send message", "err", err)
+	}
 }
 
 func (b *Bot) cmdPool(ctx context.Context, chatID int64) {
@@ -329,7 +335,9 @@ func (b *Bot) cmdPool(ctx context.Context, chatID int64) {
 	}
 
 	markup := &InlineKeyboardMarkup{InlineKeyboard: buttons}
-	_ = b.client.SendMessage(ctx, chatID, strings.Join(lines, "\n"), markup)
+	if err := b.sendChunked(ctx, chatID, strings.Join(lines, "\n"), markup); err != nil {
+		b.logger.Error("telegram send message", "err", err)
+	}
 }
 
 func (b *Bot) cmdVerify(ctx context.Context, chatID int64, args []string) {
@@ -502,7 +510,7 @@ func (b *Bot) postURL(username, slug string) string {
 }
 
 func (b *Bot) reply(ctx context.Context, chatID int64, text string) {
-	if err := b.client.SendMessage(ctx, chatID, text, nil); err != nil {
+	if err := b.sendChunked(ctx, chatID, text, nil); err != nil {
 		b.logger.Error("telegram send message", "err", err)
 	}
 }
@@ -510,10 +518,60 @@ func (b *Bot) reply(ctx context.Context, chatID int64, text string) {
 // Notify sends text to every configured admin, logging (but not returning) per-recipient errors.
 func (b *Bot) Notify(ctx context.Context, text string) {
 	for chatID := range b.adminIDs {
-		if err := b.client.SendMessage(ctx, chatID, text, nil); err != nil {
+		if err := b.sendChunked(ctx, chatID, text, nil); err != nil {
 			b.logger.Error("telegram notify", "err", err, "chat_id", chatID)
 		}
 	}
+}
+
+// sendChunked splits text into Telegram-sized pieces and sends them in
+// order, attaching markup only to the final piece. Telegram's sendMessage
+// rejects anything over 4096 UTF-8 characters outright, which /users and
+// /posts can exceed as their lists grow; without chunking, that rejection
+// was only logged server-side and the admin got no message at all.
+func (b *Bot) sendChunked(ctx context.Context, chatID int64, text string, markup *InlineKeyboardMarkup) error {
+	chunks := splitMessage(text, telegramMessageLimit)
+	for i, chunk := range chunks {
+		var m *InlineKeyboardMarkup
+		if i == len(chunks)-1 {
+			m = markup
+		}
+		if err := b.client.SendMessage(ctx, chatID, chunk, m); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// splitMessage breaks text into chunks no longer than limit, preferring to
+// split on line boundaries so a single user/post entry isn't cut in half.
+func splitMessage(text string, limit int) []string {
+	if len(text) <= limit {
+		return []string{text}
+	}
+
+	var chunks []string
+	var cur strings.Builder
+	for line := range strings.SplitSeq(text, "\n") {
+		if cur.Len() > 0 && cur.Len()+1+len(line) > limit {
+			chunks = append(chunks, cur.String())
+			cur.Reset()
+		}
+		if cur.Len() > 0 {
+			cur.WriteByte('\n')
+		}
+		cur.WriteString(line)
+		for cur.Len() > limit {
+			s := cur.String()
+			chunks = append(chunks, s[:limit])
+			cur.Reset()
+			cur.WriteString(s[limit:])
+		}
+	}
+	if cur.Len() > 0 {
+		chunks = append(chunks, cur.String())
+	}
+	return chunks
 }
 
 // AdminNotifier pushes proactive messages to a fixed set of admin chat ids
