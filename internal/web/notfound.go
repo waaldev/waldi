@@ -62,7 +62,9 @@ func (s *Server) renderNotFound(w http.ResponseWriter, r *http.Request) {
 
 	pd.Title = pd.T("error.not_found.title")
 	pd.SEO = noindexSEO()
-	s.renderer.RenderStatus(unwrapResponseWriter(w), http.StatusNotFound, "404.html", pd)
+	target := unwrapResponseWriter(w)
+	target.Header().Set("Cache-Control", "no-store")
+	s.renderer.RenderStatus(target, http.StatusNotFound, "404.html", pd)
 }
 
 // renderGone answers a deleted post's old URL with 410 instead of 404, so
@@ -84,5 +86,6 @@ func (s *Server) renderGone(w http.ResponseWriter, r *http.Request, username str
 	pd.Title = pd.T("error.gone.heading")
 	pd.SEO = noindexSEO()
 	pd.Gone = true
+	w.Header().Set("Cache-Control", "no-store")
 	s.renderer.RenderStatus(w, http.StatusGone, "404.html", pd)
 }
