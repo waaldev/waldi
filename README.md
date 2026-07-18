@@ -2,21 +2,15 @@
 
 A quiet place to write, and to be read.
 
-Live at **[waldi.blog](https://waldi.blog)**. Reading is open to the world. Writing requires an invitation—for now—while the founding writers shape the culture.
+Live at **[waldi.blog](https://waldi.blog)**. Reading is open to everyone. Writing requires an invitation for now. because I can curate a minimum quality of wildcard posts.
 
 ![A Waldi post in light and dark mode](docs/screenshot.jpg)
 
-Waldi is a multi-tenant blogging engine built for people who miss blogs. Under the hood, it's brutalist engineering: a single Go binary, one Postgres database, server-rendered `html/template` pages, and a solitary Tiptap editor island. Every writer claims `username.<base-domain>` (or their own custom domain). The binary serves everyone by simply reading the request's `Host` header at runtime. Zero per-tenant deployments. Zero infrastructure bloat.
+Waldi is a blogging platform, but not another minimalistic blogging engine. every post delivers to at least 100 readers before any black-box algorithm judges it, and every registered reader will get a random stranger post each morning in their inbox. I use a concept called [Serendipity](https://amin.waldi.blog/serendipity).
 
-The entire system exists to support one specific loop: you publish a post, a hundred strangers read it, and a private letter comes back. No public like counts. No comment sections. No toxic leaderboards. We replaced replies with private letters. Every post gets a guaranteed floor of human readers before any black-box algorithm judges it.
+[ROADMAP.md](ROADMAP.md) and [docs/DESIGN.md](docs/DESIGN.md).
 
-New writers never publish into a void.
-
-## Why
-
-Read the origin story here: [Serendipity](https://amin.waldi.blog/serendipity).
-
-The product's rules—letters instead of comments, zero public metrics, a hard list of features we will absolutely never build—are etched into [ROADMAP.md](ROADMAP.md) and [docs/DESIGN.md](docs/DESIGN.md).
+Below is an AI-written README for understanding the system.
 
 ## Architecture
 
