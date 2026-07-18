@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"regexp"
 	"strings"
 	"waldi/internal/store"
 )
@@ -146,6 +147,12 @@ func validBlogUsername(username string) bool {
 		return false
 	}
 	return true
+}
+
+var emailPattern = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+
+func validEmail(email string) bool {
+	return len(email) <= 254 && emailPattern.MatchString(email)
 }
 
 func isLocalDevHost(host string) bool {

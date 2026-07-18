@@ -17,12 +17,19 @@ func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 	pd := s.newPageData(r, currentUser(r))
 	pd.SEO = noindexSEO()
 
-	pd.Title = pd.T("auth.signup.title")
+	reader := r.URL.Query().Get("mode") == "reader"
+	titleKey, headingKey, submitKey := "auth.signup.title", "auth.signup.heading", "auth.signup.submit"
+	if reader {
+		titleKey, headingKey, submitKey = "auth.signup.reader.title", "auth.signup.reader.heading", "auth.signup.reader.submit"
+	}
+
+	pd.Title = pd.T(titleKey)
 	pd.Auth = &AuthView{
 		Mode:        "signup",
-		Heading:     pd.T("auth.signup.heading"),
-		SubmitLabel: pd.T("auth.signup.submit"),
+		Heading:     pd.T(headingKey),
+		SubmitLabel: pd.T(submitKey),
 		InviteCode:  strings.TrimSpace(r.URL.Query().Get("invite")),
+		Reader:      reader,
 	}
 	s.renderer.Render(w, "auth.html", pd)
 }
@@ -37,6 +44,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	reader := r.FormValue("mode") == "reader"
 	username := normalizeUsername(r.FormValue("username"))
 	email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 	password := r.FormValue("password")
@@ -47,7 +55,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		s.renderAuthError(w, r, "signup", "auth.error.username")
 		return
 	}
-	if email == "" || !strings.Contains(email, "@") {
+	if !validEmail(email) {
 		s.renderAuthError(w, r, "signup", "auth.error.email")
 		return
 	}
@@ -55,13 +63,15 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		s.renderAuthError(w, r, "signup", "auth.error.password_len")
 		return
 	}
-	if blogName == "" || len(blogName) > maxDisplayNameLen {
-		s.renderAuthError(w, r, "signup", "auth.error.blog_name")
-		return
-	}
-	if len(blogDescription) > maxBioLen {
-		s.renderAuthError(w, r, "signup", "auth.error.blog_description")
-		return
+	if !reader {
+		if blogName == "" || len(blogName) > maxDisplayNameLen {
+			s.renderAuthError(w, r, "signup", "auth.error.blog_name")
+			return
+		}
+		if len(blogDescription) > maxBioLen {
+			s.renderAuthError(w, r, "signup", "auth.error.blog_description")
+			return
+		}
 	}
 
 	hash, err := hashPassword(password)
@@ -393,11 +403,13 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 	heading := pd.T("auth.login.heading")
 	submit := pd.T("auth.login.submit")
 	title := pd.T("auth.login.title")
+	reader := mode == "signup" && r.FormValue("mode") == "reader"
 	switch mode {
 	case "signup":
-		heading = pd.T("auth.signup.heading")
-		submit = pd.T("auth.signup.submit")
-		title = pd.T("auth.signup.title")
+		heading, submit, title = pd.T("auth.signup.heading"), pd.T("auth.signup.submit"), pd.T("auth.signup.title")
+		if reader {
+			heading, submit, title = pd.T("auth.signup.reader.heading"), pd.T("auth.signup.reader.submit"), pd.T("auth.signup.reader.title")
+		}
 	case "forgot":
 		heading = pd.T("auth.forgot.heading")
 		submit = pd.T("auth.forgot.submit")
@@ -416,6 +428,7 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 		Error:       pd.T(messageKey),
 		ResetToken:  strings.TrimSpace(r.FormValue("token")),
 		InviteCode:  strings.TrimSpace(r.FormValue("invite")),
+		Reader:      reader,
 	}
 	s.renderer.RenderStatus(w, http.StatusBadRequest, "auth.html", pd)
 }

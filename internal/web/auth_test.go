@@ -15,6 +15,21 @@ func TestPasswordHash(t *testing.T) {
 	}
 }
 
+func TestValidEmail(t *testing.T) {
+	valid := []string{"a@b.co", "negar@waldi.blog", "first.last+tag@sub.example.com"}
+	for _, email := range valid {
+		if !validEmail(email) {
+			t.Errorf("expected %q to be valid", email)
+		}
+	}
+	invalid := []string{"", "asdasd", "asdasd@asdasd", "@example.com", "foo@", "foo bar@example.com", "foo@example .com"}
+	for _, email := range invalid {
+		if validEmail(email) {
+			t.Errorf("expected %q to be invalid", email)
+		}
+	}
+}
+
 func TestNewSessionToken(t *testing.T) {
 	a, err := newSessionToken()
 	if err != nil {
