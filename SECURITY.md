@@ -1,6 +1,6 @@
 # Security Policy
 
-Waldi is run by one person. Response times are best-effort. I fix things quickly when I can, but I never promise enterprise SLAs.
+Waldi is run by one person. Response times are best-effort. I fix things quickly when I can.
 
 ## Reporting a vulnerability
 

@@ -11,8 +11,6 @@ make migrate   # runs migrations
 make dev       # air (Go live reload) + esbuild --watch for the editor
 ```
 
-Check the README's Quickstart section for local subdomain testing (`username.localhost:8080`, `waldi.test` to test cross-subdomain cookie behavior).
-
 ## Before opening a PR
 
 ```bash
@@ -26,7 +24,7 @@ CI aggressively runs these exact three steps on every push.
 - **Keep PRs tight.** One change, one PR. Do not bundle refactors with bug fixes.
 - **Test the domain logic.** `internal/post` (the Tiptap document model, schema validation, HTML rendering) is the most heavily tested package in the codebase. Changes there demand tests. It's pure domain logic without database or HTTP noise, so tests are cheap. Write them.
 - **Routing templates.** If you add a new template page, define a view struct. Wire it into `web.PageData` (`internal/web/render.go`). Do not pass ad hoc `map[string]any` data into templates.
-- **Language catalog.** If you touch user-facing text, route it through `internal/i18n` (`T(lang, key, args...)`). Never hardcode English. Read the README's Multi-language section to see how the catalog works.
+- **Language catalog.** If you touch user-facing text, route it through `internal/i18n` (`T(lang, key, args...)`). Never hardcode English. Catalogs are flat JSON (`internal/i18n/locales/en.json`, `fa.json`); templates never fork per language.
 
 ## Database migrations
 
@@ -46,11 +44,11 @@ There are no runtime plugins. A new importer is a compiled Go package.
 ## Branches
 
 - `main` is production. Period.
-- `develop` catches the day-to-day chaos. Branch your PRs from `develop` unless you're deploying a critical hotfix directly to `main`.
+- `develop` catches the day-to-day works. Branch your PRs from `develop` unless you're deploying a critical hotfix directly to `main`.
 
 ## Good first contributions
 
-- **A new interface language.** The entire recipe is four steps, detailed in the README. You don't touch templates. The catalog just grows.
+- **A new interface language.** Drop `internal/i18n/locales/<code>.json`, mirroring `en.json`'s keys, add `"<code>": true` to `supported` in `internal/i18n/catalog.go`, and add a case to `Dir()` if it's RTL. You don't touch templates. The catalog just grows.
 - **A new blog importer.** We need Blogfa, Persianblog, and WordPress. Study `internal/importblogir` and build the next one.
 - **Design work.** Read `docs/DESIGN.md` before you touch a pixel. It defines our typography and outlaws a massive list of UI cliches. If your PR adds a drop shadow, a badge, or a third typeface, I will decline it with love.
 
