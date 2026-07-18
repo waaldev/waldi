@@ -687,7 +687,7 @@ func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang 
 			  )
 			  and not exists (
 			    select 1 from wildcards w
-			    where w.user_id = $1 and w.post_id = p.id and w.date < $2
+			    where w.user_id = $1 and w.post_id = p.id and w.date <= $2
 			  )
 			group by p.id, u.username, u.author_name, u.display_name, u.blog_lang
 		)
@@ -733,7 +733,7 @@ func (s *Store) AssignWildcard(ctx context.Context, userID, postID int64, day ti
 	_, err := s.pool.Exec(ctx, `
 		insert into wildcards (user_id, post_id, date)
 		values ($1, $2, $3)
-		on conflict (user_id, date) do nothing
+		on conflict do nothing
 	`, userID, postID, day)
 	if err != nil {
 		return fmt.Errorf("assigning wildcard: %w", err)
@@ -742,35 +742,55 @@ func (s *Store) AssignWildcard(ctx context.Context, userID, postID int64, day ti
 }
 
 func (s *Store) SetWildcard(ctx context.Context, userID, postID int64, day time.Time) error {
-	_, err := s.pool.Exec(ctx, `
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("setting wildcard: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	if _, err := tx.Exec(ctx, `
+		delete from wildcards where user_id = $1 and date = $2
+	`, userID, day); err != nil {
+		return fmt.Errorf("setting wildcard: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `
 		insert into wildcards (user_id, post_id, date, skipped)
 		values ($1, $2, $3, false)
-		on conflict (user_id, date) do update
-		set post_id = excluded.post_id, skipped = false
-	`, userID, postID, day)
-	if err != nil {
+	`, userID, postID, day); err != nil {
+		return fmt.Errorf("setting wildcard: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("setting wildcard: %w", err)
 	}
 	return nil
 }
 
-func (s *Store) WildcardSlotTaken(ctx context.Context, userID int64, day time.Time) (bool, error) {
-	var taken bool
+func (s *Store) HasActiveWildcard(ctx context.Context, userID int64, day time.Time) (bool, error) {
+	var active bool
 	if err := s.pool.QueryRow(ctx, `
 		select exists(
-			select 1 from wildcards where user_id = $1 and date = $2
+			select 1 from wildcards where user_id = $1 and date = $2 and not skipped
 		)
-	`, userID, day).Scan(&taken); err != nil {
-		return false, fmt.Errorf("checking wildcard slot: %w", err)
+	`, userID, day).Scan(&active); err != nil {
+		return false, fmt.Errorf("checking active wildcard: %w", err)
 	}
-	return taken, nil
+	return active, nil
+}
+
+func (s *Store) WildcardSkipCount(ctx context.Context, userID int64, day time.Time) (int, error) {
+	var count int
+	if err := s.pool.QueryRow(ctx, `
+		select count(*) from wildcards where user_id = $1 and date = $2 and skipped
+	`, userID, day).Scan(&count); err != nil {
+		return 0, fmt.Errorf("counting wildcard skips: %w", err)
+	}
+	return count, nil
 }
 
 func (s *Store) SkipWildcard(ctx context.Context, userID int64, day time.Time) error {
 	_, err := s.pool.Exec(ctx, `
 		update wildcards
 		set skipped = true
-		where user_id = $1 and date = $2
+		where user_id = $1 and date = $2 and not skipped
 	`, userID, day)
 	if err != nil {
 		return fmt.Errorf("skipping wildcard: %w", err)
@@ -889,7 +909,7 @@ func (s *Store) WildcardPoolCandidate(ctx context.Context, userID int64, readerL
 		  )
 		  and not exists (
 		    select 1 from wildcards w
-		    where w.user_id = $1 and w.post_id = p.id and w.date < $3
+		    where w.user_id = $1 and w.post_id = p.id and w.date <= $3
 		  )
 		order by wp.added_at asc
 		limit 1

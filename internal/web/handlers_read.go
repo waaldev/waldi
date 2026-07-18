@@ -169,8 +169,18 @@ func (s *Server) handleSkipWildcard(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	if err := s.store.SkipWildcard(r.Context(), user.ID, today()); err != nil {
+	day := today()
+	if err := s.store.SkipWildcard(r.Context(), user.ID, day); err != nil {
 		s.logger.Error("skipping wildcard", "err", err)
+	} else {
+		floor, err := s.store.WildcardImpressionFloor(r.Context())
+		if err != nil {
+			s.logger.Error("loading wildcard impression floor", "err", err)
+			floor = jobs.DefaultWildcardImpressionFloor
+		}
+		if err := jobs.EnsureUserWildcard(r.Context(), s.store, user.ID, user.Locale, day, floor); err != nil {
+			s.logger.Error("rerolling wildcard", "err", err)
+		}
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

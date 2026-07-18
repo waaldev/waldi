@@ -166,13 +166,25 @@ func (j WildcardSetJob) targetUsers(ctx context.Context, limit int) ([]store.Use
 	return j.Store.ListUsers(ctx, limit)
 }
 
-// EnsureUserWildcard assigns a stranger post on first visit if the daily slot is empty.
+// MaxDailyWildcardSkips caps how many stranger posts a reader can dismiss
+// per day before the slot stays empty until tomorrow.
+const MaxDailyWildcardSkips = 3
+
+// EnsureUserWildcard assigns a stranger post when the reader has no active
+// one for the day, rerolling after skips until MaxDailyWildcardSkips.
 func EnsureUserWildcard(ctx context.Context, st *store.Store, userID int64, readerLang string, day time.Time, floor int) error {
-	taken, err := st.WildcardSlotTaken(ctx, userID, day)
+	active, err := st.HasActiveWildcard(ctx, userID, day)
 	if err != nil {
 		return err
 	}
-	if taken {
+	if active {
+		return nil
+	}
+	skips, err := st.WildcardSkipCount(ctx, userID, day)
+	if err != nil {
+		return err
+	}
+	if skips >= MaxDailyWildcardSkips {
 		return nil
 	}
 	lang := i18n.ReaderLang(readerLang)
