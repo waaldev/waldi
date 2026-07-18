@@ -10,8 +10,9 @@ const localeCookie = "waldi_lang"
 
 // resolveLocale picks the UI language for a request: the signed-in user's
 // saved preference, then the language cookie, then Cloudflare's CF-IPCountry
-// geolocation header (a proxy for the visitor's region/timezone), falling
-// back to i18n.Default.
+// geolocation header (a proxy for the visitor's region/timezone), then the
+// browser's Accept-Language when geolocation is unavailable (VPNs, Tor,
+// requests not routed through Cloudflare), falling back to i18n.Default.
 func resolveLocale(r *http.Request, user *store.User) (lang, dir string) {
 	if user != nil && i18n.Supported(user.Locale) {
 		lang = user.Locale
@@ -19,6 +20,8 @@ func resolveLocale(r *http.Request, user *store.User) (lang, dir string) {
 		lang = cookie.Value
 	} else if fromCountry, ok := i18n.LangFromCountry(r.Header.Get("CF-IPCountry")); ok {
 		lang = fromCountry
+	} else if fromHeader, ok := i18n.LangFromAcceptLanguage(r.Header.Get("Accept-Language")); ok {
+		lang = fromHeader
 	} else {
 		lang = i18n.Default
 	}
