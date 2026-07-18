@@ -1,60 +1,59 @@
 # Contributing to Waldi
 
-Waldi is a production app first, an open-source project second — one person still shapes the roadmap and product direction (see `ROADMAP.md`). Contributions are welcome. For anything bigger than a small fix, open an issue first so we can talk it through before you spend time on a PR.
+Waldi is a production app first and an open-source project second. One person still dictates the roadmap and the product direction (see `ROADMAP.md`). But contributions matter. For anything larger than a trivial typo fix, open an issue first. We need to talk it through before you burn a weekend on a PR I won't merge.
 
 ## Local setup
 
 ```bash
 cp .env.example .env
-make db        # start Postgres (+ MinIO) via docker compose for local dev
-make migrate   # run migrations
-make dev       # air (Go live reload) + esbuild --watch for the editor, in parallel
+make db        # starts Postgres (+ MinIO) via docker compose
+make migrate   # runs migrations
+make dev       # air (Go live reload) + esbuild --watch for the editor
 ```
 
-See the README's Quickstart section for local subdomain testing (`username.localhost:8080`, `waldi.test` for cross-subdomain cookie behavior).
+Check the README's Quickstart section for local subdomain testing (`username.localhost:8080`, `waldi.test` to test cross-subdomain cookie behavior).
 
 ## Before opening a PR
 
 ```bash
-make fmt    # gofmt -w cmd internal
-make lint   # golangci-lint run
-make test   # go test ./...
+make fmt    # formats cmd and internal
+make lint   # golangci-lint
+make test   # go test
 ```
 
-CI runs the same three steps (lint → test → build) on every push and pull request.
+CI aggressively runs these exact three steps on every push.
 
-- Keep PRs small and focused — one change, one PR.
-- `internal/post` (the Tiptap document model: schema validation, sanitized HTML rendering, embeds, footnotes) is the most heavily unit-tested package in the repo. Changes there need tests; it's pure domain logic with no DB or HTTP dependencies, so tests are cheap to write and fast to run.
-- If you're adding a new template page, add a view struct and wire it into `web.PageData` (see `internal/web/render.go`) rather than passing ad hoc data into templates.
-- If you're touching user-facing strings, route them through `internal/i18n` (`T(lang, key, args...)`) rather than hardcoding English — see the README's Multi-language section for how the catalog works.
+- **Keep PRs tight.** One change, one PR. Do not bundle refactors with bug fixes.
+- **Test the domain logic.** `internal/post` (the Tiptap document model, schema validation, HTML rendering) is the most heavily tested package in the codebase. Changes there demand tests. It's pure domain logic without database or HTTP noise, so tests are cheap. Write them.
+- **Routing templates.** If you add a new template page, define a view struct. Wire it into `web.PageData` (`internal/web/render.go`). Do not pass ad hoc `map[string]any` data into templates.
+- **Language catalog.** If you touch user-facing text, route it through `internal/i18n` (`T(lang, key, args...)`). Never hardcode English. Read the README's Multi-language section to see how the catalog works.
 
 ## Database migrations
 
-Migrations live in `migrations/00N_*.sql`, run in order by `internal/migrate` (golang-migrate style). They're **append-only**: never edit a migration that's already been applied anywhere, including in this repo's history — add a new numbered file instead.
+Migrations live in `migrations/00N_*.sql`. They are strictly **append-only**. Never edit a migration that has already run anywhere, including the history of this repository. Add a new numbered file instead. We run them sequentially via `internal/migrate`.
 
 ## Adding an importer
 
-Every blog importer shares one job: turn some platform's export format into a waldi post. `internal/importblogir` (blog.ir) is the reference implementation — follow its shape for a new platform:
+Every blog importer has one job: translate a dead platform's export into a living Waldi post. The blog.ir importer (`internal/importblogir`) is your reference implementation. Follow this exact blueprint:
 
-1. Create `internal/import<platform>` with an `Export`/`LoadExport(path) (Export, error)` for parsing that platform's export file, and a `Post` type for one entry.
-2. Convert each post's HTML with `internal/importcommon`: `importcommon.Converter{}.ConvertPost(rawHTML)` returns a validated waldi document, sanitized HTML, and a word count. This is the same converter every importer uses — platform-specific quirks (odd markup, embeds, image URLs) belong in your package's pre-processing of the raw HTML before it reaches `ConvertPost`, not in the shared converter.
-3. Add an `Importer{Store, User, Opts}` with a `Run(ctx, posts) (Result, error)` method that loops the posts, converts them, and calls `store.ImportPost` — see `internal/importblogir/import.go`.
-4. Wire it into `cmd/waldi/import.go`'s `runImport` dispatch and, if it should be user-facing (not just a CLI tool for you), add a settings page following `internal/web/handlers_import_blogir.go` and `web/templates/import_blogir.html`.
+1. Create `internal/import<platform>` with an `Export`/`LoadExport(path) (Export, error)` to parse the raw file. Define a `Post` type for the entries.
+2. Pipe each post's HTML into `internal/importcommon`. The `importcommon.Converter{}.ConvertPost(rawHTML)` method spits out a validated Waldi document, sanitized HTML, and a word count. Clean up platform-specific garbage *before* calling `ConvertPost`. Don't pollute the shared converter.
+3. Build an `Importer{Store, User, Opts}` featuring a `Run(ctx, posts) (Result, error)` method. Loop the posts, convert them, and hit `store.ImportPost`.
+4. Wire your new package into `cmd/waldi/import.go`. If it's ready for humans, build a settings page matching `internal/web/handlers_import_blogir.go`.
 
-There's no runtime plugin system — a new importer is a new Go package, compiled in.
+There are no runtime plugins. A new importer is a compiled Go package.
 
 ## Branches
 
-- `main` tracks production.
-- `develop` is where day-to-day work lands; branch your PRs from `develop` unless you have a reason to target `main` directly (e.g. a hotfix).
-
+- `main` is production. Period.
+- `develop` catches the day-to-day chaos. Branch your PRs from `develop` unless you're deploying a critical hotfix directly to `main`.
 
 ## Good first contributions
 
-- **A new interface language** — the whole recipe is four small steps, documented in the README's [Multi-language / i18n](README.md#multi-language--i18n) section. No template changes needed; the catalog is the only thing that grows.
-- **A new blog importer** — `internal/importblogir` is the reference implementation; the pattern is documented step-by-step in [Adding an importer](#adding-an-importer) above. Blogfa, Persianblog, and WordPress are wanted (see ROADMAP.md).
-- **Design/template work** — read [docs/DESIGN.md](docs/DESIGN.md) first; it defines the tokens, the typography, and the (long) list of things deliberately banned. PRs that add shadows, badges, or a third typeface will be declined with love.
+- **A new interface language.** The entire recipe is four steps, detailed in the README. You don't touch templates. The catalog just grows.
+- **A new blog importer.** We need Blogfa, Persianblog, and WordPress. Study `internal/importblogir` and build the next one.
+- **Design work.** Read `docs/DESIGN.md` before you touch a pixel. It defines our typography and outlaws a massive list of UI cliches. If your PR adds a drop shadow, a badge, or a third typeface, I will decline it with love.
 
 ## Reporting bugs / requesting features
 
-Use the issue templates. For security issues, see `SECURITY.md` instead of filing a public issue.
+Use the issue templates. If it's a security flaw, read `SECURITY.md` and email me directly. Don't file a public issue.

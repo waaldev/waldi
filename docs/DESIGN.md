@@ -2,7 +2,7 @@
 
 *The feeling to build: a well-loved book read by lamplight. Cozy comes from warmth and softness; minimal comes from discipline; lovely comes from a handful of small, human moments placed exactly right.*
 
-Everything below is derived from one test: **would this feel at home printed on good paper?** If a UI element couldn't exist in a beautifully typeset book — a card shadow, a badge, a spinner — it has to justify itself or go.
+Everything below answers to one brutal test: **would this feel at home printed on good paper?** If a UI element couldn't exist in a beautifully typeset book—a card shadow, a notification badge, a loading spinner—it has to justify its existence or it dies.
 
 ---
 

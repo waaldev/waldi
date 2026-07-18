@@ -1,17 +1,18 @@
 # Security Policy
 
-Waldi is run by one person. Response times are best-effort — quick when possible, never promised.
+Waldi is run by one person. Response times are best-effort. I fix things quickly when I can, but I never promise enterprise SLAs.
 
 ## Reporting a vulnerability
 
-Please don't open a public GitHub issue for a security vulnerability. Email **me@aminzamani.com** instead, with:
+Do not open a public GitHub issue for a security vulnerability. That's reckless. Email **me@aminzamani.com** instead.
 
-- A description of the issue and its potential impact
-- Steps to reproduce (a minimal example is ideal)
-- Any relevant logs, requests, or screenshots
+Include exactly this:
+- What the issue is and what it breaks.
+- Steps to reproduce it. (A minimal example is gold.)
+- Any relevant logs, requests, or screenshots.
 
-You should get an acknowledgement within a few days. If the issue is confirmed, a fix will be prioritized and you'll be credited in the release notes unless you'd prefer otherwise.
+You will get a human acknowledgement within a few days. If the issue is real, I will prioritize a fix. You will be credited in the release notes unless you ask to remain anonymous.
 
 ## Scope
 
-This covers the `waldi` codebase itself (the Go application, templates, and editor JS). It does not cover third-party services it integrates with (Cloudflare, Resend, hosting providers, etc.) — report those directly to the relevant provider.
+This covers the `waldi` codebase. The Go application, the templates, and the editor JS. It entirely ignores third-party services like Cloudflare, Resend, or your hosting provider. If you find a hole in their infrastructure, tell them.
