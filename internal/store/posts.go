@@ -710,6 +710,31 @@ func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang 
 	return p, nil
 }
 
+func (s *Store) RandomPublishedPost(ctx context.Context, lang string) (Post, error) {
+	var p Post
+	err := s.pool.QueryRow(ctx, `
+		select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
+		       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang
+		from posts p
+		join users u on u.id = p.user_id
+		where p.status = 'published'
+		  and p.type = 'post'
+		  and p.word_count >= 50
+		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
+		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
+		  and u.blog_lang = $1
+		order by random()
+		limit 1
+	`, lang).Scan(postWithUserScanFields(&p)...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Post{}, ErrNotFound
+	}
+	if err != nil {
+		return Post{}, fmt.Errorf("finding random post: %w", err)
+	}
+	return p, nil
+}
+
 func (s *Store) AssignedWildcard(ctx context.Context, userID int64, day time.Time) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `

@@ -92,6 +92,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /sitemap.xml", s.handleBlogSitemapOrApp)
 	s.mux.HandleFunc("GET /", s.handleHome)
 	s.mux.HandleFunc("POST /lang/{code}", s.handleSetLocale)
+	s.mux.HandleFunc("GET /read", s.handleReadRandom)
 	s.mux.HandleFunc("GET /signup", s.handleSignupForm)
 	s.mux.HandleFunc("POST /signup", s.handleSignup)
 	s.mux.HandleFunc("GET /login", s.handleLoginForm)

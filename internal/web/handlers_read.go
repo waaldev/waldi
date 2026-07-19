@@ -77,6 +77,31 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	s.renderer.Render(w, "home.html", pd)
 }
 
+// handleReadRandom sends the visitor to a random published post in their
+// locale's language, so "just read" lands on real writing instead of a form.
+// Falls back to the default language, then the landing page, when nothing
+// matches.
+func (s *Server) handleReadRandom(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	if s.store == nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	lang, _ := resolveLocale(r, currentUser(r))
+	p, err := s.store.RandomPublishedPost(r.Context(), lang)
+	if errors.Is(err, store.ErrNotFound) && lang != i18n.Default {
+		p, err = s.store.RandomPublishedPost(r.Context(), i18n.Default)
+	}
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			s.logger.Error("picking random post", "err", err)
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug), http.StatusSeeOther)
+}
+
 // handleYou renders the owner's in-app blog preview: the same content a
 // guest would see on the public blog, but with the full app header and
 // owner-only affordances (Settings/Drafts), distinct from the minimal
