@@ -51,19 +51,11 @@
         <input type="hidden" name="invite" value="{{.Auth.InviteCode}}">
       {{end}}
       {{if eq .Auth.Mode "signup"}}
-        {{if .Auth.Reader}}
-          <input type="hidden" name="mode" value="reader">
-        {{end}}
         <div class="field">
-          <label for="username">{{if .Auth.Reader}}{{.T "auth.field.username.reader"}}{{else}}{{.T "auth.field.username"}}{{end}}</label>
+          <label for="username">{{.T "auth.field.username"}}</label>
           <input id="username" name="username" dir="ltr" autocomplete="username" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32">
-          {{if .Auth.Reader}}
-            <p class="field-help">{{.T "auth.field.username.help.reader"}}</p>
-          {{else}}
-            <p class="field-help" id="username-help" data-base-domain="{{.BaseDomain}}">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
-          {{end}}
+          <p class="field-help" id="username-help" data-base-domain="{{.BaseDomain}}">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
         </div>
-        {{if not .Auth.Reader}}
         <script>
           (function () {
             var input = document.getElementById("username");
@@ -91,7 +83,6 @@
           <textarea id="blog_description" name="blog_description" rows="3" maxlength="500"></textarea>
           <p class="field-help">{{.T "auth.field.blog_description.help"}}</p>
         </div>
-        {{end}}
       {{end}}
 
       <div class="field">

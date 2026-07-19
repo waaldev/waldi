@@ -108,7 +108,6 @@ type AuthView struct {
 	ResetToken  string
 	NextURL     string
 	InviteCode  string
-	Reader      bool
 }
 
 type BlogView struct {
