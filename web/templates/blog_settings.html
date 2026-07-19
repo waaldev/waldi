@@ -3,10 +3,14 @@
 {{template "app-bar" .}}
 
 <main>
-  <section class="settings-section">
-    <h1 class="settings-title">{{.T "blog.settings.heading"}}</h1>
-    <p class="settings-sub">{{.T "blog.settings.lead"}}</p>
+  <h1 class="settings-title settings-page-title">{{.T "blog.settings.title"}}</h1>
 
+  <details class="settings-fold" {{if or .BlogSettings.Error .BlogSettings.Saved}}open{{end}}>
+    <summary>
+      <span class="fold-title">{{.T "blog.settings.heading"}}</span>
+      <span class="fold-sub">{{.T "blog.settings.lead"}}</span>
+    </summary>
+    <div class="fold-body">
     {{if .BlogSettings.Error}}
       <p class="form-error">{{.BlogSettings.Error}}</p>
     {{else if .BlogSettings.Saved}}
@@ -43,12 +47,15 @@
 
       <button class="btn-save" type="submit">{{.T "blog.settings.submit"}}</button>
     </form>
-  </section>
+    </div>
+  </details>
 
-  <section class="settings-section">
-    <h2 class="settings-title">{{.T "blog.settings.pages.heading"}}</h2>
-    <p class="settings-sub">{{.T "blog.settings.pages.lead"}}</p>
-
+  <details class="settings-fold" {{if .BlogSettings.PagesError}}open{{end}}>
+    <summary>
+      <span class="fold-title">{{.T "blog.settings.pages.heading"}}</span>
+      <span class="fold-sub">{{.T "blog.settings.pages.lead"}}</span>
+    </summary>
+    <div class="fold-body">
     {{if .BlogSettings.PagesError}}
       <p class="form-error">{{.BlogSettings.PagesError}}</p>
     {{end}}
@@ -100,12 +107,15 @@
       </details>
     {{end}}
     <p class="hint">{{.T "blog.settings.pages.hint" .BlogSettings.MaxPages}}</p>
-  </section>
+    </div>
+  </details>
 
-  <section class="settings-section">
-    <h2 class="settings-title">{{.T "blog.settings.domain.heading"}}</h2>
-    <p class="settings-sub">{{.T "blog.settings.domain.lead"}}</p>
-
+  <details class="settings-fold" {{if or .BlogSettings.DomainError .BlogSettings.DomainNotice}}open{{end}}>
+    <summary>
+      <span class="fold-title">{{.T "blog.settings.domain.heading"}}</span>
+      <span class="fold-sub">{{.T "blog.settings.domain.lead"}}</span>
+    </summary>
+    <div class="fold-body">
     {{if .BlogSettings.DomainError}}
       <p class="form-error">{{.BlogSettings.DomainError}}</p>
     {{else if .BlogSettings.DomainNotice}}
@@ -171,12 +181,15 @@
         <button class="btn-save" type="submit">{{.T "blog.settings.domain.submit"}}</button>
       </form>
     {{end}}
-  </section>
+    </div>
+  </details>
 
-  <section class="settings-section">
-    <h2 class="settings-title">{{.T "blog.settings.account.heading"}}</h2>
-    <p class="settings-sub">{{.T "blog.settings.account.lead"}}</p>
-
+  <details class="settings-fold" {{if or .BlogSettings.PasswordError .BlogSettings.PasswordSaved .BlogSettings.DeleteError}}open{{end}}>
+    <summary>
+      <span class="fold-title">{{.T "blog.settings.account.heading"}}</span>
+      <span class="fold-sub">{{.T "blog.settings.account.lead"}}</span>
+    </summary>
+    <div class="fold-body">
     <div class="field">
       <label for="email">{{.T "blog.settings.account.email"}}</label>
       <input id="email" type="email" value="{{.CurrentUser.Email}}" disabled>
@@ -199,7 +212,7 @@
       <p class="form-note">{{.T "blog.settings.password.saved"}}</p>
     {{end}}
 
-    <details class="change-password">
+    <details class="change-password" {{if .BlogSettings.PasswordError}}open{{end}}>
       <summary><a href="#">{{.T "blog.settings.password.link"}}</a></summary>
       <form method="post" action="/settings/password">
         <div class="field">
@@ -233,7 +246,8 @@
         </form>
       </details>
     </div>
-  </section>
+    </div>
+  </details>
 </main>
 {{template "layout-end" .}}
 {{end}}

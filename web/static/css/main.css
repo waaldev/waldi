@@ -929,6 +929,50 @@ a.btn-secondary:hover {
   margin: 0 0 var(--s5);
 }
 
+.settings-page-title {
+  font-size: var(--text-title);
+  margin-block: var(--s5) var(--s6);
+}
+
+.settings-fold { border-block-start: 1px solid var(--hairline); }
+.settings-fold:last-of-type { border-block-end: 1px solid var(--hairline); }
+
+.settings-fold > summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s3);
+  padding-block: var(--s5);
+  cursor: pointer;
+  list-style: none;
+}
+.settings-fold > summary::-webkit-details-marker { display: none; }
+
+.settings-fold .fold-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-feed);
+  font-weight: 500;
+  transition: color 120ms;
+}
+.settings-fold > summary:hover .fold-title { color: var(--accent-ink); }
+
+.settings-fold .fold-sub {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  flex: 1;
+}
+
+.settings-fold > summary::after {
+  content: "+";
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--ink-faint);
+  margin-inline-start: auto;
+}
+.settings-fold[open] > summary::after { content: "−"; }
+
+.settings-fold > .fold-body { padding-block-end: var(--s7); }
+
 .btn-save {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
