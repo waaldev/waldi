@@ -239,7 +239,6 @@ type PostView struct {
 
 type FeedView struct {
 	Days     []FeedDay
-	Sample   []PostView
 	Wildcard *PostView
 	Empty    bool
 }

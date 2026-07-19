@@ -57,8 +57,6 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		} else if !errors.Is(err, store.ErrNotFound) {
 			s.logger.Error("loading wildcard", "err", err)
 		}
-	} else {
-		feed.Sample = landingSamplePosts()
 	}
 
 	pd.Title = pd.T("home.title")
