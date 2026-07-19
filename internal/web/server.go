@@ -122,6 +122,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /settings/domain/verify", s.handleVerifyCustomDomain)
 	s.mux.HandleFunc("POST /settings/domain/remove", s.handleRemoveCustomDomain)
 	s.mux.HandleFunc("POST /settings/password", s.handleChangePassword)
+	s.mux.HandleFunc("POST /settings/delete", s.handleDeleteAccount)
 	s.mux.HandleFunc("POST /settings/locale", s.handleSettingsLocale)
 	s.mux.HandleFunc("GET /settings/export", s.handleExportPosts)
 	s.mux.HandleFunc("GET /settings/import-blogir", s.handleImportBlogirForm)

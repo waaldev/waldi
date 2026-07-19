@@ -64,6 +64,54 @@ func (s *Server) renderSettingsPasswordError(w http.ResponseWriter, r *http.Requ
 	s.renderer.RenderStatus(w, http.StatusBadRequest, "blog_settings.html", pd)
 }
 
+// handleDeleteAccount permanently deletes the signed-in user's account
+// after confirming their password. Posts, sessions, follows, and letters
+// are removed along with the users row by the cascading foreign keys.
+func (s *Server) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if s.store == nil {
+		s.renderSettingsDeleteError(w, r, user, "blog.settings.error.db")
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		s.renderSettingsDeleteError(w, r, user, "blog.settings.error.form")
+		return
+	}
+
+	if !checkPassword(user.PasswordHash, r.FormValue("current_password")) {
+		s.renderSettingsDeleteError(w, r, user, "blog.settings.delete.error.password")
+		return
+	}
+
+	if err := s.store.DeleteUser(r.Context(), user.ID); err != nil {
+		s.logger.Error("deleting account", "user_id", user.ID, "err", err)
+		s.renderSettingsDeleteError(w, r, user, "blog.settings.error.save")
+		return
+	}
+
+	domain := sessionCookieDomain(r.Host, s.baseDomain)
+	secure := requestScheme(r) == "https"
+	clearSessionCookie(w, domain, secure)
+	clearBridgeCookie(w, domain, secure)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (s *Server) renderSettingsDeleteError(w http.ResponseWriter, r *http.Request, user *store.User, messageKey string) {
+	pd := s.newPageData(r, user)
+	pd.Title = pd.T("blog.settings.title")
+	pd.SEO = noindexSEO()
+	view := blogSettingsViewFor(*user, s.baseDomain)
+	view.Pages = s.pagesViewFor(r.Context(), user.ID)
+	view.MaxPages = store.MaxPagesPerUser
+	view.DeleteError = pd.T(messageKey)
+	pd.BlogSettings = view
+	s.renderer.RenderStatus(w, http.StatusBadRequest, "blog_settings.html", pd)
+}
+
 type exportPost struct {
 	Title       string  `json:"title"`
 	Slug        string  `json:"slug"`

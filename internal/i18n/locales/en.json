@@ -167,6 +167,11 @@
   "blog.settings.password.saved": "Password changed.",
   "blog.settings.password.error.current": "That current password is incorrect.",
   "blog.settings.password.error.length": "The new password must be at least 8 characters.",
+  "blog.settings.delete.link": "Delete account",
+  "blog.settings.delete.body": "Deletes your account, your blog, and every post permanently. If you want to keep your words, download the export first.",
+  "blog.settings.delete.confirm": "Delete your account and all of its posts? This cannot be undone.",
+  "blog.settings.delete.submit": "Delete my account",
+  "blog.settings.delete.error.password": "That password is incorrect.",
 
   "you.owner.badge": "This is your blog",
   "you.owner.drafts": "Drafts",

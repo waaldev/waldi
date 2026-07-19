@@ -173,6 +173,7 @@ type BlogSettingsView struct {
 	MaxPages      int
 	PasswordError string
 	PasswordSaved bool
+	DeleteError   string
 }
 
 // ImportBlogirView backs the hidden /settings/import-blogir page used to

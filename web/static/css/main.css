@@ -997,6 +997,9 @@ a.btn-secondary:hover {
 .domain-row form { margin: 0; }
 
 .danger-zone p { font-size: var(--text-meta); color: var(--ink-soft); }
+.delete-account { margin-block-start: var(--s3); }
+.delete-account summary { font-size: var(--text-meta); }
+.delete-account form { margin-block-start: var(--s3); }
 
 .domain-panel {
   background: var(--paper-raised);

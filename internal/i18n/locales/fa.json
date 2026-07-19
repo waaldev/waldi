@@ -161,6 +161,11 @@
   "blog.settings.password.saved": "گذرواژه تغییر کرد.",
   "blog.settings.password.error.current": "گذرواژه‌ی فعلی درست نیست.",
   "blog.settings.password.error.length": "گذرواژه‌ی تازه باید دست‌کم ۸ نویسه باشد.",
+  "blog.settings.delete.link": "حذف حساب",
+  "blog.settings.delete.body": "حساب، وبلاگ و همه‌ی نوشته‌هایت برای همیشه پاک می‌شوند. اگر می‌خواهی نوشته‌هایت را نگه داری، اول خروجی بگیر.",
+  "blog.settings.delete.confirm": "حساب و همه‌ی نوشته‌هایت حذف شوند؟ این کار برگشت‌پذیر نیست.",
+  "blog.settings.delete.submit": "حذف حساب من",
+  "blog.settings.delete.error.password": "گذرواژه درست نیست.",
 
   "you.owner.badge": "این وبلاگ شماست",
   "you.owner.drafts": "پیش‌نویس‌ها",
