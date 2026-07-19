@@ -94,6 +94,18 @@ func validateBlock(node Node) error {
 				return fmt.Errorf("unsupported blockquote child %q", child.Type)
 			}
 		}
+	case "bulletList", "orderedList":
+		if len(node.Content) == 0 {
+			return fmt.Errorf("%s cannot be empty", node.Type)
+		}
+		for i, child := range node.Content {
+			if child.Type != "listItem" {
+				return fmt.Errorf("unsupported %s child %q", node.Type, child.Type)
+			}
+			if err := validateListItem(child); err != nil {
+				return fmt.Errorf("item[%d]: %w", i, err)
+			}
+		}
 	case "horizontalRule":
 		if len(node.Content) > 0 || node.Text != "" {
 			return errors.New("divider cannot contain content")
@@ -109,6 +121,30 @@ func validateBlock(node Node) error {
 		return validateEmbed(node.Attrs)
 	default:
 		return fmt.Errorf("unsupported block node %q", node.Type)
+	}
+	return nil
+}
+
+func validateListItem(node Node) error {
+	if len(node.Content) == 0 {
+		return errors.New("list item cannot be empty")
+	}
+	for i, child := range node.Content {
+		switch child.Type {
+		case "paragraph":
+			if !validBlockDir(child.Attrs.Dir) {
+				return fmt.Errorf("child[%d]: invalid dir on paragraph", i)
+			}
+			if err := validateInlineContainer(child); err != nil {
+				return fmt.Errorf("child[%d]: %w", i, err)
+			}
+		case "bulletList", "orderedList":
+			if err := validateBlock(child); err != nil {
+				return fmt.Errorf("child[%d]: %w", i, err)
+			}
+		default:
+			return fmt.Errorf("unsupported list item child %q", child.Type)
+		}
 	}
 	return nil
 }

@@ -11,6 +11,7 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import Image from '@tiptap/extension-image'
 import Italic from '@tiptap/extension-italic'
 import Link from '@tiptap/extension-link'
+import { BulletList, ListItem, ListKeymap, OrderedList } from '@tiptap/extension-list'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Typography from '@tiptap/extension-typography'
@@ -146,6 +147,10 @@ if (root) {
         Bold,
         Italic,
         Blockquote,
+        BulletList,
+        OrderedList,
+        ListItem,
+        ListKeymap,
         HorizontalRule,
         Dropcursor,
         Gapcursor,
@@ -269,6 +274,12 @@ if (root) {
         case 'quote':
           editor.chain().focus().toggleBlockquote().run()
           break
+        case 'bullet-list':
+          editor.chain().focus().toggleBulletList().run()
+          break
+        case 'ordered-list':
+          editor.chain().focus().toggleOrderedList().run()
+          break
         case 'divider':
           editor.chain().focus().setHorizontalRule().run()
           break
@@ -375,6 +386,8 @@ if (root) {
       italic: () => editor.isActive('italic'),
       heading: () => editor.isActive('heading', { level: 2 }),
       quote: () => editor.isActive('blockquote'),
+      'bullet-list': () => editor.isActive('bulletList'),
+      'ordered-list': () => editor.isActive('orderedList'),
       link: () => editor.isActive('link'),
       footnote: () => editor.isActive('footnote'),
       ltr: () => editor.isActive(directionBlockType(editor), { dir: 'ltr' }),

@@ -31,7 +31,7 @@ func newSanitizePolicy() *bluemonday.Policy {
 	p := bluemonday.NewPolicy()
 	p.AllowURLSchemes("http", "https", "mailto")
 	p.AllowRelativeURLs(true)
-	p.AllowElements("p", "h2", "blockquote", "hr", "strong", "em", "figure", "sup", "ol", "li", "a", "img", "div", "iframe", "span")
+	p.AllowElements("p", "h2", "blockquote", "hr", "strong", "em", "figure", "sup", "ul", "ol", "li", "a", "img", "div", "iframe", "span")
 	p.AllowAttrs("class").Matching(regexp.MustCompile(`^(divider|fn-ref|fn-back|footnotes)$`)).OnElements("hr", "sup", "ol", "a")
 	p.AllowAttrs("dir").Matching(regexp.MustCompile(`^(ltr|rtl)$`)).OnElements("span", "p", "h2", "blockquote")
 	p.AllowAttrs("class").Matching(regexp.MustCompile(`^embed embed--(youtube|spotify|soundcloud)$`)).OnElements("div")
@@ -125,6 +125,24 @@ func renderBlock(buf *bytes.Buffer, node Node, footnotes *footnoteIndex) {
 			renderBlock(buf, child, footnotes)
 		}
 		buf.WriteString("</blockquote>")
+	case "bulletList":
+		buf.WriteString("<ul>")
+		for _, child := range node.Content {
+			renderBlock(buf, child, footnotes)
+		}
+		buf.WriteString("</ul>")
+	case "orderedList":
+		buf.WriteString("<ol>")
+		for _, child := range node.Content {
+			renderBlock(buf, child, footnotes)
+		}
+		buf.WriteString("</ol>")
+	case "listItem":
+		buf.WriteString("<li>")
+		for _, child := range node.Content {
+			renderBlock(buf, child, footnotes)
+		}
+		buf.WriteString("</li>")
 	case "horizontalRule":
 		buf.WriteString(`<hr class="divider">`)
 	case "image":

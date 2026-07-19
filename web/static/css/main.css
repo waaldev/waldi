@@ -474,6 +474,16 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 
 .letter-body { white-space: pre-wrap; }
 
+.prose ul,
+.prose ol {
+  margin: 0 0 0.75em;
+  padding-inline-start: 1.5em;
+}
+.prose li { margin: 0 0 0.25em; }
+.prose li p { margin: 0; }
+.prose li ul,
+.prose li ol { margin-block: 0.25em 0; }
+
 .prose blockquote {
   margin: 1em 0;
   padding-inline-start: var(--s4);
@@ -1395,6 +1405,16 @@ a.btn-secondary:hover {
 .editor-surface h2:lang(fa) {
   -webkit-text-stroke: 0.4px currentColor;
 }
+
+.editor-surface ul,
+.editor-surface ol {
+  margin: 0 0 0.75em;
+  padding-inline-start: 1.5em;
+}
+.editor-surface li { margin: 0 0 0.25em; }
+.editor-surface li p { margin: 0; }
+.editor-surface li ul,
+.editor-surface li ol { margin-block: 0.25em 0; }
 
 .editor-surface blockquote {
   margin: 1em 0;

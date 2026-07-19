@@ -133,6 +133,36 @@ func TestRenderHTMLBlockquoteWithParagraphs(t *testing.T) {
 	}
 }
 
+func TestRenderHTMLLists(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"one"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"two"}]},{"type":"orderedList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"nested"}]}]}]}]}]}]}`)
+	doc, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := RenderHTML(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "<ul><li><p>one</p></li><li><p>two</p><ol><li><p>nested</p></li></ol></li></ul>"
+	if got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestParseRejectsInvalidListChildren(t *testing.T) {
+	cases := []string{
+		`{"type":"doc","content":[{"type":"bulletList","content":[]}]}`,
+		`{"type":"doc","content":[{"type":"bulletList","content":[{"type":"paragraph","content":[{"type":"text","text":"no"}]}]}]}`,
+		`{"type":"doc","content":[{"type":"orderedList","content":[{"type":"listItem","content":[{"type":"blockquote","content":[{"type":"paragraph"}]}]}]}]}`,
+		`{"type":"doc","content":[{"type":"listItem","content":[{"type":"paragraph"}]}]}`,
+	}
+	for _, raw := range cases {
+		if _, err := Parse(json.RawMessage(raw)); err == nil {
+			t.Errorf("expected parse error for %s", raw)
+		}
+	}
+}
+
 func TestRenderHTMLFootnotes(t *testing.T) {
 	raw := json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hello","marks":[{"type":"footnote","attrs":{"id":"fn1","text":"A quiet note."}}]}]}]}`)
 	doc, err := Parse(raw)
