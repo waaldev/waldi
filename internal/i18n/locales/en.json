@@ -372,7 +372,7 @@
 
   "digest.subject": "Your Waldi daily digest",
   "digest.line": "\"%s\" — %s",
-  "digest.clause.readers": "%d people read this.",
+  "digest.clause.readers": "%d read this.",
   "digest.clause.completed": "%d finished it.",
   "digest.clause.follows": "%d followed you afterward.",
   "digest.clause.letters": "%d letters arrived for it.",
