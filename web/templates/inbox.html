@@ -20,6 +20,9 @@
       </li>
     {{end}}
   </ul>
+  {{if .Inbox.OlderURL}}
+    <p class="feed-more"><a class="quiet-link" href="{{.Inbox.OlderURL}}">{{.T "pagination.older"}}</a></p>
+  {{end}}
 {{else}}
   <p class="finish">{{.T "inbox.empty"}}</p>
 {{end}}

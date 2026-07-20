@@ -29,15 +29,24 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	letters, err := s.store.LettersForUser(r.Context(), user.ID, time.Now().Add(-inboxWindow), inboxHardLimit)
+	cursor, err := parsePageCursor(r)
+	if err != nil {
+		s.renderInboxError(w, r, "error.bad_cursor")
+		return
+	}
+	raw, err := s.store.LettersForUser(r.Context(), user.ID, time.Now().Add(-inboxWindow), inboxPageSize+1, cursor)
 	if err != nil {
 		s.logger.Error("loading inbox", "err", err)
 		s.renderInboxError(w, r, "inbox.error.list")
 		return
 	}
-	stats, err := s.store.PostStatsForUser(r.Context(), user.ID, time.Now().Add(-24*time.Hour), 10)
-	if err != nil {
-		s.logger.Error("loading inbox stats", "err", err)
+	letters, hasMore := trimPage(raw, inboxPageSize)
+	var stats []store.PostStats
+	if !cursor.Active() {
+		stats, err = s.store.PostStatsForUser(r.Context(), user.ID, time.Now().Add(-24*time.Hour), 10)
+		if err != nil {
+			s.logger.Error("loading inbox stats", "err", err)
+		}
 	}
 
 	pd := s.newPageData(r, user)
@@ -45,9 +54,10 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	pd.Title = pd.T("inbox.title")
 	pd.SEO = noindexSEO()
 	pd.Inbox = &InboxView{
-		Letters: views,
-		Stats:   statsViews(pd.Lang, stats),
-		Empty:   len(views) == 0 && len(stats) == 0,
+		Letters:  views,
+		Stats:    statsViews(pd.Lang, stats),
+		Empty:    len(views) == 0 && len(stats) == 0,
+		OlderURL: lettersOlderURL("/inbox", letters, hasMore),
 	}
 	s.renderer.Render(w, "inbox.html", pd)
 }

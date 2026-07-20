@@ -69,7 +69,8 @@ func (s *Store) LettersSentSince(ctx context.Context, userID int64, since time.T
 	return count, nil
 }
 
-func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Time, limit int) ([]Letter, error) {
+func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Time, limit int, cursor PageCursor) ([]Letter, error) {
+	before, lastID := cursorArgs(cursor)
 	rows, err := s.pool.Query(ctx, `
 		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at
 		from letters l
@@ -77,9 +78,14 @@ func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Tim
 		join posts p on p.id = l.post_id
 		where l.to_user = $1
 		  and (l.read_at is null or l.created_at >= $2)
+		  and (
+		    $4::timestamptz is null
+		    or l.created_at < $4::timestamptz
+		    or ($5::bigint is not null and l.created_at = $4::timestamptz and l.id < $5::bigint)
+		  )
 		order by l.created_at desc, l.id desc
 		limit $3
-	`, userID, since, limit)
+	`, userID, since, limit, before, lastID)
 	if err != nil {
 		return nil, fmt.Errorf("listing letters: %w", err)
 	}

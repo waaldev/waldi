@@ -17,9 +17,9 @@ const (
 	feedWindow    = 7 * 24 * time.Hour
 	feedHardLimit = 200
 
-	inboxWindow    = 7 * 24 * time.Hour
-	inboxHardLimit = 200
+	inboxWindow = 7 * 24 * time.Hour
 
+	inboxPageSize         = 5
 	letterArchivePageSize = 10
 )
 
