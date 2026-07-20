@@ -99,6 +99,44 @@ func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Tim
 	return letters, nil
 }
 
+// LettersArchiveForUser lists all letters ever received by a user, regardless
+// of age or read status, newest first — the permanent home for letters that
+// have aged out of the inbox's recent window.
+func (s *Store) LettersArchiveForUser(ctx context.Context, userID int64, limit int, cursor PageCursor) ([]Letter, error) {
+	before, lastID := cursorArgs(cursor)
+	rows, err := s.pool.Query(ctx, `
+		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at
+		from letters l
+		join users u on u.id = l.from_user
+		join posts p on p.id = l.post_id
+		where l.to_user = $1
+		  and (
+		    $3::timestamptz is null
+		    or l.created_at < $3::timestamptz
+		    or ($4::bigint is not null and l.created_at = $3::timestamptz and l.id < $4::bigint)
+		  )
+		order by l.created_at desc, l.id desc
+		limit $2
+	`, userID, limit, before, lastID)
+	if err != nil {
+		return nil, fmt.Errorf("listing letter archive: %w", err)
+	}
+	defer rows.Close()
+
+	var letters []Letter
+	for rows.Next() {
+		var letter Letter
+		if err := rows.Scan(letterWithPostScanFields(&letter)...); err != nil {
+			return nil, fmt.Errorf("scanning archived letter: %w", err)
+		}
+		letters = append(letters, letter)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating letter archive: %w", err)
+	}
+	return letters, nil
+}
+
 func (s *Store) LetterForUser(ctx context.Context, letterID, userID int64) (Letter, error) {
 	var letter Letter
 	err := s.pool.QueryRow(ctx, `

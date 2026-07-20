@@ -343,6 +343,12 @@
   "inbox.empty": "No letters have arrived yet.",
   "inbox.finish": "That's every letter. ※",
   "inbox.finish.sub": "Write back when you're ready.",
+  "inbox.archive.link": "All letters",
+  "inbox.archive.title": "All letters",
+  "inbox.archive.daylabel": "All letters",
+  "inbox.archive.back": "Letters",
+  "inbox.archive.empty": "No letters have arrived yet.",
+  "inbox.archive.finish": "That's every letter you've received. ※",
   "letter.submit": "Send",
 
   "error.render": "Something went wrong rendering this page",

@@ -149,6 +149,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /unfollow/{username}", s.handleUnfollow)
 	s.mux.HandleFunc("POST /wildcard/skip", s.handleSkipWildcard)
 	s.mux.HandleFunc("GET /inbox", s.handleInbox)
+	s.mux.HandleFunc("GET /inbox/archive", s.handleInboxArchive)
 	s.mux.HandleFunc("GET /inbox/{id}", s.handleLetter)
 	s.mux.HandleFunc("POST /letters", s.handleCreateLetter)
 	s.mux.HandleFunc("GET /{slug}", s.handlePublicPost)

@@ -19,6 +19,8 @@ const (
 
 	inboxWindow    = 7 * 24 * time.Hour
 	inboxHardLimit = 200
+
+	letterArchivePageSize = 10
 )
 
 var errBadPageCursor = fmt.Errorf("bad page cursor")
@@ -75,4 +77,12 @@ func publishedOlderURL(path string, posts []store.Post, hasMore bool) string {
 		return ""
 	}
 	return olderPageURL(path, *last.PublishedAt, last.ID)
+}
+
+func lettersOlderURL(path string, letters []store.Letter, hasMore bool) string {
+	if !hasMore || len(letters) == 0 {
+		return ""
+	}
+	last := letters[len(letters)-1]
+	return olderPageURL(path, last.CreatedAt, last.ID)
 }

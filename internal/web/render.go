@@ -249,11 +249,12 @@ type FeedDay struct {
 }
 
 type InboxView struct {
-	Letters []LetterView
-	Letter  *LetterView
-	Stats   []StatsView
-	Empty   bool
-	Error   string
+	Letters  []LetterView
+	Letter   *LetterView
+	Stats    []StatsView
+	Empty    bool
+	Error    string
+	OlderURL string
 }
 
 type LetterView struct {

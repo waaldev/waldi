@@ -52,6 +52,42 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	s.renderer.Render(w, "inbox.html", pd)
 }
 
+func (s *Server) handleInboxArchive(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if s.store == nil {
+		s.renderInboxError(w, r, "inbox.error.db")
+		return
+	}
+
+	cursor, err := parsePageCursor(r)
+	if err != nil {
+		s.renderInboxError(w, r, "error.bad_cursor")
+		return
+	}
+	raw, err := s.store.LettersArchiveForUser(r.Context(), user.ID, letterArchivePageSize+1, cursor)
+	if err != nil {
+		s.logger.Error("loading letter archive", "err", err)
+		s.renderInboxError(w, r, "inbox.error.list")
+		return
+	}
+	letters, hasMore := trimPage(raw, letterArchivePageSize)
+
+	pd := s.newPageData(r, user)
+	views := letterViews(r, s.baseDomain, letters, pd.Lang)
+	pd.Title = pd.T("inbox.archive.title")
+	pd.SEO = noindexSEO()
+	pd.Inbox = &InboxView{
+		Letters:  views,
+		Empty:    len(views) == 0,
+		OlderURL: lettersOlderURL("/inbox/archive", letters, hasMore),
+	}
+	s.renderer.Render(w, "inbox-archive.html", pd)
+}
+
 func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
 	if user == nil {

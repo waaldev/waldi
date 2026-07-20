@@ -1,4 +1,4 @@
-{{define "inbox.html"}}
+{{define "inbox-archive.html"}}
 {{template "layout-start" .}}
 {{template "app-bar" .}}
 
@@ -6,7 +6,9 @@
   <p class="form-error">{{.Inbox.Error}}</p>
 {{end}}
 
-<p class="daylabel">{{.T "inbox.daylabel"}}</p>
+<p class="feed-more"><a class="quiet-link" href="/inbox">← {{.T "inbox.archive.back"}}</a></p>
+
+<p class="daylabel">{{.T "inbox.archive.daylabel"}}</p>
 
 {{if .Inbox.Letters}}
   <ul class="feed">
@@ -20,23 +22,15 @@
       </li>
     {{end}}
   </ul>
+  {{if .Inbox.OlderURL}}
+    <p class="feed-more"><a class="quiet-link" href="{{.Inbox.OlderURL}}">{{.T "pagination.older"}}</a></p>
+  {{end}}
 {{else}}
-  <p class="finish">{{.T "inbox.empty"}}</p>
-{{end}}
-
-<p class="feed-more"><a class="quiet-link" href="/inbox/archive">{{.T "inbox.archive.link"}}</a></p>
-
-{{if .Inbox.Stats}}
-  <p class="daylabel">{{.T "inbox.stats.daylabel"}}</p>
-  <div class="stats-narrative">
-    {{range .Inbox.Stats}}<p><strong>{{.PostTitle}}</strong> — {{.Sentence}}</p>{{end}}
-    <p class="caption">{{.T "inbox.stats.caption"}}</p>
-  </div>
+  <p class="finish">{{.T "inbox.archive.empty"}}</p>
 {{end}}
 
 <footer class="finish">
-  <p>{{.T "inbox.finish"}}</p>
-  <small>{{.T "inbox.finish.sub"}}</small>
+  <p>{{.T "inbox.archive.finish"}}</p>
 </footer>
 {{template "layout-end" .}}
 {{end}}
