@@ -637,10 +637,10 @@
     /**
     Create a slice. When specifying a non-zero open depth, you must
     make sure that there are nodes of at least that depth at the
-    appropriate side of the fragment—i.e. if the fragment is an
+    appropriate side of the fragment-i.e. if the fragment is an
     empty paragraph node, `openStart` and `openEnd` can't be greater
     than 1.
-    
+
     It is not necessary for the content of open nodes to conform to
     the schema's content constraints, though it should be a valid
     start/end/middle for such a node, depending on which sides are
@@ -863,7 +863,7 @@
     /**
     The parent node that the position points into. Note that even if
     a position points into a text node, that node is not considered
-    the parent—text nodes are ‘flat’ in this model, and have no content.
+    the parent-text nodes are ‘flat’ in this model, and have no content.
     */
     get parent() {
       return this.node(this.depth);
@@ -3897,7 +3897,7 @@
   var ReplaceStep = class _ReplaceStep2 extends Step {
     /**
     The given `slice` should fit the 'gap' between `from` and
-    `to`—the depths must line up, and the surrounding nodes must be
+    `to`-the depths must line up, and the surrounding nodes must be
     able to be joined with the open sides of the slice. When
     `structure` is true, the step will fail if the content between
     from and to is not just a sequence of closing and then opening
@@ -5032,7 +5032,7 @@
     context](https://prosemirror.net/docs/ref/#model.NodeSpec.definingAsContext), or including an
     open parent node from the slice that _is_ marked as [defining
     its content](https://prosemirror.net/docs/ref/#model.NodeSpec.definingForContent).
-    
+
     This is the method, for example, to handle paste. The similar
     [`replace`](https://prosemirror.net/docs/ref/#transform.Transform.replace) method is a more
     primitive tool which will _not_ move the start and end of its given
@@ -11861,7 +11861,7 @@
     possible to the content before the position. When positive,
     prefer positions close to the content after the position. When
     zero, prefer as shallow a position as possible.
-    
+
     Note that you should **not** mutate the editor's internal DOM,
     only inspect it (and even that is usually not necessary).
     */
@@ -11872,7 +11872,7 @@
     Find the DOM node that represents the document node after the
     given position. May return `null` when the position doesn't point
     in front of a node or if the node is inside an opaque node view.
-    
+
     This is intended to be able to call things like
     `getBoundingClientRect` on that DOM node. Do **not** mutate the
     editor DOM directly, or add styling this way, since that will be
@@ -11886,9 +11886,9 @@
     Find the document position that corresponds to a given DOM
     position. (Whenever possible, it is preferable to inspect the
     document structure directly, rather than poking around in the
-    DOM, but sometimes—for example when interpreting an event
-    target—you don't have a choice.)
-    
+    DOM, but sometimes-for example when interpreting an event
+    target-you don't have a choice.)
+
     The `bias` parameter can be used to influence which side of a DOM
     node to use when the position is inside a leaf node.
     */
@@ -16354,7 +16354,7 @@ ${indentedChild}`;
      * singleton roots through deep extend() chains.
      *
      * Only ancestor `.child` links matching the current chain are cleared.
-     * The `.parent` pointer on ancestors is never touched — extensions
+     * The `.parent` pointer on ancestors is never touched - extensions
      * may be shared across live editors, so their own backward references
      * and non-matching forward links must remain intact.
      */
@@ -18319,7 +18319,7 @@ img.ProseMirror-separator {
      *
      * When aspect ratio is NOT preserved, constraints are applied independently
      * to width and height. When aspect ratio IS preserved, constraints are
-     * applied while maintaining the aspect ratio—if one dimension hits a limit,
+     * applied while maintaining the aspect ratio-if one dimension hits a limit,
      * the other is recalculated proportionally.
      *
      * This ensures that aspect ratio is never broken when constrained.
@@ -18979,10 +18979,10 @@ img.ProseMirror-separator {
     /**
     Create a slice. When specifying a non-zero open depth, you must
     make sure that there are nodes of at least that depth at the
-    appropriate side of the fragment—i.e. if the fragment is an
+    appropriate side of the fragment-i.e. if the fragment is an
     empty paragraph node, `openStart` and `openEnd` can't be greater
     than 1.
-    
+
     It is not necessary for the content of open nodes to conform to
     the schema's content constraints, though it should be a valid
     start/end/middle for such a node, depending on which sides are
@@ -19204,7 +19204,7 @@ img.ProseMirror-separator {
     /**
     The parent node that the position points into. Note that even if
     a position points into a text node, that node is not considered
-    the parent—text nodes are ‘flat’ in this model, and have no content.
+    the parent-text nodes are ‘flat’ in this model, and have no content.
     */
     get parent() {
       return this.node(this.depth);
@@ -20755,7 +20755,7 @@ img.ProseMirror-separator {
   var ReplaceStep2 = class _ReplaceStep extends Step2 {
     /**
     The given `slice` should fit the 'gap' between `from` and
-    `to`—the depths must line up, and the surrounding nodes must be
+    `to`-the depths must line up, and the surrounding nodes must be
     able to be joined with the open sides of the slice. When
     `structure` is true, the step will fail if the content between
     from and to is not just a sequence of closing and then opening
@@ -26032,7 +26032,7 @@ ${prefix}
     addInputRules() {
       return [
         nodeInputRule({
-          find: /^(?:---|—-|___\s|\*\*\*\s)$/,
+          find: /^(?:---|--|___\s|\*\*\*\s)$/,
           type: this.type
         })
       ];

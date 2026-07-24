@@ -15,7 +15,7 @@ const reactivationInactiveAfter = 30 * 24 * time.Hour
 // ReactivationJob pauses digest email for accounts that have gone quiet for
 // ~30 days and sends a one-time re-permission email asking whether they
 // still want it. Digests stay paused until the user clicks the resume link
-// (or otherwise becomes active again) — nobody keeps getting daily mail
+// (or otherwise becomes active again) - nobody keeps getting daily mail
 // they've stopped opening.
 type ReactivationJob struct {
 	Store   *store.Store

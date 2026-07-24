@@ -39,7 +39,7 @@ func (s *Store) CreateLetter(ctx context.Context, postID, fromUserID, toUserID i
 }
 
 // CompletedReadingsCount counts posts (excluding the reader's own) a user
-// has completed reading — the "you write to a writer after reading them"
+// has completed reading - the "you write to a writer after reading them"
 // qualifying signal for sending a letter.
 func (s *Store) CompletedReadingsCount(ctx context.Context, userID int64) (int, error) {
 	var count int
@@ -56,7 +56,7 @@ func (s *Store) CompletedReadingsCount(ctx context.Context, userID int64) (int, 
 	return count, nil
 }
 
-// LettersSentSince counts letters a user has sent since a given time — used
+// LettersSentSince counts letters a user has sent since a given time - used
 // to enforce a daily letter rate limit.
 func (s *Store) LettersSentSince(ctx context.Context, userID int64, since time.Time) (int, error) {
 	var count int
@@ -106,7 +106,7 @@ func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Tim
 }
 
 // LettersArchiveForUser lists all letters ever received by a user, regardless
-// of age or read status, newest first — the permanent home for letters that
+// of age or read status, newest first - the permanent home for letters that
 // have aged out of the inbox's recent window.
 func (s *Store) LettersArchiveForUser(ctx context.Context, userID int64, limit int, cursor PageCursor) ([]Letter, error) {
 	before, lastID := cursorArgs(cursor)

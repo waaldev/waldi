@@ -1,10 +1,10 @@
 /* Self-hosted subsets of Newsreader, IRMitra (RTL serif), and Vazirmatn
    (RTL sans). Only the latin/latin-ext/arabic ranges Waldi actually renders
-   are included — see web/static/fonts/. */
+   are included - see web/static/fonts/. */
 
 /* Farsi digit glyphs baked directly into the default 0-9 codepoints (the
    ss01 "Farsi Digits" substitution applied ahead of time), so fa pages get
-   Persian-style digits from unicode-range font routing alone — no reliance
+   Persian-style digits from unicode-range font routing alone - no reliance
    on font-feature-settings inheriting correctly into every component. */
 @font-face {
   font-family: "Vazirmatn FA Digits";
@@ -95,7 +95,7 @@
 }
 
 /* IRMitra with Vazirmatn digits (ss01 on :lang(fa)).
-   Separate 400/500 faces — static font; weight ranges break matching on iOS. */
+   Separate 400/500 faces - static font; weight ranges break matching on iOS. */
 @font-face {
   font-family: "IRMitra";
   font-style: normal;

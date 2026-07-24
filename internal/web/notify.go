@@ -42,7 +42,7 @@ func (s *Server) notifyPublish(r *http.Request, user store.User, post store.Post
 	if title == "" {
 		title = "(untitled)"
 	}
-	text := fmt.Sprintf("Post published: %s\nby %s — %s", title, user.Username, PublicBlogURLForOwner(r, s.baseDomain, user, "/"+post.Slug))
+	text := fmt.Sprintf("Post published: %s\nby %s - %s", title, user.Username, PublicBlogURLForOwner(r, s.baseDomain, user, "/"+post.Slug))
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), notifyTimeout)
 		defer cancel()

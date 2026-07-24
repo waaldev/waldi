@@ -9,7 +9,7 @@ import (
 
 // handleUnsubscribeDigestPage shows a confirmation page for a digest
 // unsubscribe link (GET, token in query). It does not itself change
-// subscription state — the confirm button POSTs to the same path.
+// subscription state - the confirm button POSTs to the same path.
 func (s *Server) handleUnsubscribeDigestPage(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
 	pd := s.newPageData(r, currentUser(r))
@@ -46,7 +46,7 @@ func (s *Server) handleUnsubscribeDigestPage(w http.ResponseWriter, r *http.Requ
 		s.logger.Error("looking up digest unsubscribe token", "err", err)
 	}
 
-	// Not a registered user's token — check whether it belongs to an
+	// Not a registered user's token - check whether it belongs to an
 	// anonymous captured email's digest instead.
 	exists, err := s.store.EmailCaptureTokenExists(r.Context(), token)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *Server) handleUnsubscribeDigest(w http.ResponseWriter, r *http.Request)
 		s.logger.Error("unsubscribing from digest", "err", err)
 	}
 
-	// Not a registered user's token — try it as an anonymous captured
+	// Not a registered user's token - try it as an anonymous captured
 	// email's digest unsubscribe instead.
 	if err := s.store.UnsubscribeEmailCaptureByToken(r.Context(), token); err != nil {
 		if !errors.Is(err, store.ErrNotFound) {

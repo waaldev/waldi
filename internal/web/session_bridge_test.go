@@ -77,7 +77,7 @@ func TestBridgeContinueURLRejectsBadReturn(t *testing.T) {
 	r, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/auth/bridge", nil)
 	r.Host = "localhost:8080"
 	r.AddCookie(&http.Cookie{Name: sessionCookie, Value: "tok"})
-	// Without session middleware currentUser is nil — still an expected rejection.
+	// Without session middleware currentUser is nil - still an expected rejection.
 	_, err := s.bridgeContinueURL(r, "not-a-url")
 	if err == nil {
 		t.Fatal("expected error")

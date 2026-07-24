@@ -78,7 +78,7 @@ func (s *Store) InvitationAvailable(ctx context.Context, code string) (bool, err
 
 // CreateUserAndRedeemInvitation creates a new account and immediately
 // redeems an invite code for it in one transaction, granting write access
-// on creation — the `?invite=` signup shortcut.
+// on creation - the `?invite=` signup shortcut.
 func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, username, email, passwordHash, locale, verifyToken, displayName, bio string) (User, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
@@ -125,7 +125,7 @@ func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, u
 }
 
 // RedeemInvitationForUser grants write access to an already-existing account
-// by redeeming an invite code for it — the "I already have a reader account,
+// by redeeming an invite code for it - the "I already have a reader account,
 // redeeming a code later" path used by the write-invite page.
 func (s *Store) RedeemInvitationForUser(ctx context.Context, code string, userID int64) error {
 	tx, err := s.pool.Begin(ctx)

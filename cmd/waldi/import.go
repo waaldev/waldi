@@ -13,7 +13,7 @@ import (
 // runImport dispatches to a platform-specific importer. To add support for
 // another platform, add a case here and an internal/import<platform>
 // package implementing LoadExport + Importer.Run following the blogir
-// pattern — see CONTRIBUTING.md.
+// pattern - see CONTRIBUTING.md.
 func runImport(args []string) error {
 	if len(args) == 0 {
 		return errors.New("usage: waldi import blogir --file PATH --email ADDRESS")

@@ -10,13 +10,13 @@ Waldi is a blogging platform, but not another minimalistic blogging engine. ever
 
 ## Features
 
-- **Custom domains** — point your own domain at your blog.
-- **A modern editor** — Tiptap-based, WYSIWYG.
-- **Letters** — private replies from readers.
-- **RSS** — full-content feeds, autodiscoverable.
-- **Bilingual by design** — English and Persian (RTL) out of the box, per-post language.
-- **Blog importers** — more platforms on the way.
-- **Self-hostable** — MIT licensed, run your own instance.
+- **Custom domains** - point your own domain at your blog.
+- **A modern editor** - Tiptap-based, WYSIWYG.
+- **Letters** - private replies from readers.
+- **RSS** - full-content feeds, autodiscoverable.
+- **Bilingual by design** - English and Persian (RTL) out of the box, per-post language.
+- **Blog importers** - more platforms on the way.
+- **Self-hostable** - MIT licensed, run your own instance.
 
 ## Quickstart
 
@@ -39,4 +39,4 @@ Check `ROADMAP.md`
 
 ## License
 
-MIT — see `LICENSE`.
+MIT - see `LICENSE`.

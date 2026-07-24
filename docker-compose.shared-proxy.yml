@@ -5,7 +5,7 @@
 #
 # You're responsible for pointing your existing proxy at the `waldi`
 # service on port 8080 and for TLS (including on-demand certs for verified
-# custom domains via `POST /internal/caddy-ask` — see DEPLOY.md).
+# custom domains via `POST /internal/caddy-ask` - see DEPLOY.md).
 #
 # docker network create proxy_network   # once, if it doesn't exist yet
 

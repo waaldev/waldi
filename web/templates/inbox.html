@@ -32,7 +32,7 @@
 {{if .Inbox.Stats}}
   <p class="daylabel">{{.T "inbox.stats.daylabel"}}</p>
   <div class="stats-narrative">
-    {{range .Inbox.Stats}}<p><strong>{{.PostTitle}}</strong> — {{.Sentence}}</p>{{end}}
+    {{range .Inbox.Stats}}<p><strong>{{.PostTitle}}</strong> - {{.Sentence}}</p>{{end}}
     <p class="caption">{{.T "inbox.stats.caption"}}</p>
   </div>
 {{end}}

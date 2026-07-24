@@ -43,7 +43,7 @@ type WeeklyStats struct {
 
 // WeeklyStats aggregates growth metrics for the window [since, until), plus
 // a writer-retention cohort whose first published post fell in
-// [cohortStart, cohortEnd) — checked for activity again in [since, until).
+// [cohortStart, cohortEnd) - checked for activity again in [since, until).
 func (s *Store) WeeklyStats(ctx context.Context, since, until, cohortStart, cohortEnd time.Time) (WeeklyStats, error) {
 	var stats WeeklyStats
 

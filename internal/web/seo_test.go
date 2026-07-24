@@ -33,7 +33,7 @@ func TestFirstImageSrc(t *testing.T) {
 }
 
 func TestPostDocumentTitle(t *testing.T) {
-	if got := postDocumentTitle("Draft", "Ada's blog"); got != "Ada's blog — Draft" {
+	if got := postDocumentTitle("Draft", "Ada's blog"); got != "Ada's blog - Draft" {
 		t.Fatalf("got %q", got)
 	}
 }

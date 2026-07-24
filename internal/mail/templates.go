@@ -91,7 +91,7 @@ func DigestEmail(lang string, lines []string, unsubscribeURL string) (subject, p
 }
 
 // DigestLine is one item in the reader digest: a sentence describing a
-// post, with a link to it. URL is required — every reader digest line
+// post, with a link to it. URL is required - every reader digest line
 // points somewhere, unlike the writer digest's own-post stat lines.
 type DigestLine struct {
 	Text string
@@ -154,7 +154,7 @@ func PasswordResetEmail(lang, resetURL string) (subject, plain, htmlBody string)
 
 // ReactivationEmail returns plain and HTML bodies for the re-permission
 // email sent once to accounts inactive ~30 days, asking whether they still
-// want digest email. Digests stay paused unless resumeURL is clicked —
+// want digest email. Digests stay paused unless resumeURL is clicked -
 // silence is the safe default, not an assumption of continued interest.
 func ReactivationEmail(lang, resumeURL string) (subject, plain, htmlBody string) {
 	switch lang {
