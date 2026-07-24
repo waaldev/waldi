@@ -21,7 +21,7 @@ func (s *Server) handleSetLocale(w http.ResponseWriter, r *http.Request) {
 	// server's CF-IPCountry guess against the visitor's real OS timezone
 	// (common for Iranian/Afghan visitors on a VPN, whose IP country isn't
 	// Iran/Afghanistan). It only needs the cookie set for the next
-	// request — no DB write, no cache purge, no redirect.
+	// request - no DB write, no cache purge, no redirect.
 	if r.URL.Query().Get("auto") == "1" {
 		w.WriteHeader(http.StatusNoContent)
 		return

@@ -12,7 +12,7 @@ import (
 // CreateEmailCapture stores an anonymous visitor's email address against the
 // blog they subscribed from, ignoring duplicates. The same address may be
 // captured against several different blogs (one row per email+blog) so that
-// signing up later can follow all of them — see AdoptEmailCaptureFollows.
+// signing up later can follow all of them - see AdoptEmailCaptureFollows.
 func (s *Store) CreateEmailCapture(ctx context.Context, email, sourceUsername string, sourcePostID *int64) error {
 	_, err := s.pool.Exec(ctx, `
 		insert into email_captures (email, source_username, source_post_id)
@@ -45,7 +45,7 @@ func (s *Store) AdoptEmailCaptureFollows(ctx context.Context, userID int64, emai
 }
 
 // DeleteEmailCapturesByEmail removes an email's capture rows and any digest
-// bookkeeping for it — called once that address becomes a real account, so
+// bookkeeping for it - called once that address becomes a real account, so
 // it stops being treated as anonymous.
 func (s *Store) DeleteEmailCapturesByEmail(ctx context.Context, email string) error {
 	_, err := s.pool.Exec(ctx, `delete from email_captures where email = $1`, email)
@@ -72,7 +72,7 @@ type EmailCaptureDigestPost struct {
 
 // EmailCaptureFolloweePosts returns, for every still-anonymous captured
 // email, posts published since `since` by the blogs that address subscribed
-// to — the anonymous-capture equivalent of a registered reader's followee
+// to - the anonymous-capture equivalent of a registered reader's followee
 // feed. Ordered by email so callers can group consecutive rows.
 func (s *Store) EmailCaptureFolloweePosts(ctx context.Context, since time.Time, limit int) ([]EmailCaptureDigestPost, error) {
 	if limit <= 0 {
@@ -115,7 +115,7 @@ type EmailCaptureAddress struct {
 }
 
 // EmailCaptureAddresses lists every distinct still-anonymous captured
-// email — the full candidate pool for the reader digest's anonymous pass,
+// email - the full candidate pool for the reader digest's anonymous pass,
 // independent of whether they have any fresh followee posts today (someone
 // with nothing new from their subscribed blogs can still get a wildcard).
 func (s *Store) EmailCaptureAddresses(ctx context.Context, limit int) ([]EmailCaptureAddress, error) {
@@ -150,7 +150,7 @@ func (s *Store) EmailCaptureAddresses(ctx context.Context, limit int) ([]EmailCa
 
 // EmailCaptureWildcard picks a "today's stranger" post for an anonymous
 // captured email's digest: an admin-curated wildcard_pool post if one is
-// eligible, otherwise a random published post — in both cases excluding
+// eligible, otherwise a random published post - in both cases excluding
 // blogs that email already subscribed to. Anonymous addresses have no
 // account to track prior wildcard history against, so this doesn't attempt
 // the impression-based dedup registered readers get; a straight random pick
@@ -265,8 +265,8 @@ func (s *Store) EmailCaptureTokenExists(ctx context.Context, token string) (bool
 }
 
 // UnsubscribeEmailCaptureByToken removes all capture data for the email
-// matching an unsubscribe token — both the follow-adoption source rows and
-// the digest bookkeeping — so the address is fully forgotten.
+// matching an unsubscribe token - both the follow-adoption source rows and
+// the digest bookkeeping - so the address is fully forgotten.
 func (s *Store) UnsubscribeEmailCaptureByToken(ctx context.Context, token string) error {
 	var email string
 	err := s.pool.QueryRow(ctx, `

@@ -17,9 +17,9 @@ The production stack is brutally simple: **Caddy** (HTTPS) → **Waldi** (HTTP o
 Point your domain at the VPS. 
 
 ```
-waldi.blog            A     <vps-ip>   (proxied — orange cloud)
+waldi.blog            A     <vps-ip>   (proxied - orange cloud)
 *.waldi.blog          A     <vps-ip>   (proxied)
-cname.waldi.blog      A     <vps-ip>   (not proxied — custom domain routing target)
+cname.waldi.blog      A     <vps-ip>   (not proxied - custom domain routing target)
 ```
 
 Enable the orange cloud (proxy) on the first two. Traffic must flow through Cloudflare for edge caching to work. 
@@ -28,7 +28,7 @@ The `cname.waldi.blog` hostname is the routing target where users CNAME their cu
 
 For users adding custom domains, they must add:
 
-1. **TXT** `_waldi-challenge.example.com` — this verifies ownership (surface this in blog settings).
+1. **TXT** `_waldi-challenge.example.com` - this verifies ownership (surface this in blog settings).
 2. Routing. They need one of the following:
    - **CNAME** `www.example.com` → `cname.waldi.blog` (for subdomains).
    - **A/AAAA** `example.com` → the exact IP addresses `cname.waldi.blog` resolves to. Alternatively, an **ALIAS/ANAME** to `cname.waldi.blog` if their provider allows it (for root/apex domains that cannot hold a CNAME).

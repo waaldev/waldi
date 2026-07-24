@@ -12,7 +12,7 @@ import (
 
 const (
 	// minCompletedReadingsForLetters gates letter-sending on having actually
-	// read a few posts first — you write to a writer after reading them.
+	// read a few posts first - you write to a writer after reading them.
 	minCompletedReadingsForLetters = 3
 	// maxLettersPerDay caps how many letters one account can send in a day.
 	maxLettersPerDay = 5

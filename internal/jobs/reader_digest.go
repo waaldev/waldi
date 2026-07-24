@@ -28,7 +28,7 @@ type ReaderDigestJob struct {
 }
 
 // postURL builds a post's public blog URL from outside any HTTP request
-// context (this job runs as a CLI cron, not a web handler) — mirrors
+// context (this job runs as a CLI cron, not a web handler) - mirrors
 // telegrambot.Bot.postURL's same simplification.
 func postURL(baseDomain, username, slug string) string {
 	return "https://" + username + "." + baseDomain + "/" + slug

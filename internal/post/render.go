@@ -18,7 +18,7 @@ import (
 var sanitizePolicy = newSanitizePolicy()
 
 // embedSrcPattern locks the iframe src we ever emit down to the exact
-// origins/paths renderEmbed builds — nothing user-supplied reaches this
+// origins/paths renderEmbed builds - nothing user-supplied reaches this
 // attribute unescaped except the soundcloud track URL, which is itself
 // validated (scheme + host) in doc.go before it's percent-encoded here.
 var embedSrcPattern = regexp.MustCompile(

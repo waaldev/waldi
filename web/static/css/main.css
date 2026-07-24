@@ -1,4 +1,4 @@
-/* Waldi — main.css
+/* Waldi - main.css
    Every rule derives from the tokens. No raw hex below the token block. */
 
 :root {
@@ -1218,7 +1218,7 @@ a.btn-secondary:hover {
 
 .blog-head .inline-form { margin: 0; }
 
-/* owner-only quiet row under the bio — kept on one line; if it's wider
+/* owner-only quiet row under the bio - kept on one line; if it's wider
    than the viewport it scrolls horizontally instead of wrapping and
    stranding the last item alone. */
 .owner-row {

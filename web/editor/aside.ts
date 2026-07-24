@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 
-// A quiet callout box for tangential remarks — same shape as Blockquote
+// A quiet callout box for tangential remarks - same shape as Blockquote
 // (wrap/lift a paragraph) but its own node so it can carry the paper-raised
 // box styling instead of the blockquote's inset rule.
 export const Aside = Node.create({

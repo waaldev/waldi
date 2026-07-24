@@ -7,7 +7,7 @@ import (
 	"waldi/internal/store"
 )
 
-// handleResumeDigest resumes a paused digest subscription (GET, one-click —
+// handleResumeDigest resumes a paused digest subscription (GET, one-click -
 // this is a re-permission ask, not an unsubscribe, so there's no confirm
 // step). Also lifts a pause for users who click through a stale
 // digest-unsubscribe link before ever pausing, which is harmless.

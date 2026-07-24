@@ -11,7 +11,7 @@ import (
 const maxBlogirUploadBytes = 50 << 20
 
 // handleImportBlogirForm serves the hidden /settings/import-blogir page. It
-// is not linked from any nav — the URL is meant to be sent directly to a
+// is not linked from any nav - the URL is meant to be sent directly to a
 // writer migrating from blog.ir so they can restore their own backup.
 func (s *Server) handleImportBlogirForm(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)

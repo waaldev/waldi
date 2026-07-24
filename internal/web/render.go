@@ -277,9 +277,9 @@ type StatsView struct {
 
 // minifyCSS strips comments and non-essential whitespace before embedding
 // CSS in public-page HTML. It only drops whitespace immediately adjacent to
-// { } ; : , — never whitespace between two other tokens (which would
+// { } ; : , - never whitespace between two other tokens (which would
 // collapse a descendant-combinator space, e.g. ".a .b", into something
-// meaningless) — and never touches the contents of quoted strings (e.g.
+// meaningless) - and never touches the contents of quoted strings (e.g.
 // content: " •"), so it's safe on hand-authored CSS without needing a real
 // parser.
 func minifyCSS(css string) string {

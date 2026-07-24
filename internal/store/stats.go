@@ -187,7 +187,7 @@ func (s *Store) RecordDigestSent(ctx context.Context, userID int64, kind string,
 
 // VerifiedSubscribedUsers returns accounts eligible to receive the reader
 // digest: verified email, not opted out of digest emails. Every candidate
-// may or may not have anything to report on a given day — callers skip
+// may or may not have anything to report on a given day - callers skip
 // sending when there's nothing to say.
 func (s *Store) VerifiedSubscribedUsers(ctx context.Context, limit int) ([]User, error) {
 	if limit <= 0 {

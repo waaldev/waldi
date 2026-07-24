@@ -337,7 +337,7 @@ var errBadCursor = errors.New("bad page cursor")
 
 // buildBlogView assembles the BlogView shared by the public blog profile
 // page (guests, on username.baseDomain) and the owner's in-app "You"
-// preview at /you — same posts/archives/pages; the owner template adds
+// preview at /you - same posts/archives/pages; the owner template adds
 // settings/drafts affordances instead of follow.
 func (s *Server) buildBlogView(r *http.Request, owner store.User, viewer *store.User, isOwner bool) (BlogView, error) {
 	blogView := blogViewFromUser(owner, s.baseDomain)

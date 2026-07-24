@@ -240,7 +240,7 @@ func (b *Bot) cmdUsers(ctx context.Context, chatID int64) {
 			verified = "verified"
 		}
 		lines = append(lines, fmt.Sprintf(
-			"• %s — %s (%s)\n  %s — joined %s",
+			"• %s - %s (%s)\n  %s - joined %s",
 			u.Username,
 			u.Email,
 			verified,
@@ -269,7 +269,7 @@ func (b *Bot) cmdPosts(ctx context.Context, chatID int64) {
 
 	for _, p := range posts {
 		url := b.postURL(p.Username, p.Slug)
-		published := "—"
+		published := "-"
 		if p.PublishedAt != nil {
 			published = p.PublishedAt.Format("2006-01-02")
 		}
@@ -278,7 +278,7 @@ func (b *Bot) cmdPosts(ctx context.Context, chatID int64) {
 			title = "(untitled)"
 		}
 		lines = append(lines, fmt.Sprintf(
-			"• #%d %s\n  %s by @%s (%s) — %s",
+			"• #%d %s\n  %s by @%s (%s) - %s",
 			p.ID,
 			title,
 			url,
@@ -575,7 +575,7 @@ func splitMessage(text string, limit int) []string {
 }
 
 // AdminNotifier pushes proactive messages to a fixed set of admin chat ids
-// without the polling loop or Store dependency a full Bot requires — for
+// without the polling loop or Store dependency a full Bot requires - for
 // one-shot CLI jobs (cron) that only need to send, not receive, messages.
 type AdminNotifier struct {
 	client   *Client
@@ -627,14 +627,14 @@ func helpText() string {
 	return strings.TrimSpace(`
 Waldi admin bot
 
-/users — list users (newest first) with blog URLs
-/posts — latest posts with links; tap a button to add to the wildcard pool
-/pool — show today's wildcard pool; tap a button to remove a post
-/verify email@example.com — force-verify a user's email
+/users - list users (newest first) with blog URLs
+/posts - latest posts with links; tap a button to add to the wildcard pool
+/pool - show today's wildcard pool; tap a button to remove a post
+/verify email@example.com - force-verify a user's email
 /setusername USER EMAIL_OR_USERNAME new_username
 /setemail USER EMAIL_OR_USERNAME new@example.com
-/delete USERNAME_OR_EMAIL — delete a user (confirmation required)
-/invite [note] — create a signup invitation link
-/wildcardfloor [N] — show or set the wildcard impression floor (fallback when the pool has no match)
+/delete USERNAME_OR_EMAIL - delete a user (confirmation required)
+/invite [note] - create a signup invitation link
+/wildcardfloor [N] - show or set the wildcard impression floor (fallback when the pool has no match)
 `)
 }
