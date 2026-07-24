@@ -133,6 +133,38 @@ func TestRenderHTMLBlockquoteWithParagraphs(t *testing.T) {
 	}
 }
 
+func TestParseTipTapAside(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"aside","content":[{"type":"paragraph","content":[{"type":"text","text":"note"}]}]}]}`)
+	_, err := Parse(raw)
+	if err != nil {
+		t.Fatalf("expected aside with paragraph to parse, got: %v", err)
+	}
+}
+
+func TestRenderHTMLAsideWithParagraphs(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"aside","content":[{"type":"paragraph","content":[{"type":"text","text":"note"},{"type":"text","text":"link","marks":[{"type":"link","attrs":{"href":"https://example.com"}}]}]}]}]}`)
+	doc, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := RenderHTML(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `<div class="aside"><p>note<a href="https://example.com" rel="nofollow">link</a></p></div>`
+	if got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestParseRejectsEmptyAside(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"aside","content":[]}]}`)
+	_, err := Parse(raw)
+	if err == nil {
+		t.Fatal("expected empty aside error")
+	}
+}
+
 func TestRenderHTMLLists(t *testing.T) {
 	raw := json.RawMessage(`{"type":"doc","content":[{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"one"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"two"}]},{"type":"orderedList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"nested"}]}]}]}]}]}]}`)
 	doc, err := Parse(raw)

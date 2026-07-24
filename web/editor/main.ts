@@ -17,6 +17,7 @@ import Text from '@tiptap/extension-text'
 import Typography from '@tiptap/extension-typography'
 import { NodeSelection } from '@tiptap/pm/state'
 
+import { Aside } from './aside'
 import { Direction, DirectionMark } from './direction'
 import { Embed, parseEmbedURL } from './embed'
 import { Footnote } from './footnote'
@@ -146,6 +147,7 @@ if (root) {
         Text,
         Bold,
         Italic,
+        Aside,
         Blockquote,
         BulletList,
         OrderedList,
@@ -274,6 +276,9 @@ if (root) {
         case 'quote':
           editor.chain().focus().toggleBlockquote().run()
           break
+        case 'aside':
+          editor.chain().focus().toggleAside().run()
+          break
         case 'bullet-list':
           editor.chain().focus().toggleBulletList().run()
           break
@@ -386,6 +391,7 @@ if (root) {
       italic: () => editor.isActive('italic'),
       heading: () => editor.isActive('heading', { level: 2 }),
       quote: () => editor.isActive('blockquote'),
+      aside: () => editor.isActive('aside'),
       'bullet-list': () => editor.isActive('bulletList'),
       'ordered-list': () => editor.isActive('orderedList'),
       link: () => editor.isActive('link'),
@@ -590,8 +596,9 @@ function setLink(editor: Editor, linkPrompt: string) {
 // blockquote so a whole quote flips together) rather than a text-run mark:
 // a quote's border/alignment need to flip along with its bidi text, not
 // just the characters inside it.
-function directionBlockType(editor: Editor): 'blockquote' | 'heading' | 'paragraph' {
+function directionBlockType(editor: Editor): 'blockquote' | 'aside' | 'heading' | 'paragraph' {
   if (editor.isActive('blockquote')) return 'blockquote'
+  if (editor.isActive('aside')) return 'aside'
   if (editor.isActive('heading')) return 'heading'
   return 'paragraph'
 }

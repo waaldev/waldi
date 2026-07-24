@@ -491,6 +491,15 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   color: var(--ink-soft);
 }
 
+.prose .aside {
+  margin: 1em 0;
+  padding: var(--s4);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+}
+.prose .aside > *:last-child { margin-bottom: 0; }
+
 .prose img {
   max-width: 100%;
   height: auto;
@@ -1319,6 +1328,9 @@ a.btn-secondary:hover {
 }
 
 .bubble-menu button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-sans);
   font-size: var(--text-meta);
   line-height: 1;
@@ -1470,6 +1482,15 @@ a.btn-secondary:hover {
   font-style: italic;
   color: var(--ink-soft);
 }
+
+.editor-surface .aside {
+  margin: 1em 0;
+  padding: var(--s4);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+}
+.editor-surface .aside > *:last-child { margin-bottom: 0; }
 
 .editor-surface img { max-width: 100%; height: auto; border-radius: var(--radius); display: block; }
 

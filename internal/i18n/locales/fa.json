@@ -299,6 +299,7 @@
   "editor.toolbar.rtl": "راست‌به‌چپ",
   "editor.toolbar.heading": "تیتر ۲",
   "editor.toolbar.quote": "نقل‌قول",
+  "editor.toolbar.aside": "حاشیه",
   "editor.toolbar.bullet_list": "فهرست نقطه‌ای",
   "editor.toolbar.ordered_list": "فهرست شماره‌دار",
   "editor.toolbar.image": "تصویر",

@@ -29697,6 +29697,25 @@ ${prefix}
   });
   var index_default14 = Typography;
 
+  // aside.ts
+  var Aside = Node3.create({
+    name: "aside",
+    content: "block+",
+    group: "block",
+    defining: true,
+    parseHTML() {
+      return [{ tag: "div.aside" }];
+    },
+    renderHTML({ HTMLAttributes }) {
+      return ["div", mergeAttributes({ class: "aside" }, HTMLAttributes), 0];
+    },
+    addCommands() {
+      return {
+        toggleAside: () => ({ commands }) => commands.toggleWrap(this.name)
+      };
+    }
+  });
+
   // direction.ts
   var DirectionMark = Mark2.create({
     name: "dir",
@@ -29724,7 +29743,7 @@ ${prefix}
     addGlobalAttributes() {
       return [
         {
-          types: ["paragraph", "heading", "blockquote"],
+          types: ["paragraph", "heading", "blockquote", "aside"],
           attributes: {
             dir: {
               default: null,
@@ -29956,6 +29975,7 @@ ${prefix}
           index_default13,
           index_default2,
           index_default10,
+          Aside,
           index_default,
           BulletList,
           OrderedList,
@@ -30080,6 +30100,9 @@ ${prefix}
           case "quote":
             editor.chain().focus().toggleBlockquote().run();
             break;
+          case "aside":
+            editor.chain().focus().toggleAside().run();
+            break;
           case "bullet-list":
             editor.chain().focus().toggleBulletList().run();
             break;
@@ -30167,6 +30190,7 @@ ${prefix}
         italic: () => editor.isActive("italic"),
         heading: () => editor.isActive("heading", { level: 2 }),
         quote: () => editor.isActive("blockquote"),
+        aside: () => editor.isActive("aside"),
         "bullet-list": () => editor.isActive("bulletList"),
         "ordered-list": () => editor.isActive("orderedList"),
         link: () => editor.isActive("link"),
@@ -30342,6 +30366,7 @@ ${prefix}
   }
   function directionBlockType(editor) {
     if (editor.isActive("blockquote")) return "blockquote";
+    if (editor.isActive("aside")) return "aside";
     if (editor.isActive("heading")) return "heading";
     return "paragraph";
   }

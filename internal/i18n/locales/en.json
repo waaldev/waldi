@@ -306,6 +306,7 @@
   "editor.toolbar.rtl": "Right-to-left",
   "editor.toolbar.heading": "Heading 2",
   "editor.toolbar.quote": "Quote",
+  "editor.toolbar.aside": "Aside",
   "editor.toolbar.bullet_list": "Bulleted list",
   "editor.toolbar.ordered_list": "Numbered list",
   "editor.toolbar.image": "Image",

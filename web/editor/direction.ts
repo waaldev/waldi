@@ -28,7 +28,7 @@ export const DirectionMark = Mark.create({
   },
 })
 
-// Block-level direction: sets `dir` on the paragraph/heading/blockquote
+// Block-level direction: sets `dir` on the paragraph/heading/blockquote/aside
 // itself, so both the bidi rendering and direction-aware CSS (border/
 // padding sides, start-aligned text) flip together for that block.
 export const Direction = Extension.create({
@@ -36,7 +36,7 @@ export const Direction = Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ['paragraph', 'heading', 'blockquote'],
+        types: ['paragraph', 'heading', 'blockquote', 'aside'],
         attributes: {
           dir: {
             default: null,

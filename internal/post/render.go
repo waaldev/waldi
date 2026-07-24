@@ -33,8 +33,8 @@ func newSanitizePolicy() *bluemonday.Policy {
 	p.AllowRelativeURLs(true)
 	p.AllowElements("p", "h2", "blockquote", "hr", "strong", "em", "figure", "sup", "ul", "ol", "li", "a", "img", "div", "iframe", "span")
 	p.AllowAttrs("class").Matching(regexp.MustCompile(`^(divider|fn-ref|fn-back|footnotes)$`)).OnElements("hr", "sup", "ol", "a")
-	p.AllowAttrs("dir").Matching(regexp.MustCompile(`^(ltr|rtl)$`)).OnElements("span", "p", "h2", "blockquote")
-	p.AllowAttrs("class").Matching(regexp.MustCompile(`^embed embed--(youtube|spotify|soundcloud)$`)).OnElements("div")
+	p.AllowAttrs("dir").Matching(regexp.MustCompile(`^(ltr|rtl)$`)).OnElements("span", "p", "h2", "blockquote", "div")
+	p.AllowAttrs("class").Matching(regexp.MustCompile(`^(aside|embed embed--(?:youtube|spotify|soundcloud))$`)).OnElements("div")
 	p.AllowAttrs("id").Matching(regexp.MustCompile(`^fn(ref)?-[0-9]+$`)).OnElements("a", "li")
 	p.AllowAttrs("href").Matching(regexp.MustCompile(`(?i)^(?:https?://\S+|mailto:\S+|#fn(?:ref)?-[0-9]+)$`)).OnElements("a")
 	p.AllowAttrs("src").Matching(regexp.MustCompile(`(?i)^(?:https?://|/media/|/static/uploads/)`)).OnElements("img")
@@ -153,6 +153,12 @@ func renderBlock(buf *bytes.Buffer, node Node, footnotes *footnoteIndex) {
 		buf.WriteString(`"></figure>`)
 	case "embed":
 		renderEmbed(buf, node.Attrs)
+	case "aside":
+		buf.WriteString(`<div class="aside"` + dirAttr(node.Attrs.Dir) + `>`)
+		for _, child := range node.Content {
+			renderBlock(buf, child, footnotes)
+		}
+		buf.WriteString("</div>")
 	}
 }
 

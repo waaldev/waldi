@@ -94,6 +94,26 @@ func validateBlock(node Node) error {
 				return fmt.Errorf("unsupported blockquote child %q", child.Type)
 			}
 		}
+	case "aside":
+		if !validBlockDir(node.Attrs.Dir) {
+			return errors.New("invalid dir on aside")
+		}
+		if len(node.Content) == 0 {
+			return errors.New("aside cannot be empty")
+		}
+		for i, child := range node.Content {
+			switch child.Type {
+			case "paragraph", "heading":
+				if !validBlockDir(child.Attrs.Dir) {
+					return fmt.Errorf("child[%d]: invalid dir on %s", i, child.Type)
+				}
+				if err := validateInlineContainer(child); err != nil {
+					return fmt.Errorf("child[%d]: %w", i, err)
+				}
+			default:
+				return fmt.Errorf("unsupported aside child %q", child.Type)
+			}
+		}
 	case "bulletList", "orderedList":
 		if len(node.Content) == 0 {
 			return fmt.Errorf("%s cannot be empty", node.Type)
