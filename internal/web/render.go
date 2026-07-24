@@ -382,6 +382,13 @@ func (p PageData) T(key string, args ...any) string {
 	return i18n.T(p.Lang, key, args...)
 }
 
+// TN translates a count-aware catalog key into the page's resolved
+// language, choosing the plural form for n, for use from templates as
+// {{.TN "some.key" count}}.
+func (p PageData) TN(key string, n int, args ...any) string {
+	return i18n.TN(p.Lang, key, n, args...)
+}
+
 // newPageData starts a PageData with the request's resolved locale and
 // current-user view already filled in.
 func (s *Server) newPageData(r *http.Request, user *store.User) PageData {

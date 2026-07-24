@@ -6,6 +6,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //go:embed locales/*.json
@@ -72,8 +73,34 @@ func T(lang, key string, args ...any) string {
 	if !ok {
 		message = key
 	}
-	if len(args) == 0 {
+	if len(args) == 0 || !strings.Contains(message, "%") {
 		return message
 	}
 	return fmt.Sprintf(message, args...)
+}
+
+// TN resolves a count-aware message: key+".one" when n == 1, otherwise
+// key+".other". Languages that don't inflect by count (e.g. Persian nouns)
+// can simply omit the plural variants and fall back to the bare key. When
+// args is empty, n itself is used as the sole format argument, since the
+// common case is a single "%d ..." placeholder driving both the plural
+// choice and the printed count.
+func TN(lang, key string, n int, args ...any) string {
+	suffix := ".other"
+	if n == 1 {
+		suffix = ".one"
+	}
+	if len(args) == 0 {
+		args = []any{n}
+	}
+	pkey := key + suffix
+	if !supported[lang] {
+		lang = Default
+	}
+	if _, ok := catalog[lang][pkey]; !ok {
+		if _, ok := catalog[Default][pkey]; !ok {
+			return T(lang, key, args...)
+		}
+	}
+	return T(lang, pkey, args...)
 }

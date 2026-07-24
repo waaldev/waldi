@@ -87,7 +87,8 @@ if (root) {
     footnotePrompt: root.dataset.uiFootnotePrompt || 'Footnote text',
     embedPrompt: root.dataset.uiEmbedPrompt || 'YouTube, Spotify, or SoundCloud URL',
     embedInvalid: root.dataset.uiEmbedInvalid || "That URL isn't a supported embed",
-    words: root.dataset.uiWords || '%d words',
+    wordsOne: root.dataset.uiWordsOne || '%d word',
+    wordsOther: root.dataset.uiWordsOther || '%d words',
   }
 
   const form = root.querySelector<HTMLFormElement>('[data-editor-form]')
@@ -244,7 +245,8 @@ if (root) {
     const updateWordCount = () => {
       if (!wordCount) return
       const words = editor.getText().trim().split(/\s+/).filter(Boolean).length
-      wordCount.textContent = uiDigits(pageLang, ui.words.replace('%d', String(words)))
+      const template = words === 1 ? ui.wordsOne : ui.wordsOther
+      wordCount.textContent = uiDigits(pageLang, template.replace('%d', String(words)))
     }
 
     const setState = (state: SaveState) => {

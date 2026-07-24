@@ -30,7 +30,7 @@ func writePublishedViews(posts []store.Post, engagement map[int64]store.PostEnga
 
 func writeDraftMeta(lang string, updated time.Time, words int, now time.Time) string {
 	rel := formatRelativePast(updated, now, lang)
-	return i18n.T(lang, "write.draft.meta", rel, i18n.T(lang, "write.words", words))
+	return i18n.T(lang, "write.draft.meta", rel, i18n.TN(lang, "write.words", words))
 }
 
 func writePublishedMeta(lang string, publishedAt *time.Time, readers, letters int) string {
@@ -38,8 +38,10 @@ func writePublishedMeta(lang string, publishedAt *time.Time, readers, letters in
 		return ""
 	}
 	date := formatArticleDate(*publishedAt, lang)
+	readersClause := i18n.TN(lang, "write.published.meta.readers", readers)
 	if letters > 0 {
-		return i18n.T(lang, "write.published.meta.full", date, readers, letters)
+		lettersClause := i18n.TN(lang, "write.published.meta.letters", letters)
+		return i18n.T(lang, "write.published.meta.full", date, readersClause, lettersClause)
 	}
-	return i18n.T(lang, "write.published.meta", date, readers)
+	return i18n.T(lang, "write.published.meta", date, readersClause)
 }

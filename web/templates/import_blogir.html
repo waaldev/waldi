@@ -14,11 +14,11 @@
     {{if .ImportBlogir.Done}}
       <p class="form-note">{{.T "import_blogir.result.heading"}}</p>
       <ul>
-        <li>{{.T "import_blogir.result.imported" .ImportBlogir.Imported}}</li>
-        <li>{{.T "import_blogir.result.skipped" .ImportBlogir.Skipped}}</li>
+        <li>{{.TN "import_blogir.result.imported" .ImportBlogir.Imported}}</li>
+        <li>{{.TN "import_blogir.result.skipped" .ImportBlogir.Skipped}}</li>
       </ul>
       {{if .ImportBlogir.Failed}}
-        <p class="form-error">{{.T "import_blogir.result.failed_heading" (len .ImportBlogir.Failed)}}</p>
+        <p class="form-error">{{.TN "import_blogir.result.failed_heading" (len .ImportBlogir.Failed)}}</p>
         <ul>
           {{range $f := .ImportBlogir.Failed}}
             <li>{{$f.Title}} ({{$f.Slug}}): {{$f.Err}}</li>

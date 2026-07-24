@@ -107,16 +107,16 @@ func digestEligible(user store.User) bool {
 func DigestSentence(lang string, stat store.PostStats) string {
 	var clauses []string
 	if stat.Readers > 0 {
-		clauses = append(clauses, i18n.T(lang, "digest.clause.readers", stat.Readers))
+		clauses = append(clauses, i18n.TN(lang, "digest.clause.readers", stat.Readers))
 	}
 	if stat.Completed > 0 {
-		clauses = append(clauses, i18n.T(lang, "digest.clause.completed", stat.Completed))
+		clauses = append(clauses, i18n.TN(lang, "digest.clause.completed", stat.Completed))
 	}
 	if stat.Follows > 0 {
-		clauses = append(clauses, i18n.T(lang, "digest.clause.follows", stat.Follows))
+		clauses = append(clauses, i18n.TN(lang, "digest.clause.follows", stat.Follows))
 	}
 	if stat.Letters > 0 {
-		clauses = append(clauses, i18n.T(lang, "digest.clause.letters", stat.Letters))
+		clauses = append(clauses, i18n.TN(lang, "digest.clause.letters", stat.Letters))
 	}
 	return strings.Join(clauses, " ")
 }
