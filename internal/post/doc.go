@@ -90,6 +90,10 @@ func validateBlock(node Node) error {
 				if err := validateInlineContainer(child); err != nil {
 					return fmt.Errorf("child[%d]: %w", i, err)
 				}
+			case "bulletList", "orderedList":
+				if err := validateBlock(child); err != nil {
+					return fmt.Errorf("child[%d]: %w", i, err)
+				}
 			default:
 				return fmt.Errorf("unsupported blockquote child %q", child.Type)
 			}
@@ -108,6 +112,10 @@ func validateBlock(node Node) error {
 					return fmt.Errorf("child[%d]: invalid dir on %s", i, child.Type)
 				}
 				if err := validateInlineContainer(child); err != nil {
+					return fmt.Errorf("child[%d]: %w", i, err)
+				}
+			case "bulletList", "orderedList":
+				if err := validateBlock(child); err != nil {
 					return fmt.Errorf("child[%d]: %w", i, err)
 				}
 			default:
