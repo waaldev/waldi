@@ -249,5 +249,14 @@
     </div>
   </details>
 </main>
+
+{{if or .BlogSettings.Error .BlogSettings.Saved .BlogSettings.PasswordError .BlogSettings.PasswordSaved .BlogSettings.DeleteError}}
+<script>
+  (function () {
+    var msg = document.querySelector(".form-error, .form-note");
+    if (msg) msg.scrollIntoView({ block: "center" });
+  })();
+</script>
+{{end}}
 {{template "layout-end" .}}
 {{end}}
