@@ -1,0 +1,47 @@
+{{define "kept.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<p class="daylabel">{{.T "kept.daylabel"}}</p>
+
+{{if .Kept.Posts}}
+  <ul class="feed">
+    {{range .Kept.Posts}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <div class="feed-writer">
+          <a href="{{.BlogURL}}">{{.WriterLabel}}</a>
+          <span class="re">·</span>
+          <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
+            <button class="keep-inline" type="submit">{{$.T "post.unkeep"}}</button>
+          </form>
+        </div>
+        {{if .FromLetter}}
+          <a class="feed-item" href="{{.URL}}">
+            <h2 class="feed-title">{{$.T "inbox.letter.link" .Title}}</h2>
+            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          </a>
+        {{else}}
+          <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
+            <h2 class="feed-title">{{.Title}}</h2>
+            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          </a>
+        {{end}}
+      </li>
+    {{end}}
+  </ul>
+  {{if .Kept.OlderURL}}
+    <p class="feed-more"><a class="quiet-link" href="{{.Kept.OlderURL}}">{{.T "pagination.older"}}</a></p>
+  {{end}}
+{{else}}
+  <div class="empty-state">
+    <h2>{{.T "kept.empty.heading"}}</h2>
+    <p>{{.T "kept.empty.body"}}</p>
+  </div>
+{{end}}
+
+<footer class="finish">
+  <p>{{.T "kept.finish"}}</p>
+  <small>{{.T "kept.finish.sub"}}</small>
+</footer>
+{{template "layout-end" .}}
+{{end}}

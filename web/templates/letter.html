@@ -9,5 +9,18 @@
   </header>
   <p class="letter-body">{{.Inbox.Letter.Body}}</p>
 </article>
+
+<footer class="post-actions">
+  {{if .Inbox.Letter.Kept}}
+    <form class="inline-form" method="post" action="/unkeep/{{.Inbox.Letter.PostID}}">
+      <button class="quiet" type="submit">{{.T "post.unkeep"}}</button>
+    </form>
+  {{else}}
+    <form class="inline-form" method="post" action="/keep/{{.Inbox.Letter.PostID}}">
+      <input type="hidden" name="letter_id" value="{{.Inbox.Letter.ID}}">
+      <button class="quiet" type="submit">{{.T "post.keep"}}</button>
+    </form>
+  {{end}}
+</footer>
 {{template "layout-end" .}}
 {{end}}
