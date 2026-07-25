@@ -1075,6 +1075,7 @@ a.btn-secondary:hover {
 
 .delete-account { margin-block-start: var(--s3); }
 .delete-account form { margin-block-start: var(--s3); }
+.delete-account .form-error { margin-block-start: var(--s3); }
 
 .confirm-delete summary { font-size: var(--text-meta); cursor: pointer; }
 .confirm-delete .hint { margin-block: var(--s2); }

@@ -230,10 +230,6 @@
     <div class="danger-zone">
       <p><a href="/settings/export">{{.T "blog.settings.account.export"}}</a> {{.T "blog.settings.account.export.body"}}</p>
 
-      {{if .BlogSettings.DeleteError}}
-        <p class="form-error">{{.BlogSettings.DeleteError}}</p>
-      {{end}}
-
       <details class="delete-account" {{if .BlogSettings.DeleteError}}open{{end}}>
         <summary>{{.T "blog.settings.delete.link"}}</summary>
         <p class="hint">{{.T "blog.settings.delete.body"}}</p>
@@ -243,6 +239,9 @@
             <input id="delete_password" name="current_password" type="password" autocomplete="current-password" required>
           </div>
           <button class="quiet-danger" type="submit">{{.T "blog.settings.delete.submit"}}</button>
+          {{if .BlogSettings.DeleteError}}
+            <p class="form-error">{{.BlogSettings.DeleteError}}</p>
+          {{end}}
         </form>
       </details>
     </div>
