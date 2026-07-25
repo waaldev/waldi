@@ -1063,13 +1063,20 @@ a.btn-secondary:hover {
 .domain-row form { margin: 0; }
 
 .danger-zone p { font-size: var(--text-meta); color: var(--ink-soft); }
-.change-password summary { cursor: pointer; }
+
+.change-password summary,
+.delete-account summary {
+  font-size: var(--text-meta);
+  color: var(--accent);
+  cursor: pointer;
+}
+.change-password summary:hover,
+.delete-account summary:hover { color: var(--accent-ink); }
 
 .delete-account { margin-block-start: var(--s3); }
-.delete-account summary { font-size: var(--text-meta); cursor: pointer; }
 .delete-account form { margin-block-start: var(--s3); }
 
-.confirm-delete summary { font-size: var(--text-meta); }
+.confirm-delete summary { font-size: var(--text-meta); cursor: pointer; }
 .confirm-delete .hint { margin-block: var(--s2); }
 .confirm-delete form { margin: 0; }
 .owner-row .confirm-delete,
