@@ -232,6 +232,19 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   color: var(--accent);
 }
 
+/* keep sits inline in the writer/date line, at the same weight as the date */
+.keep-form { display: inline; margin: 0; }
+
+.keep-inline {
+  font: inherit;
+  color: var(--ink-faint);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.keep-inline:hover { color: var(--ink-soft); }
+
 /* ---------- wildcard ---------- */
 
 .wildcard {
