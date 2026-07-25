@@ -1073,6 +1073,8 @@ a.btn-secondary:hover {
 .change-password summary:hover,
 .delete-account summary:hover { color: var(--accent-ink); }
 
+.change-password form { margin-block-start: var(--s4); }
+
 .delete-account { margin-block-start: var(--s3); }
 .delete-account form { margin-block-start: var(--s3); }
 .delete-account .form-error { margin-block-start: var(--s3); }
