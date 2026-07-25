@@ -19,8 +19,7 @@ const (
 
 	inboxWindow = 7 * 24 * time.Hour
 
-	inboxPageSize         = 5
-	letterArchivePageSize = 10
+	inboxPageSize = 5
 )
 
 var errBadPageCursor = fmt.Errorf("bad page cursor")
