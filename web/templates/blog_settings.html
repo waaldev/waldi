@@ -213,7 +213,7 @@
     {{end}}
 
     <details class="change-password" {{if .BlogSettings.PasswordError}}open{{end}}>
-      <summary><a href="#">{{.T "blog.settings.password.link"}}</a></summary>
+      <summary>{{.T "blog.settings.password.link"}}</summary>
       <form method="post" action="/settings/password">
         <div class="field">
           <label for="current_password">{{.T "blog.settings.password.current"}}</label>
@@ -235,7 +235,7 @@
       {{end}}
 
       <details class="delete-account" {{if .BlogSettings.DeleteError}}open{{end}}>
-        <summary><a href="#">{{.T "blog.settings.delete.link"}}</a></summary>
+        <summary>{{.T "blog.settings.delete.link"}}</summary>
         <p class="hint">{{.T "blog.settings.delete.body"}}</p>
         <form method="post" action="/settings/delete">
           <div class="field">
