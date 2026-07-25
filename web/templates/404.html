@@ -21,7 +21,7 @@
 
 {{if .Blog}}
   {{if .BridgeSession}}
-  <script src="/static/js/session.js" defer data-app-base="{{.AppBaseURL}}"></script>
+  <script src="/static/js/session.js?v={{assetVersion}}" defer data-app-base="{{.AppBaseURL}}"></script>
   {{end}}
 {{end}}
 {{template "layout-end" .}}

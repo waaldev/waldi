@@ -1,6 +1,8 @@
 package web
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -356,8 +358,39 @@ func minifyCSS(css string) string {
 	return strings.TrimSpace(out.String())
 }
 
+// assetVersion returns a short content hash of web/static, used to cache-bust
+// linked (non-inlined) assets: /static/ is served with a year-long immutable
+// Cache-Control, so a stale browser or CDN cache never revalidates on its own
+// unless the URL itself changes when the content does.
+func assetVersion(files fs.FS) (string, error) {
+	h := sha256.New()
+	err := fs.WalkDir(files, "web/static", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		b, err := fs.ReadFile(files, path)
+		if err != nil {
+			return err
+		}
+		h.Write([]byte(path))
+		h.Write(b)
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil))[:10], nil
+}
+
 func NewRenderer(files fs.FS) (*Renderer, error) {
 	assets, err := loadInlineAssets(files)
+	if err != nil {
+		return nil, err
+	}
+	version, err := assetVersion(files)
 	if err != nil {
 		return nil, err
 	}
@@ -366,6 +399,7 @@ func NewRenderer(files fs.FS) (*Renderer, error) {
 		"siteFontsCSS": func() template.CSS { return assets.fontsCSS },
 		"siteThemeJS":  func() template.JS { return assets.themeJS },
 		"sitePostJS":   func() template.JS { return assets.postJS },
+		"assetVersion": func() string { return version },
 	}
 	tmpl, err := template.New("").Funcs(funcs).ParseFS(files, "web/templates/*.html")
 	if err != nil {
