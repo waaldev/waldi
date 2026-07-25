@@ -130,6 +130,11 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	pd := s.newPageData(r, user)
 	view := letterView(r, s.baseDomain, letter, pd.Lang)
 	view.Read = true
+	kept, err := s.store.IsKept(r.Context(), user.ID, letter.PostID)
+	if err != nil {
+		s.logger.Error("loading keep state", "err", err)
+	}
+	view.Kept = kept
 	pd.Title = pd.T("letter.page.title", view.FromWriterLabel)
 	pd.SEO = noindexSEO()
 	pd.Inbox = &InboxView{Letter: &view}

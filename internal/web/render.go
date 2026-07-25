@@ -72,6 +72,7 @@ type PageData struct {
 	Post             *PostView
 	Feed             *FeedView
 	Inbox            *InboxView
+	Kept             *KeptView
 	SEO              *SEOView
 	AppBaseURL       string
 	PageURL          string
@@ -230,6 +231,12 @@ type PostView struct {
 	URL              string
 	Following        bool
 	CanFollow        bool
+	CanKeep          bool
+	Kept             bool
+	// FromLetter marks a kept post whose URL points back at the letter it
+	// was kept from (an in-app page) rather than the public post, so the
+	// shelf can skip the new-tab treatment used for external blog links.
+	FromLetter       bool
 	CanSendLetters   bool
 	ImpressionID     int64
 	DateError        bool
@@ -257,6 +264,14 @@ type InboxView struct {
 	OlderURL string
 }
 
+// KeptView backs /kept, a reader's private shelf of posts they kept. It is
+// never shown to anyone but the reader, and no keep count is ever exposed.
+type KeptView struct {
+	Posts    []PostView
+	Empty    bool
+	OlderURL string
+}
+
 type LetterView struct {
 	ID              int64
 	PostID          int64
@@ -268,6 +283,7 @@ type LetterView struct {
 	Body            string
 	CreatedAt       string
 	Read            bool
+	Kept            bool
 }
 
 type StatsView struct {
@@ -413,6 +429,8 @@ func navActiveForPath(path string) string {
 		return "inbox"
 	case path == "/you" || strings.HasPrefix(path, "/you/"):
 		return "you"
+	case path == "/kept":
+		return "kept"
 	default:
 		return ""
 	}
