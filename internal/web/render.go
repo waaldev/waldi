@@ -236,12 +236,12 @@ type PostView struct {
 	// FromLetter marks a kept post whose URL points back at the letter it
 	// was kept from (an in-app page) rather than the public post, so the
 	// shelf can skip the new-tab treatment used for external blog links.
-	FromLetter       bool
-	CanSendLetters   bool
-	ImpressionID     int64
-	DateError        bool
-	Subscribed       bool
-	LetterSent       bool
+	FromLetter     bool
+	CanSendLetters bool
+	ImpressionID   int64
+	DateError      bool
+	Subscribed     bool
+	LetterSent     bool
 }
 
 type FeedView struct {
