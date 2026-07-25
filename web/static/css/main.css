@@ -1074,6 +1074,8 @@ a.btn-secondary:hover {
 .delete-account summary:hover { color: var(--accent-ink); }
 
 .change-password form { margin-block-start: var(--s4); }
+.change-password .form-error,
+.change-password .form-note { margin-block-start: var(--s3); }
 
 .delete-account { margin-block-start: var(--s3); }
 .delete-account form { margin-block-start: var(--s3); }

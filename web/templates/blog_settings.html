@@ -206,13 +206,7 @@
       </div>
     </form>
 
-    {{if .BlogSettings.PasswordError}}
-      <p class="form-error">{{.BlogSettings.PasswordError}}</p>
-    {{else if .BlogSettings.PasswordSaved}}
-      <p class="form-note">{{.T "blog.settings.password.saved"}}</p>
-    {{end}}
-
-    <details class="change-password" {{if .BlogSettings.PasswordError}}open{{end}}>
+    <details class="change-password" {{if or .BlogSettings.PasswordError .BlogSettings.PasswordSaved}}open{{end}}>
       <summary>{{.T "blog.settings.password.link"}}</summary>
       <form method="post" action="/settings/password">
         <div class="field">
@@ -224,6 +218,11 @@
           <input id="new_password" name="new_password" type="password" autocomplete="new-password">
         </div>
         <button class="quiet-danger" type="submit">{{.T "blog.settings.password.submit"}}</button>
+        {{if .BlogSettings.PasswordError}}
+          <p class="form-error">{{.BlogSettings.PasswordError}}</p>
+        {{else if .BlogSettings.PasswordSaved}}
+          <p class="form-note">{{.T "blog.settings.password.saved"}}</p>
+        {{end}}
       </form>
     </details>
 
