@@ -19,8 +19,7 @@ const (
 
 	inboxWindow = 7 * 24 * time.Hour
 
-	inboxPageSize         = 5
-	letterArchivePageSize = 10
+	inboxPageSize = 5
 )
 
 var errBadPageCursor = fmt.Errorf("bad page cursor")
@@ -85,4 +84,14 @@ func lettersOlderURL(path string, letters []store.Letter, hasMore bool) string {
 	}
 	last := letters[len(letters)-1]
 	return olderPageURL(path, last.CreatedAt, last.ID)
+}
+
+// keptOlderURL paginates /kept by keep time (not the post's publish time),
+// since the shelf is ordered by when the reader kept each post.
+func keptOlderURL(kept []store.KeptPost, hasMore bool) string {
+	if !hasMore || len(kept) == 0 {
+		return ""
+	}
+	last := kept[len(kept)-1]
+	return olderPageURL("/kept", last.KeptAt, last.ID)
 }

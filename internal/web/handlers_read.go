@@ -34,6 +34,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		views := s.postViewsWithURLs(r, posts)
+		s.markKept(r, user.ID, views)
 		feed.Empty = len(views) == 0
 		feed.Days = buildFeedDays(views, pd.Lang)
 

@@ -34,7 +34,19 @@
       <ul class="feed">
         {{range .Posts}}
           <li lang="{{.Lang}}" dir="{{.Dir}}">
-            <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+            <div class="feed-writer">
+              <a href="{{.BlogURL}}">{{.WriterLabel}}</a>
+              <span class="re">·</span>
+              {{if .Kept}}
+                <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
+                  <button class="keep-inline" type="submit">{{$.T "post.unkeep"}}</button>
+                </form>
+              {{else}}
+                <form class="keep-form" method="post" action="/keep/{{.ID}}">
+                  <button class="keep-inline" type="submit">{{$.T "post.keep"}}</button>
+                </form>
+              {{end}}
+            </div>
             <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
               <h2 class="feed-title">{{.Title}}</h2>
               {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
@@ -49,6 +61,8 @@
       <p>{{.T "home.empty.following.body"}}</p>
     </div>
   {{end}}
+
+  <p class="feed-more"><a class="quiet-link" href="/kept">{{.T "home.kept.link"}}</a></p>
 
   <footer class="finish">
     <p>{{.T "home.finish"}}</p>
