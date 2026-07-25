@@ -79,9 +79,13 @@
   {{end}}
 
   <footer class="editor-delete">
-    <form method="post" action="/write/{{.Write.Post.ID}}/delete" onsubmit="return confirm('{{.T "editor.delete_confirm"}}')">
-      <button class="quiet-danger" type="submit">{{if eq .Write.Post.Status "published"}}{{.T "editor.delete_post"}}{{else}}{{.T "editor.delete_draft"}}{{end}}</button>
-    </form>
+    <details class="confirm-delete">
+      <summary class="quiet-danger">{{if eq .Write.Post.Status "published"}}{{.T "editor.delete_post"}}{{else}}{{.T "editor.delete_draft"}}{{end}}</summary>
+      <p class="hint">{{.T "editor.delete_confirm"}}</p>
+      <form method="post" action="/write/{{.Write.Post.ID}}/delete">
+        <button class="quiet-danger" type="submit">{{.T "editor.delete_confirm_submit"}}</button>
+      </form>
+    </details>
   </footer>
 </section>
 <script src="/static/js/editor.js" defer></script>

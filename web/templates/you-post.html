@@ -11,7 +11,7 @@
       <a href="{{.Post.URL}}" target="_blank" rel="noopener">{{.T "post.owner.badge"}}</a>
       <span class="sep">·</span>&nbsp;<a href="/write/{{.Post.ID}}">{{.T "post.owner.edit"}}</a>
       <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.date-edit').classList.toggle('open')">{{.T "you.post.edit_date"}}</button>
-      <span class="sep">·</span>&nbsp;<form class="inline-form" method="post" action="/write/{{.Post.ID}}/delete" onsubmit="return confirm('{{.T "post.owner.delete_confirm"}}')"><button class="quiet-danger" type="submit">{{.T "post.owner.delete"}}</button></form>
+      <span class="sep">·</span>&nbsp;<details class="confirm-delete"><summary class="quiet-danger">{{.T "post.owner.delete"}}</summary> <span class="hint">{{.T "post.owner.delete_confirm"}}</span> <form class="inline-form" method="post" action="/write/{{.Post.ID}}/delete"><button class="quiet-danger" type="submit">{{.T "post.owner.delete_confirm_submit"}}</button></form></details>
     </div>
 
     <form class="date-edit{{if .Post.DateError}} open{{end}}" method="post" action="/write/{{.Post.ID}}/published-at">
