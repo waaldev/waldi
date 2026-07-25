@@ -1067,6 +1067,12 @@ a.btn-secondary:hover {
 .delete-account summary { font-size: var(--text-meta); }
 .delete-account form { margin-block-start: var(--s3); }
 
+.confirm-delete summary { font-size: var(--text-meta); }
+.confirm-delete .hint { margin-block: var(--s2); }
+.confirm-delete form { margin: 0; }
+.owner-row .confirm-delete,
+.owner-row .confirm-delete .hint { display: inline; }
+
 .domain-panel {
   background: var(--paper-raised);
   border-radius: var(--radius);

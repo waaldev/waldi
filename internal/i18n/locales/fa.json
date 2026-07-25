@@ -44,6 +44,7 @@
   "post.owner.edit": "ویرایش",
   "post.owner.delete": "حذف",
   "post.owner.delete_confirm": "این نوشته حذف شود؟ از وبلاگت برداشته می‌شود و نشانی‌اش دیگر کار نمی‌کند. نامه‌هایی که برایش آمده می‌مانند.",
+  "post.owner.delete_confirm_submit": "بله، حذف شود",
   "post.subscribe.heading": "هر صبح، نوشته‌های تازه و یک نوشته از یک غریبه.",
   "post.subscribe.body": "همین. نه خبرنامه‌ای، نه تبلیغی. هر وقت خواستی، با یک کلیک لغوش کن.",
   "post.subscribe.placeholder": "ایمیل",
@@ -163,7 +164,6 @@
   "blog.settings.password.error.length": "گذرواژه‌ی تازه باید دست‌کم ۸ نویسه باشد.",
   "blog.settings.delete.link": "حذف حساب",
   "blog.settings.delete.body": "حساب، وبلاگ و همه‌ی نوشته‌هایت برای همیشه پاک می‌شوند. اگر می‌خواهی نوشته‌هایت را نگه داری، اول خروجی بگیر.",
-  "blog.settings.delete.confirm": "حساب و همه‌ی نوشته‌هایت حذف شوند؟ این کار برگشت‌پذیر نیست.",
   "blog.settings.delete.submit": "حذف حساب من",
   "blog.settings.delete.error.password": "گذرواژه درست نیست.",
 
@@ -333,6 +333,7 @@
   "editor.delete_draft": "حذف پیش‌نویس",
   "editor.delete_post": "حذف نوشته",
   "editor.delete_confirm": "این نوشته حذف شود؟ از وبلاگت برداشته می‌شود و نشانی‌اش دیگر کار نمی‌کند. نامه‌هایی که برایش آمده می‌مانند.",
+  "editor.delete_confirm_submit": "بله، حذف شود",
   "kept.title": "نگه‌داشته‌ها",
   "kept.daylabel": "نگه‌داشته‌ها",
   "kept.empty.heading": "این قفسه هنوز خالی است",
