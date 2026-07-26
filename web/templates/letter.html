@@ -2,13 +2,17 @@
 {{template "layout-start" .}}
 {{template "app-bar" .}}
 
-<article class="prose" lang="{{.Lang}}" dir="{{.Dir}}">
-  <header class="article-head">
-    <h1 class="article-title">{{.T "letter.view.heading" .Inbox.Letter.PostTitle}}</h1>
-    <p class="article-meta">{{.T "letter.view.from.prefix"}} <a href="{{.Inbox.Letter.FromBlogURL}}" target="_blank" rel="noopener">{{.Inbox.Letter.FromWriterLabel}}</a> · {{.Inbox.Letter.CreatedAt}}</p>
-  </header>
-  <p class="letter-body">{{.Inbox.Letter.Body}}</p>
+<p class="letter-context">{{.Inbox.Letter.ContextLine}}</p>
+
+{{range $i, $entry := .Inbox.Letter.Thread}}
+{{if $i}}<hr class="letter-divider">{{end}}
+<article class="letter-entry" lang="{{$.Lang}}" dir="{{$.Dir}}">
+  <p class="letter-from"><span class="who">{{if eq $entry.FromUsername $.CurrentUser.Username}}{{$.T "letter.you"}}{{else}}{{$entry.FromWriterLabel}}{{end}}</span> · {{$entry.CreatedAt}}</p>
+  <div class="prose"><p>{{$entry.Body}}</p></div>
 </article>
+{{end}}
+
+<p class="endmark" role="presentation"></p>
 
 <footer class="post-actions">
   {{if .Inbox.Letter.Kept}}
@@ -23,5 +27,14 @@
     </form>
   {{end}}
 </footer>
+
+{{if not .Inbox.Letter.Closed}}
+<footer class="letter-actions">
+  <a class="btn-follow" href="/inbox/{{.Inbox.Letter.ID}}/reply">{{.T "letter.reply.cta"}}</a>
+  <form class="inline-form" method="post" action="/inbox/{{.Inbox.Letter.ID}}/close">
+    <button class="quiet-danger" type="submit">{{.T "letter.close.cta"}}</button>
+  </form>
+</footer>
+{{end}}
 {{template "layout-end" .}}
 {{end}}

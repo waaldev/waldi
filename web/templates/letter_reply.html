@@ -1,0 +1,18 @@
+{{define "letter_reply.html"}}
+{{template "layout-start" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  <a class="wordmark" href="/inbox/{{.Inbox.Letter.ID}}"><span class="wordmark-back" aria-hidden="true">←</span>{{.T "letter.reply.back"}}</a>
+  <nav>{{template "theme-toggle" .}}</nav>
+</header>
+
+<p class="composer-to">{{.T "letter.reply.to" .Inbox.Letter.OtherWriterLabel .Inbox.Letter.PostTitle}}</p>
+
+<form method="post" action="/inbox/{{.Inbox.Letter.ID}}/reply">
+  <textarea class="composer-body" name="body" lang="{{.Lang}}" dir="{{.Dir}}" placeholder="{{.T "letter.reply.placeholder" .Inbox.Letter.OtherWriterLabel}}" required minlength="2" maxlength="5000"></textarea>
+  <div class="composer-send">
+    <button class="btn-follow" type="submit">{{.T "letter.reply.send"}}</button>
+    <p class="field-help">{{.T "letter.reply.hint"}}</p>
+  </div>
+</form>
+{{template "layout-end" .}}
+{{end}}
