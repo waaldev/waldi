@@ -98,11 +98,6 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	pd := s.newPageData(r, user)
 	view := letterView(r, s.baseDomain, anchor, pd.Lang)
 	view.Read = true
-	kept, err := s.store.IsLetterKept(r.Context(), user.ID, id)
-	if err != nil {
-		s.logger.Error("loading keep state", "err", err)
-	}
-	view.Kept = kept
 	view.Thread = letterViews(r, s.baseDomain, thread, pd.Lang)
 	view.Closed = thread[0].ClosedAt != nil
 	view.OtherWriterLabel = view.FromWriterLabel
