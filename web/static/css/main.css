@@ -542,8 +542,6 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 }
 .prose .fn-back:hover { color: var(--ink); }
 
-.letter-body { white-space: pre-wrap; }
-
 .prose ul,
 .prose ol {
   margin: 0 0 0.75em;
@@ -666,6 +664,67 @@ a.quiet:hover { color: var(--ink); }
   cursor: pointer;
 }
 .quiet-danger:hover { color: var(--ink-soft); }
+
+/* ---------- letters: reading a letter / a correspondence ---------- */
+
+.letter-context {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  text-align: center;
+  margin-block-end: var(--s6);
+}
+
+.letter-entry + .letter-entry { margin-block-start: var(--s6); }
+
+.letter-from {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  margin-block-end: var(--s4);
+}
+.letter-from .who { color: var(--ink); }
+
+.letter-entry .prose { font-size: var(--text-body); white-space: pre-wrap; }
+
+.letter-divider {
+  text-align: center;
+  color: var(--ink-faint);
+  margin-block: var(--s6);
+  border: 0;
+}
+.letter-divider::before { content: "※"; }
+
+.letter-actions {
+  margin-block-start: var(--s7);
+  text-align: center;
+}
+.letter-actions .btn-follow { text-decoration: none; }
+.letter-actions .quiet-danger { display: block; margin: var(--s4) auto 0; }
+
+.composer-to {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  margin-block-end: var(--s4);
+}
+.composer-body {
+  width: 100%;
+  min-height: 40vh;
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: 1.65;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  resize: none;
+}
+.composer-body:focus { outline: none; }
+.composer-body::placeholder { color: var(--ink-faint); }
+.composer-body:lang(fa) { font-size: 1.3125rem; line-height: 1.9; }
+
+.composer-send {
+  margin-block-start: var(--s6);
+  text-align: center;
+}
 
 /* ---------- email capture (anonymous visitors, end of post) ---------- */
 
@@ -1645,8 +1704,7 @@ a.btn-secondary:hover {
   }
 
   .prose,
-  .editor-surface,
-  .letter-body {
+  .editor-surface {
     overflow-wrap: anywhere;
     word-break: break-word;
   }
@@ -1700,7 +1758,7 @@ a.btn-secondary:hover {
 /* ---------- print ---------- */
 
 @media print {
-  .bar, .post-actions, .letter-composer { display: none; }
+  .bar, .post-actions, .letter-composer, .letter-actions { display: none; }
   body { background: #fff; color: #000; }
   .page { animation: none; max-width: none; }
 }
