@@ -23,15 +23,19 @@ type Letter struct {
 	Body            string
 	CreatedAt       time.Time
 	ReadAt          *time.Time
+	InReplyTo       *int64
+	ClosedAt        *time.Time
 }
 
-func (s *Store) CreateLetter(ctx context.Context, postID, fromUserID, toUserID int64, body string) (Letter, error) {
+// CreateLetter records a letter. inReplyTo is nil for a first-contact
+// letter, or the thread's root letter id when replying - see LetterThread.
+func (s *Store) CreateLetter(ctx context.Context, postID, fromUserID, toUserID int64, body string, inReplyTo *int64) (Letter, error) {
 	var letter Letter
 	err := s.pool.QueryRow(ctx, `
-		insert into letters (post_id, from_user, to_user, body)
-		values ($1, $2, $3, $4)
-		returning id, post_id, from_user, to_user, body, created_at, read_at
-	`, postID, fromUserID, toUserID, body).Scan(letterScanFields(&letter)...)
+		insert into letters (post_id, from_user, to_user, body, in_reply_to)
+		values ($1, $2, $3, $4, $5)
+		returning id, post_id, from_user, to_user, body, created_at, read_at, in_reply_to, closed_at
+	`, postID, fromUserID, toUserID, body, inReplyTo).Scan(letterScanFields(&letter)...)
 	if err != nil {
 		return Letter{}, fmt.Errorf("creating letter: %w", err)
 	}
@@ -72,7 +76,7 @@ func (s *Store) LettersSentSince(ctx context.Context, userID int64, since time.T
 func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Time, limit int, cursor PageCursor) ([]Letter, error) {
 	before, lastID := cursorArgs(cursor)
 	rows, err := s.pool.Query(ctx, `
-		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at
+		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at, l.in_reply_to, l.closed_at
 		from letters l
 		join users u on u.id = l.from_user
 		join posts p on p.id = l.post_id
@@ -108,7 +112,7 @@ func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Tim
 func (s *Store) LetterForUser(ctx context.Context, letterID, userID int64) (Letter, error) {
 	var letter Letter
 	err := s.pool.QueryRow(ctx, `
-		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at
+		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at, l.in_reply_to, l.closed_at
 		from letters l
 		join users u on u.id = l.from_user
 		join posts p on p.id = l.post_id
@@ -121,6 +125,50 @@ func (s *Store) LetterForUser(ctx context.Context, letterID, userID int64) (Lett
 		return Letter{}, fmt.Errorf("finding letter: %w", err)
 	}
 	return letter, nil
+}
+
+// LetterThread returns every letter in a correspondence anchored at
+// rootID - the root itself plus all replies - oldest first, so a page can
+// render it as a stack of letters read in sequence.
+func (s *Store) LetterThread(ctx context.Context, rootID int64) ([]Letter, error) {
+	rows, err := s.pool.Query(ctx, `
+		select l.id, l.post_id, p.title, p.slug, l.from_user, u.username, u.author_name, u.display_name, l.to_user, l.body, l.created_at, l.read_at, l.in_reply_to, l.closed_at
+		from letters l
+		join users u on u.id = l.from_user
+		join posts p on p.id = l.post_id
+		where l.id = $1 or l.in_reply_to = $1
+		order by l.created_at asc, l.id asc
+	`, rootID)
+	if err != nil {
+		return nil, fmt.Errorf("listing letter thread: %w", err)
+	}
+	defer rows.Close()
+
+	var letters []Letter
+	for rows.Next() {
+		var letter Letter
+		if err := rows.Scan(letterWithPostScanFields(&letter)...); err != nil {
+			return nil, fmt.Errorf("scanning letter: %w", err)
+		}
+		letters = append(letters, letter)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating letter thread: %w", err)
+	}
+	return letters, nil
+}
+
+// CloseCorrespondence quietly stops further letters in a thread - no
+// notification to either side, just no further replies accepted. rootID
+// must already be the thread root.
+func (s *Store) CloseCorrespondence(ctx context.Context, rootID int64) error {
+	_, err := s.pool.Exec(ctx, `
+		update letters set closed_at = coalesce(closed_at, now()) where id = $1
+	`, rootID)
+	if err != nil {
+		return fmt.Errorf("closing correspondence: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) MarkLetterRead(ctx context.Context, letterID, userID int64) error {
@@ -144,6 +192,8 @@ func letterScanFields(l *Letter) []any {
 		&l.Body,
 		&l.CreatedAt,
 		letterReadAtDest(l),
+		letterInReplyToDest(l),
+		letterClosedAtDest(l),
 	}
 }
 
@@ -161,25 +211,50 @@ func letterWithPostScanFields(l *Letter) []any {
 		&l.Body,
 		&l.CreatedAt,
 		letterReadAtDest(l),
+		letterInReplyToDest(l),
+		letterClosedAtDest(l),
 	}
 }
 
-type letterReadAtScanner struct {
-	letter *Letter
+type nullTimeScanner struct {
+	dest **time.Time
 }
 
-func letterReadAtDest(l *Letter) any {
-	return letterReadAtScanner{letter: l}
-}
-
-func (s letterReadAtScanner) Scan(value any) error {
+func (s nullTimeScanner) Scan(value any) error {
 	var t sql.NullTime
 	if err := t.Scan(value); err != nil {
 		return err
 	}
 	if t.Valid {
-		readAt := t.Time
-		s.letter.ReadAt = &readAt
+		scanned := t.Time
+		*s.dest = &scanned
+	}
+	return nil
+}
+
+func letterReadAtDest(l *Letter) any {
+	return nullTimeScanner{dest: &l.ReadAt}
+}
+
+func letterClosedAtDest(l *Letter) any {
+	return nullTimeScanner{dest: &l.ClosedAt}
+}
+
+type letterInReplyToScanner struct {
+	letter *Letter
+}
+
+func letterInReplyToDest(l *Letter) any {
+	return letterInReplyToScanner{letter: l}
+}
+
+func (s letterInReplyToScanner) Scan(value any) error {
+	var id sql.NullInt64
+	if err := id.Scan(value); err != nil {
+		return err
+	}
+	if id.Valid {
+		s.letter.InReplyTo = &id.Int64
 	}
 	return nil
 }

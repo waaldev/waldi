@@ -174,7 +174,7 @@ func (s *Server) handleCreateLetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := s.store.CreateLetter(r.Context(), postID, user.ID, post.UserID, body); err != nil {
+	if _, err := s.store.CreateLetter(r.Context(), postID, user.ID, post.UserID, body, nil); err != nil {
 		s.logger.Error("creating letter", "err", err)
 		http.Error(w, "letter failed", http.StatusInternalServerError)
 		return
