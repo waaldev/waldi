@@ -13,6 +13,7 @@
 <footer class="post-actions">
   {{if .Inbox.Letter.Kept}}
     <form class="inline-form" method="post" action="/unkeep/{{.Inbox.Letter.PostID}}">
+      <input type="hidden" name="letter_id" value="{{.Inbox.Letter.ID}}">
       <button class="quiet" type="submit">{{.T "post.unkeep"}}</button>
     </form>
   {{else}}

@@ -24,29 +24,40 @@ type KeptPost struct {
 	SourceLetterFromUser    string
 }
 
-// Keep adds a post to a reader's private shelf. Kept posts are never shown
-// to anyone but the reader who kept them - there is no public keep count.
-// letterID records that the keep came from a received letter about the post,
-// so the shelf can later link back to that letter; pass nil when keeping
-// from the home feed. Re-keeping a post already on the shelf fills in a
-// missing source letter rather than overwriting one that's already set.
+// Keep adds a post, or a specific letter about a post, to a reader's private
+// shelf. Kept posts are never shown to anyone but the reader who kept them -
+// there is no public keep count. letterID records that the keep came from a
+// received letter about the post, so the shelf can later link back to that
+// letter; pass nil when keeping from the home feed. Keeping the post
+// directly and keeping a letter about it are tracked as separate entries -
+// each is idempotent on its own, but one doesn't imply or satisfy the other.
 func (s *Store) Keep(ctx context.Context, userID, postID int64, letterID *int64) error {
-	_, err := s.pool.Exec(ctx, `
-		insert into keeps (user_id, post_id, source_letter_id)
-		values ($1, $2, $3)
-		on conflict (user_id, post_id) do update
-			set source_letter_id = coalesce(keeps.source_letter_id, excluded.source_letter_id)
-	`, userID, postID, letterID)
+	var err error
+	if letterID == nil {
+		_, err = s.pool.Exec(ctx, `
+			insert into keeps (user_id, post_id, source_letter_id)
+			values ($1, $2, null)
+			on conflict (user_id, post_id) where source_letter_id is null do nothing
+		`, userID, postID)
+	} else {
+		_, err = s.pool.Exec(ctx, `
+			insert into keeps (user_id, post_id, source_letter_id)
+			values ($1, $2, $3)
+			on conflict (source_letter_id) where source_letter_id is not null do nothing
+		`, userID, postID, *letterID)
+	}
 	if err != nil {
 		return fmt.Errorf("keeping post: %w", err)
 	}
 	return nil
 }
 
-func (s *Store) Unkeep(ctx context.Context, userID, postID int64) error {
+// UnkeepPost removes a post kept directly from the feed, leaving untouched
+// any separate keep of a letter about that same post.
+func (s *Store) UnkeepPost(ctx context.Context, userID, postID int64) error {
 	_, err := s.pool.Exec(ctx, `
 		delete from keeps
-		where user_id = $1 and post_id = $2
+		where user_id = $1 and post_id = $2 and source_letter_id is null
 	`, userID, postID)
 	if err != nil {
 		return fmt.Errorf("unkeeping post: %w", err)
@@ -54,13 +65,28 @@ func (s *Store) Unkeep(ctx context.Context, userID, postID int64) error {
 	return nil
 }
 
-func (s *Store) IsKept(ctx context.Context, userID, postID int64) (bool, error) {
+// UnkeepLetter removes a kept letter, leaving untouched any separate plain
+// keep of the underlying post.
+func (s *Store) UnkeepLetter(ctx context.Context, userID, letterID int64) error {
+	_, err := s.pool.Exec(ctx, `
+		delete from keeps
+		where user_id = $1 and source_letter_id = $2
+	`, userID, letterID)
+	if err != nil {
+		return fmt.Errorf("unkeeping letter: %w", err)
+	}
+	return nil
+}
+
+// IsPostKept reports whether the reader kept the post directly (not via a
+// specific letter), for the Keep control on the post itself.
+func (s *Store) IsPostKept(ctx context.Context, userID, postID int64) (bool, error) {
 	var kept bool
 	if err := s.pool.QueryRow(ctx, `
 		select exists(
 			select 1
 			from keeps
-			where user_id = $1 and post_id = $2
+			where user_id = $1 and post_id = $2 and source_letter_id is null
 		)
 	`, userID, postID).Scan(&kept); err != nil {
 		return false, fmt.Errorf("checking keep: %w", err)
@@ -68,9 +94,26 @@ func (s *Store) IsKept(ctx context.Context, userID, postID int64) (bool, error) 
 	return kept, nil
 }
 
-// KeptPostIDs reports which of the given posts a reader has kept, so a page
-// showing many posts at once (a feed, an inbox) can check keep state with
-// one query instead of one per post.
+// IsLetterKept reports whether the reader kept this specific letter, for the
+// Keep control on the letter itself - independent of whether they also kept
+// the underlying post directly.
+func (s *Store) IsLetterKept(ctx context.Context, userID, letterID int64) (bool, error) {
+	var kept bool
+	if err := s.pool.QueryRow(ctx, `
+		select exists(
+			select 1
+			from keeps
+			where user_id = $1 and source_letter_id = $2
+		)
+	`, userID, letterID).Scan(&kept); err != nil {
+		return false, fmt.Errorf("checking letter keep: %w", err)
+	}
+	return kept, nil
+}
+
+// KeptPostIDs reports which of the given posts a reader has kept directly
+// (not via a specific letter), so a page showing many posts at once (a feed)
+// can check keep state with one query instead of one per post.
 func (s *Store) KeptPostIDs(ctx context.Context, userID int64, postIDs []int64) (map[int64]bool, error) {
 	kept := make(map[int64]bool, len(postIDs))
 	if len(postIDs) == 0 {
@@ -79,7 +122,7 @@ func (s *Store) KeptPostIDs(ctx context.Context, userID int64, postIDs []int64) 
 	rows, err := s.pool.Query(ctx, `
 		select post_id
 		from keeps
-		where user_id = $1 and post_id = any($2)
+		where user_id = $1 and post_id = any($2) and source_letter_id is null
 	`, userID, postIDs)
 	if err != nil {
 		return nil, fmt.Errorf("checking kept posts: %w", err)
@@ -95,6 +138,37 @@ func (s *Store) KeptPostIDs(ctx context.Context, userID int64, postIDs []int64) 
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("iterating kept post ids: %w", err)
+	}
+	return kept, nil
+}
+
+// KeptLetterIDs reports which of the given letters a reader has kept, so an
+// inbox listing many letters at once can check keep state with one query
+// instead of one per letter.
+func (s *Store) KeptLetterIDs(ctx context.Context, userID int64, letterIDs []int64) (map[int64]bool, error) {
+	kept := make(map[int64]bool, len(letterIDs))
+	if len(letterIDs) == 0 {
+		return kept, nil
+	}
+	rows, err := s.pool.Query(ctx, `
+		select source_letter_id
+		from keeps
+		where user_id = $1 and source_letter_id = any($2)
+	`, userID, letterIDs)
+	if err != nil {
+		return nil, fmt.Errorf("checking kept letters: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var letterID int64
+		if err := rows.Scan(&letterID); err != nil {
+			return nil, fmt.Errorf("scanning kept letter id: %w", err)
+		}
+		kept[letterID] = true
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating kept letter ids: %w", err)
 	}
 	return kept, nil
 }

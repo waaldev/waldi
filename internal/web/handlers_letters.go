@@ -51,6 +51,9 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 
 	pd := s.newPageData(r, user)
 	views := letterViews(r, s.baseDomain, letters, pd.Lang)
+	if err := s.markLettersKept(r, user.ID, views); err != nil {
+		s.logger.Error("loading kept letter ids", "err", err)
+	}
 	pd.Title = pd.T("inbox.title")
 	pd.SEO = noindexSEO()
 	pd.Inbox = &InboxView{
@@ -94,7 +97,7 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	pd := s.newPageData(r, user)
 	view := letterView(r, s.baseDomain, letter, pd.Lang)
 	view.Read = true
-	kept, err := s.store.IsKept(r.Context(), user.ID, letter.PostID)
+	kept, err := s.store.IsLetterKept(r.Context(), user.ID, id)
 	if err != nil {
 		s.logger.Error("loading keep state", "err", err)
 	}

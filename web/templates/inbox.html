@@ -17,6 +17,17 @@
           <h2 class="feed-title">{{$.T "inbox.letter.link" .PostTitle}}</h2>
           <p class="feed-excerpt">{{.Body}}</p>
         </a>
+        {{if .Kept}}
+          <form class="keep-form" method="post" action="/unkeep/{{.PostID}}">
+            <input type="hidden" name="letter_id" value="{{.ID}}">
+            <button class="keep kept" type="submit">{{$.T "post.kept"}}</button>
+          </form>
+        {{else}}
+          <form class="keep-form" method="post" action="/keep/{{.PostID}}">
+            <input type="hidden" name="letter_id" value="{{.ID}}">
+            <button class="keep" type="submit">{{$.T "post.keep"}}</button>
+          </form>
+        {{end}}
       </li>
     {{end}}
   </ul>

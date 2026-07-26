@@ -38,16 +38,19 @@ func (s *Server) changeKeep(w http.ResponseWriter, r *http.Request, keep bool) {
 		return
 	}
 
-	if keep {
-		var letterID *int64
-		if raw := r.FormValue("letter_id"); raw != "" {
-			if id, err := strconv.ParseInt(raw, 10, 64); err == nil && id > 0 {
-				letterID = &id
-			}
+	var letterID *int64
+	if raw := r.FormValue("letter_id"); raw != "" {
+		if id, err := strconv.ParseInt(raw, 10, 64); err == nil && id > 0 {
+			letterID = &id
 		}
+	}
+
+	if keep {
 		err = s.store.Keep(r.Context(), user.ID, postID, letterID)
+	} else if letterID != nil {
+		err = s.store.UnkeepLetter(r.Context(), user.ID, *letterID)
 	} else {
-		err = s.store.Unkeep(r.Context(), user.ID, postID)
+		err = s.store.UnkeepPost(r.Context(), user.ID, postID)
 	}
 	if err != nil {
 		s.logger.Error("changing keep", "err", err)
@@ -75,6 +78,28 @@ func (s *Server) markKept(r *http.Request, userID int64, views []PostView) {
 		views[i].CanKeep = true
 		views[i].Kept = kept[views[i].ID]
 	}
+}
+
+// markLettersKept sets Kept on each inbox letter view with a single query,
+// mirroring markKept for the letter list rather than the post feed. A
+// letter's keep state is tracked independently of whether the underlying
+// post was also kept directly from the feed.
+func (s *Server) markLettersKept(r *http.Request, userID int64, views []LetterView) error {
+	if len(views) == 0 {
+		return nil
+	}
+	ids := make([]int64, len(views))
+	for i, v := range views {
+		ids[i] = v.ID
+	}
+	kept, err := s.store.KeptLetterIDs(r.Context(), userID, ids)
+	if err != nil {
+		return err
+	}
+	for i := range views {
+		views[i].Kept = kept[views[i].ID]
+	}
+	return nil
 }
 
 // handleKept renders a reader's private shelf of kept posts, newest keep
