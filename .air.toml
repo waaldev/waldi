@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 cmd = "go build -o tmp/waldi ./cmd/waldi"
 bin = "tmp/waldi"
 args_bin = ["serve"]
-include_ext = ["go", "html"]
+include_ext = ["go", "html", "css"]
 exclude_dir = ["tmp", "web/editor/node_modules", "web/static/js"]
 delay = 200
 
