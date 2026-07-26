@@ -193,7 +193,7 @@
   "letter.reply.back": "Back",
   "letter.reply.title": "Reply to %s",
   "letter.reply.to": "To %s, about \"%s\"",
-  "letter.reply.placeholder": "%s dear,",
+  "letter.reply.placeholder": "Dear %s,",
   "letter.reply.send": "Send the letter",
   "letter.reply.hint": "Letters travel slowly; it'll arrive tomorrow morning.",
 
