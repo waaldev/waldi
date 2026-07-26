@@ -297,6 +297,12 @@ type LetterView struct {
 	CreatedAt       string
 	Read            bool
 	Kept            bool
+
+	// Set only on the page-anchor view (InboxView.Letter), not on list items.
+	Thread           []LetterView
+	Closed           bool
+	ContextLine      string
+	OtherWriterLabel string
 }
 
 type StatsView struct {

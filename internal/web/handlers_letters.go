@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -80,7 +81,7 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	letter, err := s.store.LetterForUser(r.Context(), id, user.ID)
+	anchor, thread, err := s.resolveThread(r.Context(), id, user.ID)
 	if errors.Is(err, store.ErrNotFound) {
 		http.NotFound(w, r)
 		return
@@ -95,17 +96,183 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pd := s.newPageData(r, user)
-	view := letterView(r, s.baseDomain, letter, pd.Lang)
+	view := letterView(r, s.baseDomain, anchor, pd.Lang)
 	view.Read = true
 	kept, err := s.store.IsLetterKept(r.Context(), user.ID, id)
 	if err != nil {
 		s.logger.Error("loading keep state", "err", err)
 	}
 	view.Kept = kept
-	pd.Title = pd.T("letter.page.title", view.FromWriterLabel)
+	view.Thread = letterViews(r, s.baseDomain, thread, pd.Lang)
+	view.Closed = thread[0].ClosedAt != nil
+	view.OtherWriterLabel = view.FromWriterLabel
+	if len(thread) == 1 {
+		view.ContextLine = pd.T("letter.context.single", anchor.PostTitle)
+	} else {
+		view.ContextLine = pd.T("letter.context.correspondence", view.OtherWriterLabel, anchor.PostTitle)
+	}
+	pd.Title = pd.T("letter.page.title", view.OtherWriterLabel)
 	pd.SEO = noindexSEO()
 	pd.Inbox = &InboxView{Letter: &view}
 	s.renderer.Render(w, "letter.html", pd)
+}
+
+func (s *Server) handleReplyForm(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if s.store == nil {
+		s.renderInboxError(w, r, "inbox.error.db")
+		return
+	}
+
+	id, ok := parseID(w, r.PathValue("id"))
+	if !ok {
+		return
+	}
+	anchor, thread, err := s.resolveThread(r.Context(), id, user.ID)
+	if errors.Is(err, store.ErrNotFound) {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.logger.Error("loading letter", "err", err)
+		s.renderInboxError(w, r, "inbox.error.letter")
+		return
+	}
+	if thread[0].ClosedAt != nil {
+		redirect(w, r, "/inbox/"+strconv.FormatInt(id, 10))
+		return
+	}
+
+	pd := s.newPageData(r, user)
+	view := letterView(r, s.baseDomain, anchor, pd.Lang)
+	view.OtherWriterLabel = view.FromWriterLabel
+	pd.Title = pd.T("letter.reply.title", view.OtherWriterLabel)
+	pd.SEO = noindexSEO()
+	pd.Inbox = &InboxView{Letter: &view}
+	s.renderer.Render(w, "letter_reply.html", pd)
+}
+
+func (s *Server) handleCreateReply(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		redirect(w, r, s.loginURL(r, s.baseDomain, pageURL(r)))
+		return
+	}
+	if s.store == nil {
+		http.Error(w, "database unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad form", http.StatusBadRequest)
+		return
+	}
+
+	id, ok := parseID(w, r.PathValue("id"))
+	if !ok {
+		return
+	}
+	anchor, thread, err := s.resolveThread(r.Context(), id, user.ID)
+	if errors.Is(err, store.ErrNotFound) {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.logger.Error("loading letter", "err", err)
+		http.Error(w, "reply failed", http.StatusInternalServerError)
+		return
+	}
+	if thread[0].ClosedAt != nil {
+		http.Error(w, "this correspondence is closed", http.StatusForbidden)
+		return
+	}
+
+	body := strings.TrimSpace(r.FormValue("body"))
+	if len([]rune(body)) < 2 {
+		http.Error(w, "letter is empty", http.StatusBadRequest)
+		return
+	}
+	if len([]rune(body)) > 5000 {
+		http.Error(w, "letter is too long", http.StatusBadRequest)
+		return
+	}
+
+	sentToday, err := s.store.LettersSentSince(r.Context(), user.ID, time.Now().Add(-24*time.Hour))
+	if err != nil {
+		s.logger.Error("checking letter rate limit", "err", err)
+		http.Error(w, "reply failed", http.StatusInternalServerError)
+		return
+	}
+	if sentToday >= maxLettersPerDay {
+		http.Error(w, "too many letters today, try again tomorrow", http.StatusTooManyRequests)
+		return
+	}
+
+	rootID := thread[0].ID
+	if _, err := s.store.CreateLetter(r.Context(), anchor.PostID, user.ID, anchor.FromUserID, body, &rootID); err != nil {
+		s.logger.Error("creating reply", "err", err)
+		http.Error(w, "reply failed", http.StatusInternalServerError)
+		return
+	}
+	redirect(w, r, "/inbox/"+strconv.FormatInt(id, 10))
+}
+
+func (s *Server) handleCloseCorrespondence(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		redirect(w, r, s.loginURL(r, s.baseDomain, pageURL(r)))
+		return
+	}
+	if s.store == nil {
+		http.Error(w, "database unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	id, ok := parseID(w, r.PathValue("id"))
+	if !ok {
+		return
+	}
+	_, thread, err := s.resolveThread(r.Context(), id, user.ID)
+	if errors.Is(err, store.ErrNotFound) {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.logger.Error("loading letter", "err", err)
+		http.Error(w, "close failed", http.StatusInternalServerError)
+		return
+	}
+	if err := s.store.CloseCorrespondence(r.Context(), thread[0].ID); err != nil {
+		s.logger.Error("closing correspondence", "err", err)
+		http.Error(w, "close failed", http.StatusInternalServerError)
+		return
+	}
+	redirect(w, r, "/inbox")
+}
+
+// resolveThread loads the letter addressed to viewer at id, and the full
+// thread it belongs to (itself, if it's the thread's root - see
+// store.LetterThread). Because LetterForUser requires the anchor to be
+// addressed to the viewer, and a thread only ever has two participants,
+// the anchor's From* fields always describe the other participant,
+// regardless of how many letters are in the thread.
+func (s *Server) resolveThread(ctx context.Context, id, viewerID int64) (store.Letter, []store.Letter, error) {
+	anchor, err := s.store.LetterForUser(ctx, id, viewerID)
+	if err != nil {
+		return store.Letter{}, nil, err
+	}
+	rootID := anchor.ID
+	if anchor.InReplyTo != nil {
+		rootID = *anchor.InReplyTo
+	}
+	thread, err := s.store.LetterThread(ctx, rootID)
+	if err != nil {
+		return store.Letter{}, nil, err
+	}
+	return anchor, thread, nil
 }
 
 func (s *Server) handleCreateLetter(w http.ResponseWriter, r *http.Request) {
