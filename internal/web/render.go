@@ -238,7 +238,14 @@ type PostView struct {
 	// FromLetter marks a kept post whose URL points back at the letter it
 	// was kept from (an in-app page) rather than the public post, so the
 	// shelf can skip the new-tab treatment used for external blog links.
-	FromLetter     bool
+	FromLetter bool
+	// SourceLetterID is the letter this entry was kept from, set alongside
+	// FromLetter, so the shelf's "take off the shelf" action can unkeep this
+	// specific letter rather than any plain keep of the underlying post.
+	SourceLetterID int64
+	// KeptWhen is a relative-time label ("Kept yesterday") set only on the
+	// shelf, where it's the reader's own record of when they kept a thing.
+	KeptWhen       string
 	CanSendLetters bool
 	ImpressionID   int64
 	DateError      bool
@@ -268,8 +275,12 @@ type InboxView struct {
 
 // KeptView backs /kept, a reader's private shelf of posts they kept. It is
 // never shown to anyone but the reader, and no keep count is ever exposed.
+// Posts and Letters are drawn from the same reverse-chronological keep
+// order and only split apart for display, so pagination stays keyed to the
+// combined list rather than either group alone.
 type KeptView struct {
 	Posts    []PostView
+	Letters  []PostView
 	Empty    bool
 	OlderURL string
 }

@@ -232,10 +232,59 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   color: var(--accent);
 }
 
-/* keep sits inline in the writer/date line, at the same weight as the date */
 .keep-form { display: inline; margin: 0; }
 
-.keep-inline {
+/* the keep action sits below the feed-item, as its sibling, not inline in
+   the writer line - so it reads as a card action, not a piece of metadata */
+.keep {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+  background: none;
+  border: 0;
+  padding: var(--s1) 0 0;
+  margin-block-start: var(--s1);
+  cursor: pointer;
+  transition: color 120ms;
+}
+.keep:hover { color: var(--ink-soft); }
+.keep.kept { color: var(--accent); }
+.keep.kept:hover { color: var(--accent-ink); }
+
+/* ---------- shelf (kept page) ---------- */
+
+.shelf-head {
+  text-align: center;
+  margin-block: var(--s5) var(--s6);
+}
+.shelf-head h1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-title);
+  font-weight: 500;
+  margin: 0 0 var(--s2);
+}
+.shelf-head p {
+  font-family: var(--font-serif);
+  font-size: var(--text-ui);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.shelf-head p:lang(fa) { font-style: normal; }
+
+/* the remove action sits below the feed-item as its own line, at the
+   same weight as the daylabel/meta text elsewhere in the feed */
+.kept-when {
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+  margin-block-start: var(--s2);
+}
+.kept-when .sep { margin-inline: var(--s2); }
+.kept-when .remove {
+  appearance: none;
+  -webkit-appearance: none;
   font: inherit;
   color: var(--ink-faint);
   background: none;
@@ -243,7 +292,16 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   padding: 0;
   cursor: pointer;
 }
-.keep-inline:hover { color: var(--ink-soft); }
+.kept-when .remove:hover { color: var(--ink-soft); }
+
+.shelf-empty {
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  color: var(--ink-soft);
+  text-align: center;
+  margin-block: var(--s7);
+}
+.shelf-empty:lang(fa) { line-height: 1.9; }
 
 /* ---------- wildcard ---------- */
 

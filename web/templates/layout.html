@@ -50,6 +50,7 @@
   <nav>
     <a href="/write" {{if eq .NavActive "write"}}class="current"{{end}}>{{.T "nav.write"}}</a>
     <a href="/inbox" {{if eq .NavActive "inbox"}}class="current"{{end}}>{{.T "nav.inbox"}}</a>
+    <a href="/kept" {{if eq .NavActive "kept"}}class="current"{{end}}>{{.T "nav.kept"}}</a>
     <a href="/you" {{if eq .NavActive "you"}}class="current"{{end}}>{{.T "nav.you"}}</a>
     {{template "theme-toggle" .}}
   </nav>

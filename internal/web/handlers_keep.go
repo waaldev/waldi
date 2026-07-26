@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 	"waldi/internal/store"
 )
 
@@ -109,28 +110,37 @@ func (s *Server) handleKept(w http.ResponseWriter, r *http.Request) {
 	for i, kp := range kept {
 		posts[i] = kp.Post
 	}
+	pd := s.newPageData(r, user)
+
 	views := s.postViewsWithURLs(r, posts)
+	now := time.Now()
+	var postViews, letterViews []PostView
 	for i, kp := range kept {
 		views[i].CanKeep = true
 		views[i].Kept = true
+		views[i].KeptWhen = formatKeptWhen(kp.KeptAt, now, pd.Lang)
 		// A post kept from a received letter is shown as that letter - the
 		// sender, their words, and a link back to the letter itself - since
 		// the letter, not the underlying post, is what was kept.
 		if kp.SourceLetterID != nil {
 			views[i].URL = fmt.Sprintf("/inbox/%d", *kp.SourceLetterID)
 			views[i].FromLetter = true
+			views[i].SourceLetterID = *kp.SourceLetterID
 			views[i].Excerpt = kp.SourceLetterBody
 			views[i].WriterLabel = writerLabel(kp.SourceLetterFromName, kp.SourceLetterFromDisplay, kp.SourceLetterFromUser)
 			views[i].BlogURL = PublicBlogURL(r, s.baseDomain, kp.SourceLetterFromUser, "/")
+			letterViews = append(letterViews, views[i])
+		} else {
+			postViews = append(postViews, views[i])
 		}
 	}
 
-	pd := s.newPageData(r, user)
 	pd.Title = pd.T("kept.title")
 	pd.SEO = noindexSEO()
 	pd.NavActive = "kept"
 	pd.Kept = &KeptView{
-		Posts:    views,
+		Posts:    postViews,
+		Letters:  letterViews,
 		Empty:    len(kept) == 0 && !cursor.Active(),
 		OlderURL: keptOlderURL(kept, hasMore),
 	}

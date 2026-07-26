@@ -2,46 +2,62 @@
 {{template "layout-start" .}}
 {{template "app-bar" .}}
 
-<p class="daylabel">{{.T "kept.daylabel"}}</p>
+<section class="shelf-head">
+  <h1>{{.T "kept.head.title"}}</h1>
+  <p>{{.T "kept.head.sub"}}</p>
+</section>
 
 {{if .Kept.Posts}}
+  <p class="daylabel">{{.T "kept.daylabel.posts"}}</p>
   <ul class="feed">
     {{range .Kept.Posts}}
       <li lang="{{.Lang}}" dir="{{.Dir}}">
-        <div class="feed-writer">
-          <a href="{{.BlogURL}}">{{.WriterLabel}}</a>
-          <span class="re">·</span>
+        <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+        <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
+          <h2 class="feed-title">{{.Title}}</h2>
+          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+        </a>
+        <div class="kept-when">{{.KeptWhen}} <span class="sep">·</span>
           <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
-            <button class="keep-inline" type="submit">{{$.T "post.unkeep"}}</button>
+            <button class="remove" type="submit">{{$.T "kept.remove"}}</button>
           </form>
         </div>
-        {{if .FromLetter}}
-          <a class="feed-item" href="{{.URL}}">
-            <h2 class="feed-title">{{$.T "inbox.letter.link" .Title}}</h2>
-            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
-          </a>
-        {{else}}
-          <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
-            <h2 class="feed-title">{{.Title}}</h2>
-            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
-          </a>
-        {{end}}
       </li>
     {{end}}
   </ul>
+{{end}}
+
+{{if .Kept.Letters}}
+  <p class="daylabel">{{.T "kept.daylabel.letters"}}</p>
+  <ul class="feed">
+    {{range .Kept.Letters}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+        <a class="feed-item" href="{{.URL}}">
+          <h2 class="feed-title">{{$.T "inbox.letter.link" .Title}}</h2>
+          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+        </a>
+        <div class="kept-when">{{.KeptWhen}} <span class="sep">·</span>
+          <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
+            <input type="hidden" name="letter_id" value="{{.SourceLetterID}}">
+            <button class="remove" type="submit">{{$.T "kept.remove"}}</button>
+          </form>
+        </div>
+      </li>
+    {{end}}
+  </ul>
+{{end}}
+
+{{if .Kept.Empty}}
+  <p class="shelf-empty">{{.T "kept.empty"}}<br>{{.T "kept.empty.sub"}}</p>
+{{else}}
   {{if .Kept.OlderURL}}
     <p class="feed-more"><a class="quiet-link" href="{{.Kept.OlderURL}}">{{.T "pagination.older"}}</a></p>
   {{end}}
-{{else}}
-  <div class="empty-state">
-    <h2>{{.T "kept.empty.heading"}}</h2>
-    <p>{{.T "kept.empty.body"}}</p>
-  </div>
+  <footer class="finish">
+    <p>{{.T "kept.finish"}}</p>
+    <small>{{.T "kept.finish.sub"}}</small>
+  </footer>
 {{end}}
-
-<footer class="finish">
-  <p>{{.T "kept.finish"}}</p>
-  <small>{{.T "kept.finish.sub"}}</small>
-</footer>
 {{template "layout-end" .}}
 {{end}}

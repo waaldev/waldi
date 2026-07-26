@@ -76,6 +76,33 @@ func formatRelativePast(t, now time.Time, lang string) string {
 	}
 }
 
+// formatKeptWhen renders when a reader kept a post or letter, e.g. "Kept
+// yesterday" or "Kept 4 days ago". Past a month it drops the day count in
+// favor of a month label ("Kept in June"), since exact recency stops
+// mattering once something has settled on the shelf.
+func formatKeptWhen(t, now time.Time, lang string) string {
+	d := daysBetween(t.In(now.Location()), now)
+	switch {
+	case d == 0:
+		return i18n.T(lang, "kept.when.today")
+	case d == 1:
+		return i18n.T(lang, "kept.when.yesterday")
+	case d <= 30:
+		return i18n.T(lang, "kept.when.days", d)
+	case t.In(now.Location()).Year() == now.Year():
+		return i18n.T(lang, "kept.when.month", formatMonthOnly(t, lang))
+	default:
+		return i18n.T(lang, "kept.when.month_year", formatMonthOnly(t, lang), formatYear(t, lang))
+	}
+}
+
+func formatMonthOnly(t time.Time, lang string) string {
+	if lang == "fa" {
+		return ptime.New(t.In(ptime.Iran())).Month().String()
+	}
+	return t.Format("January")
+}
+
 func formatYear(t time.Time, lang string) string {
 	if lang == "fa" {
 		pc := ptime.New(t.In(ptime.Iran()))
