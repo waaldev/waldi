@@ -23,6 +23,13 @@ func publicAuthorName(user store.User) string {
 	return publicDisplayName(user)
 }
 
+func publicAttribution(user store.User) string {
+	if name := strings.TrimSpace(user.AuthorName); name != "" {
+		return name
+	}
+	return user.Username
+}
+
 func publicDisplayName(user store.User) string {
 	if name := strings.TrimSpace(user.DisplayName); name != "" {
 		return name
@@ -81,6 +88,7 @@ func blogViewFromUser(owner store.User, baseDomain string) BlogView {
 		Username:    owner.Username,
 		DisplayName: publicDisplayName(owner),
 		AuthorName:  publicAuthorName(owner),
+		Attribution: publicAttribution(owner),
 		WriterLabel: writerLabelFromUser(owner),
 		Bio:         strings.TrimSpace(owner.Bio),
 		Lang:        blogPageLang(owner),

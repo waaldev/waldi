@@ -117,6 +117,7 @@ type BlogView struct {
 	Username    string
 	DisplayName string
 	AuthorName  string
+	Attribution string
 	WriterLabel string
 	Bio         string
 	Lang        string

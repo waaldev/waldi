@@ -288,6 +288,7 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 		Username:    owner.Username,
 		DisplayName: publicDisplayName(owner),
 		AuthorName:  publicAuthorName(owner),
+		Attribution: publicAttribution(owner),
 		WriterLabel: writerLabelFromUser(owner),
 		Title:       blogTitle,
 	}

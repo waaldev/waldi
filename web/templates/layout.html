@@ -77,7 +77,7 @@
 {{define "public-blog-finish"}}
 <footer class="finish">
   <p>{{.T "profile.finish"}}</p>
-  <small class="profile-finish-sub">{{.T "profile.finish.sub.before" .Blog.AuthorName}}<a href="{{.AppBaseURL}}/">{{.T "brand"}}</a>{{.T "profile.finish.sub.after"}}{{if .SEO}}{{if .SEO.RSSURL}} · <a href="{{.SEO.RSSURL}}" dir="ltr">{{.T "profile.finish.rss"}}</a>{{end}}{{end}}</small>
+  <small class="profile-finish-sub">{{.T "profile.finish.sub.before" .Blog.Attribution}}<a href="{{.AppBaseURL}}/">{{.T "brand"}}</a>{{.T "profile.finish.sub.after"}}{{if .SEO}}{{if .SEO.RSSURL}} · <a href="{{.SEO.RSSURL}}" dir="ltr">{{.T "profile.finish.rss"}}</a>{{end}}{{end}}</small>
 </footer>
 {{end}}
 
