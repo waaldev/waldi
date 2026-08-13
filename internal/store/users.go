@@ -327,6 +327,21 @@ func (s *Store) SetPasswordResetToken(ctx context.Context, userID int64, token s
 	return nil
 }
 
+func (s *Store) PasswordResetTokenValid(ctx context.Context, token string) (bool, error) {
+	var ok bool
+	err := s.pool.QueryRow(ctx, `
+		select exists (
+			select 1 from users
+			where password_reset_token = $1
+			  and password_reset_expires_at > now()
+		)
+	`, token).Scan(&ok)
+	if err != nil {
+		return false, fmt.Errorf("checking password reset token: %w", err)
+	}
+	return ok, nil
+}
+
 func (s *Store) ResetPasswordByToken(ctx context.Context, token, passwordHash string) (User, error) {
 	var user User
 	err := s.pool.QueryRow(ctx, `

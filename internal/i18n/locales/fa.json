@@ -234,7 +234,7 @@
   "auth.reset.title": "رمز جدید - والدی",
   "auth.reset.heading": "یک رمز تازه انتخاب کن.",
   "auth.reset.submit": "ذخیره رمز عبور",
-  "auth.error.reset_invalid": "این لینک بازیابی نامعتبر است یا منقضی شده.",
+  "auth.error.reset_invalid": "این لینک بازیابی نامعتبر است یا منقضی شده. از این‌جا یک لینک تازه بگیر؛ فقط آخرین لینک کار می‌کند.",
   "auth.error.reset_failed": "رمز عبور عوض نشد.",
   "auth.verify.title": "تأیید ایمیل",
   "auth.verify.heading": "تأیید ایمیل",

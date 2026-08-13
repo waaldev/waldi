@@ -311,6 +311,15 @@ func (s *Server) handleResetPasswordForm(w http.ResponseWriter, r *http.Request)
 		http.NotFound(w, r)
 		return
 	}
+	if s.store != nil {
+		valid, err := s.store.PasswordResetTokenValid(r.Context(), token)
+		if err != nil {
+			s.logger.Error("checking reset token", "err", err)
+		} else if !valid {
+			s.renderAuthError(w, r, "forgot", "auth.error.reset_invalid")
+			return
+		}
+	}
 	pd := s.newPageData(r, currentUser(r))
 	pd.Title = pd.T("auth.reset.title")
 	pd.SEO = noindexSEO()
@@ -336,7 +345,7 @@ func (s *Server) handleResetPassword(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(r.FormValue("token"))
 	password := r.FormValue("password")
 	if token == "" {
-		s.renderAuthError(w, r, "reset", "auth.error.reset_invalid")
+		s.renderAuthError(w, r, "forgot", "auth.error.reset_invalid")
 		return
 	}
 	if len(password) < 8 {
@@ -353,7 +362,7 @@ func (s *Server) handleResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	user, err := s.store.ResetPasswordByToken(r.Context(), token, hash)
 	if errors.Is(err, store.ErrNotFound) {
-		s.renderAuthError(w, r, "reset", "auth.error.reset_invalid")
+		s.renderAuthError(w, r, "forgot", "auth.error.reset_invalid")
 		return
 	}
 	if err != nil {
@@ -364,8 +373,14 @@ func (s *Server) handleResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if err := s.startSession(w, r, user.ID); err != nil {
 		s.logger.Error("starting session after reset", "err", err)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	dest := "/"
+	if !user.EmailVerified() {
+		dest = "/verify-email"
+	}
+	redirect(w, r, dest)
 }
 
 func (s *Server) startSession(w http.ResponseWriter, r *http.Request, userID int64) error {

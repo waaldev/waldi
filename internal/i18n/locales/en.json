@@ -241,7 +241,7 @@
   "auth.reset.title": "New password - Waldi",
   "auth.reset.heading": "Choose a new password.",
   "auth.reset.submit": "Save password",
-  "auth.error.reset_invalid": "This reset link is invalid or has expired.",
+  "auth.error.reset_invalid": "That reset link is invalid or has expired. Ask for a new one below - only the newest link works.",
   "auth.error.reset_failed": "Could not reset your password.",
   "auth.verify.title": "Confirm your email",
   "auth.verify.heading": "Confirm your email",
