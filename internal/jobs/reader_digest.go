@@ -34,6 +34,10 @@ func postURL(baseDomain, username, slug string) string {
 	return "https://" + username + "." + baseDomain + "/" + slug
 }
 
+func wildcardPostURL(baseDomain, username, slug string) string {
+	return postURL(baseDomain, username, slug) + "?src=wildcard"
+}
+
 func (j ReaderDigestJob) Run(ctx context.Context) error {
 	if j.Store == nil {
 		return fmt.Errorf("store is required")
@@ -97,7 +101,7 @@ func (j ReaderDigestJob) Run(ctx context.Context) error {
 		if hasWildcard {
 			wildcardLine = &mail.DigestLine{
 				Text: i18n.T(user.Locale, "reader_digest.wildcard_line", wildcard.Title, authorLabel(wildcard)),
-				URL:  postURL(j.BaseDomain, wildcard.Username, wildcard.Slug),
+				URL:  wildcardPostURL(j.BaseDomain, wildcard.Username, wildcard.Slug),
 			}
 		}
 
@@ -173,7 +177,7 @@ func (j ReaderDigestJob) runForCapturedEmails(ctx context.Context, mailer mail.M
 		if wcErr == nil {
 			wildcardLine = &mail.DigestLine{
 				Text: i18n.T(lang, "reader_digest.wildcard_line", wildcard.Title, authorLabel(wildcard)),
-				URL:  postURL(j.BaseDomain, wildcard.Username, wildcard.Slug),
+				URL:  wildcardPostURL(j.BaseDomain, wildcard.Username, wildcard.Slug),
 			}
 		}
 

@@ -7,6 +7,14 @@ import (
 	"waldi/internal/store"
 )
 
+func TestWildcardPostURLMarksImpressionSource(t *testing.T) {
+	got := wildcardPostURL("waldi.blog", "alice", "a-post")
+	want := "https://alice.waldi.blog/a-post?src=wildcard"
+	if got != want {
+		t.Fatalf("wildcardPostURL() = %q, want %q", got, want)
+	}
+}
+
 func TestDigestSentence(t *testing.T) {
 	stat := store.PostStats{
 		PostTitle: "اولین نوشته",
