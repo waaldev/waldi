@@ -32,8 +32,10 @@ type WeeklyStats struct {
 	ActiveReaders int
 	RitualReaders int
 
-	WildcardsShown       int
-	WildcardsSkipped     int
+	WildcardsShown   int
+	WildcardsSkipped int
+	// WildcardsCompletable counts non-skipped assignments the reader actually
+	// opened, rather than every assignment created by the daily job.
 	WildcardsCompletable int
 	WildcardsCompleted   int
 
@@ -137,21 +139,25 @@ func (s *Store) WeeklyStats(ctx context.Context, since, until, cohortStart, coho
 
 	if err := s.pool.QueryRow(ctx, `
 		with weekly_wc as (
-			select user_id, post_id, skipped
+			select user_id, post_id, skipped, opened_at
 			from wildcards
 			where date >= $1 and date < $2
 		)
 		select
 			count(*) as shown,
 			count(*) filter (where skipped) as skipped,
-			count(*) filter (where not skipped) as completable,
 			count(*) filter (
-				where not skipped and exists (
+				where not skipped and opened_at >= $1 and opened_at < $2
+			) as completable,
+			count(*) filter (
+				where not skipped and opened_at >= $1 and opened_at < $2 and exists (
 					select 1 from impressions i
 					join readings r on r.impression_id = i.id
 					where i.post_id = weekly_wc.post_id
 					  and i.reader_key = 'user:' || weekly_wc.user_id
 					  and r.completed
+					  and r.updated_at >= weekly_wc.opened_at
+					  and r.updated_at < $2
 				)
 			) as completed
 		from weekly_wc
