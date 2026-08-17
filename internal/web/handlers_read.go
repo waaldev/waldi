@@ -249,6 +249,13 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 	view := postView(p)
 	view.BlogURL = "/"
 	view.ImpressionID = s.createPostImpression(w, r, p.ID, p.UserID)
+	if view.ImpressionID != 0 && impressionSourceFromRequest(r) == store.ImpressionWildcard {
+		if user := currentUser(r); user != nil {
+			if err := s.store.MarkWildcardOpened(r.Context(), user.ID, p.ID, today()); err != nil {
+				s.logger.Error("marking wildcard opened", "post_id", p.ID, "user_id", user.ID, "err", err)
+			}
+		}
+	}
 	view.Subscribed = r.URL.Query().Get("subscribed") == "1"
 	view.LetterSent = r.URL.Query().Get("letter") == "sent"
 	user := currentUser(r)

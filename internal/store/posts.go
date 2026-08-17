@@ -667,13 +667,25 @@ func (s *Store) FeedPosts(ctx context.Context, userID int64, since time.Time, li
 func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang string, day time.Time, impressionFloor int) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `
-		with candidates as (
+		with wildcard_opens as (
+			-- Preserve anonymous/email-capture opens recorded as wildcard impressions,
+			-- and add assigned readers whose deduplicated impression kept an older
+			-- feed/direct source.
+			select post_id, reader_key
+			from impressions
+			where source = 'wildcard'
+			union
+			select post_id, 'user:' || user_id
+			from wildcards
+			where opened_at is not null
+		),
+		candidates as (
 			select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
 			       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang,
-			       count(distinct i.reader_key) filter (where i.source = 'wildcard')::int as wildcard_impressions
+			       count(distinct wo.reader_key)::int as wildcard_impressions
 			from posts p
 			join users u on u.id = p.user_id
-			left join impressions i on i.post_id = p.id
+			left join wildcard_opens wo on wo.post_id = p.id
 			where p.status = 'published'
 			  and p.type = 'post'
 			  and p.word_count >= 50
@@ -754,6 +766,8 @@ func (s *Store) AssignedWildcard(ctx context.Context, userID int64, day time.Tim
 	return p, nil
 }
 
+// AssignWildcard records an offer to a reader. It deliberately does not count
+// as an impression; MarkWildcardOpened does that only after the reader opens it.
 func (s *Store) AssignWildcard(ctx context.Context, userID, postID int64, day time.Time) error {
 	_, err := s.pool.Exec(ctx, `
 		insert into wildcards (user_id, post_id, date)
@@ -762,6 +776,21 @@ func (s *Store) AssignWildcard(ctx context.Context, userID, postID int64, day ti
 	`, userID, postID, day)
 	if err != nil {
 		return fmt.Errorf("assigning wildcard: %w", err)
+	}
+	return nil
+}
+
+// MarkWildcardOpened records the first time a reader opens their assigned
+// wildcard. Repeated opens are idempotent, and only the exact assignment is
+// marked so an old wildcard link cannot activate a different reroll.
+func (s *Store) MarkWildcardOpened(ctx context.Context, userID, postID int64, day time.Time) error {
+	_, err := s.pool.Exec(ctx, `
+		update wildcards
+		set opened_at = coalesce(opened_at, now())
+		where user_id = $1 and post_id = $2 and not skipped and date = $3
+	`, userID, postID, day)
+	if err != nil {
+		return fmt.Errorf("marking wildcard opened: %w", err)
 	}
 	return nil
 }
