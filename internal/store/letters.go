@@ -81,7 +81,7 @@ func (s *Store) LettersForUser(ctx context.Context, userID int64, since time.Tim
 		join users u on u.id = l.from_user
 		join posts p on p.id = l.post_id
 		where l.to_user = $1
-		  and (l.read_at is null or l.created_at >= $2)
+		  and (l.read_at is null or l.read_at >= $2)
 		  and (
 		    $4::timestamptz is null
 		    or l.created_at < $4::timestamptz
