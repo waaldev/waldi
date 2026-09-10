@@ -15,6 +15,7 @@ import { BulletList, ListItem, ListKeymap, OrderedList } from '@tiptap/extension
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Typography from '@tiptap/extension-typography'
+import { Placeholder } from '@tiptap/extensions'
 import { NodeSelection } from '@tiptap/pm/state'
 
 import { Aside } from './aside'
@@ -89,6 +90,7 @@ if (root) {
     embedInvalid: root.dataset.uiEmbedInvalid || "That URL isn't a supported embed",
     wordsOne: root.dataset.uiWordsOne || '%d word',
     wordsOther: root.dataset.uiWordsOther || '%d words',
+    bodyPlaceholder: root.dataset.uiBodyPlaceholder || 'Write.',
   }
 
   const form = root.querySelector<HTMLFormElement>('[data-editor-form]')
@@ -130,11 +132,12 @@ if (root) {
     }
 
     let editorReady = false
+    const blankDraft = titleInput.value.trim() === '' && expectedWords === 0 && !docLoadFailed
 
     const editor = new Editor({
       element: mount,
       content: initialContent,
-      autofocus: 'end',
+      autofocus: blankDraft ? false : 'end',
       editorProps: {
         attributes: {
           class: 'editor-surface',
@@ -159,6 +162,12 @@ if (root) {
         Gapcursor,
         History,
         Typography,
+        Placeholder.configure({
+          placeholder: ui.bodyPlaceholder,
+          showOnlyWhenEditable: true,
+          showOnlyCurrent: false,
+          emptyEditorClass: 'is-editor-empty',
+        }),
         Image.configure({
           allowBase64: false,
           inline: false,
@@ -239,6 +248,7 @@ if (root) {
         }
         syncDoc()
         updateWordCount()
+        if (blankDraft) titleInput.focus()
       },
     })
 

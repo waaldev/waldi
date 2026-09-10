@@ -21,6 +21,7 @@
     "@tiptap/extension-paragraph": "^3.14.0",
     "@tiptap/extension-text": "^3.14.0",
     "@tiptap/extension-typography": "^3.14.0",
+    "@tiptap/extensions": "^3.27.1",
     "esbuild": "^0.25.0"
   }
 }

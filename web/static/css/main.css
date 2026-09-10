@@ -1451,6 +1451,8 @@ a.btn-secondary:hover {
 }
 .editor-title::placeholder { color: var(--ink-faint); }
 .editor-title:focus { outline: none; }
+.editor-title,
+.editor-surface { caret-color: var(--accent); }
 
 .editor-delete {
   margin-block-start: var(--s7);
@@ -1461,6 +1463,14 @@ a.btn-secondary:hover {
 
 .editor-mount { min-height: 50vh; }
 .editor-mount:focus { outline: none; }
+
+.editor-surface p.is-editor-empty::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+  color: var(--ink-faint);
+}
 
 /* floating selection toolbar */
 

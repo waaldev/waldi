@@ -29926,7 +29926,8 @@ ${prefix}
       embedPrompt: root.dataset.uiEmbedPrompt || "YouTube, Spotify, or SoundCloud URL",
       embedInvalid: root.dataset.uiEmbedInvalid || "That URL isn't a supported embed",
       wordsOne: root.dataset.uiWordsOne || "%d word",
-      wordsOther: root.dataset.uiWordsOther || "%d words"
+      wordsOther: root.dataset.uiWordsOther || "%d words",
+      bodyPlaceholder: root.dataset.uiBodyPlaceholder || "Write."
     };
     const form = root.querySelector("[data-editor-form]");
     const titleInput = root.querySelector("[data-editor-title]");
@@ -29959,10 +29960,11 @@ ${prefix}
         initialContent = { type: "doc", content: [{ type: "paragraph" }] };
       }
       let editorReady = false;
+      const blankDraft = titleInput.value.trim() === "" && expectedWords === 0 && !docLoadFailed;
       const editor = new Editor({
         element: mount,
         content: initialContent,
-        autofocus: "end",
+        autofocus: blankDraft ? false : "end",
         editorProps: {
           attributes: {
             class: "editor-surface",
@@ -29987,6 +29989,12 @@ ${prefix}
           index_default5,
           index_default7,
           index_default14,
+          Placeholder.configure({
+            placeholder: ui.bodyPlaceholder,
+            showOnlyWhenEditable: true,
+            showOnlyCurrent: false,
+            emptyEditorClass: "is-editor-empty"
+          }),
           index_default9.configure({
             allowBase64: false,
             inline: false
@@ -30067,6 +30075,7 @@ ${prefix}
           }
           syncDoc();
           updateWordCount();
+          if (blankDraft) titleInput.focus();
         }
       });
       const updateWordCount = () => {

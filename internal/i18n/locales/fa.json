@@ -308,6 +308,7 @@
   "write.invite.error.note_required": "کمی درباره‌ی نوشتنت بگو.",
 
   "editor.title.placeholder": "عنوان",
+  "editor.body.placeholder": "بنویسید.",
   "editor.toolbar.aria": "ابزارهای ویرایش",
   "editor.toolbar.bold": "بولد",
   "editor.toolbar.italic": "ایتالیک",

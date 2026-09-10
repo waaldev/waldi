@@ -315,6 +315,7 @@
   "write.invite.error.note_required": "Tell us a bit about your writing.",
 
   "editor.title.placeholder": "Title",
+  "editor.body.placeholder": "Write.",
   "editor.toolbar.aria": "Editing tools",
   "editor.toolbar.bold": "Bold",
   "editor.toolbar.italic": "Italic",
