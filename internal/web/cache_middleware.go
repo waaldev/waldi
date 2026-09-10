@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	publicCacheControl  = "public, max-age=0, must-revalidate, s-maxage=2592000"
-	privateCacheControl = "private, max-age=0, must-revalidate"
+	publicCacheControl           = "public, max-age=0, must-revalidate, s-maxage=2592000"
+	privateCacheControl          = "private, max-age=0, must-revalidate"
+	staticRevalidateCacheControl = "public, max-age=86400, must-revalidate"
 )
 
 type cacheCapture struct {
@@ -139,7 +140,11 @@ func flushCapture(w http.ResponseWriter, c *cacheCapture) {
 
 func staticCacheControl(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		cacheControl := staticRevalidateCacheControl
+		if r.URL.Query().Get("v") != "" || strings.HasPrefix(r.URL.Path, "/static/uploads/") {
+			cacheControl = "public, max-age=31536000, immutable"
+		}
+		w.Header().Set("Cache-Control", cacheControl)
 		next.ServeHTTP(w, r)
 	})
 }

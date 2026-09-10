@@ -90,3 +90,25 @@ func renderCachedTestPage(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte("<p>cached</p>"))
 }
+
+func TestStaticCacheRequiresVersionForImmutable(t *testing.T) {
+	handler := staticCacheControl(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+
+	for _, tt := range []struct {
+		url  string
+		want string
+	}{
+		{url: "/static/favicon.png", want: staticRevalidateCacheControl},
+		{url: "/static/favicon.png?v=abc", want: "public, max-age=31536000, immutable"},
+		{url: "/static/uploads/user/image.webp", want: "public, max-age=31536000, immutable"},
+	} {
+		r := httptest.NewRequest(http.MethodGet, tt.url, nil)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, r)
+		if got := w.Header().Get("Cache-Control"); got != tt.want {
+			t.Errorf("%s: Cache-Control = %q, want %q", tt.url, got, tt.want)
+		}
+	}
+}

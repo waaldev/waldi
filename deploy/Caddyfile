@@ -9,6 +9,7 @@
 	tls {
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
+	encode zstd gzip
 	reverse_proxy waldi:8080 {
 		header_up Host {host}
 		header_up X-Forwarded-Proto {scheme}
@@ -20,6 +21,7 @@
 	tls {
 		on_demand
 	}
+	encode zstd gzip
 	reverse_proxy waldi:8080 {
 		header_up Host {host}
 		header_up X-Forwarded-Proto https

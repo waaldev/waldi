@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="icon" href="/static/favicon.png" type="image/png">
-  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="icon" href="/static/favicon.png?v={{assetVersion}}" type="image/png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png?v={{assetVersion}}">
   <title>{{if .SEO}}{{if .SEO.Title}}{{.SEO.Title}}{{else}}{{.Title}}{{end}}{{else}}{{.Title}}{{end}}</title>
   {{if .SEO}}
     {{if .SEO.Description}}<meta name="description" content="{{.SEO.Description}}">{{end}}
@@ -29,7 +29,11 @@
     {{if .SEO.OGImage}}<meta name="twitter:image" content="{{.SEO.OGImage}}">{{end}}
     {{if .SEO.JSONLD}}<script type="application/ld+json">{{.SEO.JSONLD}}</script>{{end}}
   {{end}}
+  {{if eq .Lang "fa"}}
   <link rel="preload" href="/static/fonts/irmitra.woff" as="font" type="font/woff" crossorigin>
+  {{else}}
+  <link rel="preload" href="/static/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+  {{end}}
   {{if .Inline}}
   <style>{{siteFontsCSS}}{{siteMainCSS}}</style>
   <script>{{siteThemeJS}}</script>

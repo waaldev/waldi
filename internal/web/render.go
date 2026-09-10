@@ -84,12 +84,9 @@ type PageData struct {
 	DevSessionBridge bool
 	NavActive        string
 	Gone             bool
-	// Inline marks a public, chrome-less page render (blog pages,
-	// unsubscribe/resume links) where CSS/JS is embedded directly into the
-	// HTML so the page needs only one request to load. App pages leave this
-	// false and keep cacheable external <link>/<script src> assets, since a
-	// logged-in session navigates many pages and benefits from disk-cache
-	// reuse of one shared main.css/theme.js.
+	// Inline marks one-off public pages where CSS/JS is embedded directly into
+	// the HTML. Blog and app pages keep versioned external assets so navigation
+	// reuses one shared browser-cache entry.
 	Inline bool
 }
 
