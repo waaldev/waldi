@@ -10,8 +10,8 @@
     <div class="owner-row">
       <a href="{{.Post.URL}}" target="_blank" rel="noopener">{{.T "post.owner.badge"}}</a>
       <span class="sep">·</span>&nbsp;<a href="/write/{{.Post.ID}}">{{.T "post.owner.edit"}}</a>
-      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.date-edit').classList.toggle('open')">{{.T "you.post.edit_date"}}</button>
-      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.delete-confirm').classList.toggle('open')">{{.T "post.owner.delete"}}</button>
+      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" data-owner-toggle="date-edit">{{.T "you.post.edit_date"}}</button>
+      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" data-owner-toggle="delete-confirm">{{.T "post.owner.delete"}}</button>
     </div>
 
     <form class="date-edit{{if .Post.DateError}} open{{end}}" method="post" action="/write/{{.Post.ID}}/published-at">
@@ -20,7 +20,7 @@
       <input type="hidden" name="slug" value="{{.Post.Slug}}">
       <input type="hidden" name="lang" value="{{.Post.Lang}}">
       <button class="apply" type="submit">{{.T "you.post.date_apply"}}</button>
-      <button class="cancel" type="button" onclick="this.closest('.date-edit').classList.remove('open')">{{.T "you.post.date_cancel"}}</button>
+      <button class="cancel" type="button" data-owner-close>{{.T "you.post.date_cancel"}}</button>
       <span class="note">{{if .Post.DateError}}{{.T "you.post.date_error"}}{{else}}{{.T "you.post.date_note"}}{{end}}</span>
     </form>
 
@@ -42,5 +42,6 @@
   <p class="caption">{{.T "you.post.stats.caption"}}</p>
 </section>
 
+<script src="/static/js/owner-post.js?v={{assetVersion}}" defer></script>
 {{template "layout-end" .}}
 {{end}}
