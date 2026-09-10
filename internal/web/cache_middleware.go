@@ -2,12 +2,15 @@ package web
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
+	"strings"
 	"waldi/internal/i18n"
 )
 
 const (
-	publicCacheControl  = "public, max-age=86400, stale-while-revalidate=604800"
+	publicCacheControl  = "public, max-age=0, must-revalidate, s-maxage=86400"
 	privateCacheControl = "private, max-age=0, must-revalidate"
 )
 
@@ -63,8 +66,29 @@ func (s *Server) withCacheHeaders(w http.ResponseWriter, r *http.Request, next f
 	}
 	w.Header().Set("Cache-Control", cacheControlForLocale(r))
 	w.Header().Set("Vary", "Cookie, CF-IPCountry")
+	etag := etagForBody(capture.buf.Bytes())
+	w.Header().Set("ETag", etag)
+	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
 	w.WriteHeader(capture.status)
 	_, _ = capture.buf.WriteTo(w)
+}
+
+func etagForBody(body []byte) string {
+	sum := sha256.Sum256(body)
+	return `W/"` + hex.EncodeToString(sum[:8]) + `"`
+}
+
+func etagMatches(header, etag string) bool {
+	for value := range strings.SplitSeq(header, ",") {
+		value = strings.TrimSpace(value)
+		if value == "*" || value == etag {
+			return true
+		}
+	}
+	return false
 }
 
 func hasSessionCookie(r *http.Request) bool {

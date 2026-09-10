@@ -180,7 +180,7 @@ The ask endpoint strictly accepts requests from the private Docker network. If y
 
 ## Cloudflare CDN Cache
 
-Waldi inherently serves `Cache-Control: public, max-age=86400` headers on all anonymous HTML pages. When you enable the Cloudflare proxy, those pages are cached instantly at the edge.
+Waldi serves anonymous HTML with `max-age=0` for immediate browser revalidation and `s-maxage=86400` for one day of shared CDN caching. Content ETags make unchanged browser revalidation return a small `304 Not Modified` response.
 
 ### Setup in Cloudflare Dashboard
 
