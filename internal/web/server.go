@@ -139,6 +139,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /write/{id}", s.handleEditDraft)
 	s.mux.HandleFunc("POST /api/drafts/{id}", s.handleAutosaveDraft)
 	s.mux.HandleFunc("POST /api/uploads/images", s.handleImageUpload)
+	s.mux.HandleFunc("POST /api/events/impressions", s.handleImpressionEvent)
 	s.mux.HandleFunc("POST /api/events/readings", s.handleReadingEvent)
 	s.mux.HandleFunc("POST /write/{id}/publish", s.handlePublishPost)
 	s.mux.HandleFunc("POST /write/{id}/draft", s.handleUnpublishPost)

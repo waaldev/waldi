@@ -248,7 +248,6 @@ type PostView struct {
 	// shelf, where it's the reader's own record of when they kept a thing.
 	KeptWhen       string
 	CanSendLetters bool
-	ImpressionID   int64
 	DateError      bool
 	Subscribed     bool
 	LetterSent     bool

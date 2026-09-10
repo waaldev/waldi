@@ -265,14 +265,6 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 
 	view := postView(p)
 	view.BlogURL = "/"
-	view.ImpressionID = s.createPostImpression(w, r, p.ID, p.UserID)
-	if view.ImpressionID != 0 && impressionSourceFromRequest(r) == store.ImpressionWildcard {
-		if user := currentUser(r); user != nil {
-			if err := s.store.MarkWildcardOpened(r.Context(), user.ID, p.ID, today()); err != nil {
-				s.logger.Error("marking wildcard opened", "post_id", p.ID, "user_id", user.ID, "err", err)
-			}
-		}
-	}
 	view.FromRandom = r.URL.Query().Get("src") == "random"
 	view.Subscribed = r.URL.Query().Get("subscribed") == "1"
 	view.LetterSent = r.URL.Query().Get("letter") == "sent"
@@ -474,45 +466,6 @@ func postView(p store.Post) PostView {
 		PublishedAtInput: publishedInput,
 		ModifiedAtISO:    modifiedISO,
 		URL:              "/" + p.Slug,
-	}
-}
-
-func (s *Server) createPostImpression(w http.ResponseWriter, r *http.Request, postID, authorID int64) int64 {
-	if s.store == nil {
-		return 0
-	}
-	if user := currentUser(r); user != nil && user.ID == authorID {
-		return 0
-	}
-
-	readerKey, cookie := readerKeyFromRequest(r, s.baseDomain)
-	if cookie != nil {
-		http.SetCookie(w, cookie)
-	}
-
-	var userID *int64
-	if user := currentUser(r); user != nil {
-		id := user.ID
-		userID = &id
-	}
-
-	source := impressionSourceFromRequest(r)
-	id, err := s.store.EnsureImpression(r.Context(), postID, readerKey, userID, source)
-	if err != nil {
-		s.logger.Error("creating impression", "post_id", postID, "source", source, "err", err)
-		return 0
-	}
-	return id
-}
-
-func impressionSourceFromRequest(r *http.Request) store.ImpressionSource {
-	switch r.URL.Query().Get("src") {
-	case "feed":
-		return store.ImpressionFeed
-	case "wildcard":
-		return store.ImpressionWildcard
-	default:
-		return store.ImpressionDirect
 	}
 }
 

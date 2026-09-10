@@ -1,6 +1,23 @@
 package web
 
-import "testing"
+import (
+	"testing"
+	"waldi/internal/store"
+)
+
+func TestImpressionSource(t *testing.T) {
+	tests := map[string]store.ImpressionSource{
+		"feed":     store.ImpressionFeed,
+		"wildcard": store.ImpressionWildcard,
+		"random":   store.ImpressionDirect,
+		"":         store.ImpressionDirect,
+	}
+	for raw, want := range tests {
+		if got := impressionSource(raw); got != want {
+			t.Fatalf("impressionSource(%q) = %q, want %q", raw, got, want)
+		}
+	}
+}
 
 func TestValidReadingEvent(t *testing.T) {
 	tests := []struct {

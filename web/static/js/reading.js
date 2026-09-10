@@ -2,8 +2,10 @@
   var root = document.querySelector('[data-reading-root]')
   if (!root) return
 
-  var impressionID = Number(root.getAttribute('data-impression-id') || '0')
-  if (!impressionID) return
+  var postID = Number(root.getAttribute('data-post-id') || '0')
+  if (!postID) return
+
+  var impressionID = 0
 
   var startedAt = Date.now()
   var maxScroll = 0
@@ -32,6 +34,7 @@
   }
 
   function send() {
+    if (!impressionID) return
     var body = JSON.stringify(payload())
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/events/readings', new Blob([body], { type: 'application/json' }))
@@ -46,9 +49,21 @@
     }).catch(function () {})
   }
 
-  window.addEventListener('scroll', updateScroll, { passive: true })
-  window.addEventListener('pagehide', send)
-  window.setInterval(send, 15000)
-  updateScroll()
+  var source = new URLSearchParams(window.location.search).get('src') || 'direct'
+  fetch('/api/events/impressions', {
+    method: 'POST',
+    body: JSON.stringify({ post_id: postID, source: source }),
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+  })
+    .then(function (response) { return response.ok ? response.json() : null })
+    .then(function (data) {
+      impressionID = data && Number(data.impression_id || '0')
+      if (!impressionID) return
+      window.addEventListener('scroll', updateScroll, { passive: true })
+      window.addEventListener('pagehide', send)
+      window.setInterval(send, 15000)
+      updateScroll()
+    })
+    .catch(function () {})
 })()
-

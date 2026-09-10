@@ -2,7 +2,7 @@
 {{template "layout-start" .}}
 {{template "public-blog-bar-post" .}}
 
-<article data-reading-root data-impression-id="{{.Post.ImpressionID}}" lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
+<article data-reading-root data-post-id="{{.Post.ID}}" lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
   <header class="article-head">
     <h1 class="article-title">{{.Post.Title}}</h1>
     <p class="article-meta"><a href="/">{{.Post.WriterLabel}}</a>{{if .Post.PublishedAtISO}} · <time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{else if .Post.PublishedAt}} · {{.Post.PublishedAt}}{{end}}</p>
@@ -87,9 +87,7 @@
 
 {{template "public-blog-finish" .}}
 
-{{if .Post.ImpressionID}}
-  <script src="/static/js/reading.js?v={{assetVersion}}" defer></script>
-{{end}}
+<script src="/static/js/reading.js?v={{assetVersion}}" defer></script>
 {{if .Inline}}
 <script>{{sitePostJS}}</script>
 {{else}}
