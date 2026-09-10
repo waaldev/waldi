@@ -722,7 +722,7 @@ func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang 
 	return p, nil
 }
 
-func (s *Store) RandomPublishedPost(ctx context.Context, lang string) (Post, error) {
+func (s *Store) RandomPublishedPost(ctx context.Context, lang string, excludeID int64) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `
 		select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
@@ -735,9 +735,10 @@ func (s *Store) RandomPublishedPost(ctx context.Context, lang string) (Post, err
 		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and u.blog_lang = $1
+		  and ($2 = 0 or p.id <> $2)
 		order by random()
 		limit 1
-	`, lang).Scan(postWithUserScanFields(&p)...)
+	`, lang, excludeID).Scan(postWithUserScanFields(&p)...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Post{}, ErrNotFound
 	}

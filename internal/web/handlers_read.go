@@ -4,6 +4,7 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
+	"strconv"
 	"time"
 	"waldi/internal/i18n"
 	"waldi/internal/jobs"
@@ -87,9 +88,10 @@ func (s *Server) handleReadRandom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	lang, _ := resolveLocale(r, currentUser(r))
-	p, err := s.store.RandomPublishedPost(r.Context(), lang)
+	exclude, _ := strconv.ParseInt(r.URL.Query().Get("not"), 10, 64)
+	p, err := s.store.RandomPublishedPost(r.Context(), lang, exclude)
 	if errors.Is(err, store.ErrNotFound) && lang != i18n.Default {
-		p, err = s.store.RandomPublishedPost(r.Context(), i18n.Default)
+		p, err = s.store.RandomPublishedPost(r.Context(), i18n.Default, exclude)
 	}
 	if err != nil {
 		if !errors.Is(err, store.ErrNotFound) {

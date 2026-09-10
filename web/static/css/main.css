@@ -331,6 +331,12 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 }
 .wildcard .skip:hover { color: var(--ink-soft); }
 
+.another {
+  text-align: center;
+  font-size: var(--text-ui);
+  margin-block: var(--s6) 0;
+}
+
 /* ---------- finish line / empty states ---------- */
 
 .finish {

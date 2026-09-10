@@ -59,6 +59,7 @@
       <p class="capture-note">{{.T "post.subscribe.body"}}</p>
     {{end}}
   </section>
+  <p class="another"><a class="quiet-link" href="{{.AppBaseURL}}/read?not={{.Post.ID}}">{{.T "post.another"}}</a></p>
 {{end}}
 
 {{if .CurrentUser}}
