@@ -107,7 +107,7 @@ func (s *Server) handleReadRandom(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug), http.StatusSeeOther)
+	http.Redirect(w, r, PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src=random"), http.StatusSeeOther)
 }
 
 // handleYou renders the owner's in-app blog preview: the same content a
@@ -273,6 +273,7 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 			}
 		}
 	}
+	view.FromRandom = r.URL.Query().Get("src") == "random"
 	view.Subscribed = r.URL.Query().Get("subscribed") == "1"
 	view.LetterSent = r.URL.Query().Get("letter") == "sent"
 	user := currentUser(r)
