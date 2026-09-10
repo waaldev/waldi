@@ -331,6 +331,19 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 }
 .wildcard .skip:hover { color: var(--ink-soft); }
 
+.wildcard .skip-note {
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+  margin-block: var(--s2) 0;
+}
+
+.wildcard-spent {
+  font-family: var(--font-serif);
+  font-size: var(--text-ui);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
 .another {
   text-align: center;
   font-size: var(--text-ui);

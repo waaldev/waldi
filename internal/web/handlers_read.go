@@ -59,6 +59,13 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		} else if !errors.Is(err, store.ErrNotFound) {
 			s.logger.Error("loading wildcard", "err", err)
 		}
+
+		skips, err := s.store.WildcardSkipCount(r.Context(), user.ID, day)
+		if err != nil {
+			s.logger.Error("counting wildcard skips", "err", err)
+		}
+		feed.WildcardSkipsLeft = max(jobs.MaxDailyWildcardSkips-skips, 0)
+		feed.WildcardSpent = feed.Wildcard == nil && skips > 0
 	}
 
 	pd.Title = pd.T("home.title")

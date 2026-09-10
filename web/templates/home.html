@@ -25,6 +25,12 @@
       <form class="inline-form" method="post" action="/wildcard/skip">
         <button class="skip" type="submit">{{.T "home.wildcard.skip"}}</button>
       </form>
+      <p class="skip-note">{{.TN "home.wildcard.skip.note" .Feed.WildcardSkipsLeft}}</p>
+    </section>
+  {{else if .Feed.WildcardSpent}}
+    <section class="wildcard">
+      <p class="wildcard-label">{{.T "home.wildcard.kicker"}}</p>
+      <p class="wildcard-spent">{{.T "home.wildcard.spent"}}</p>
     </section>
   {{end}}
 
