@@ -15,7 +15,7 @@
   <p class="endmark" role="presentation"></p>
 
   <footer class="post-actions">
-    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous-follow">{{.T "post.follow" .Blog.WriterLabel}}</a>
+    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous-follow" hidden>{{.T "post.follow" .Blog.WriterLabel}}</a>
     <form class="inline-form" method="post" action="/follow/{{.Post.Username}}" data-state="follow" hidden>
       <input type="hidden" name="source_post_id" value="{{.Post.ID}}">
       <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
@@ -23,14 +23,14 @@
     <form class="inline-form" method="post" action="/unfollow/{{.Post.Username}}" data-state="unfollow" hidden>
       <button class="quiet" type="submit">{{.T "post.unfollow"}}</button>
     </form>
-    <a class="quiet" href="{{.LoginURL}}" data-state="anonymous-letter">{{.T "letter.send"}}</a>
+    <a class="quiet" href="{{.LoginURL}}" data-state="anonymous-letter" hidden>{{.T "letter.send"}}</a>
     <button class="quiet" type="button" data-letter-open data-state="letter" hidden>{{.T "letter.send"}}</button>
     <span class="quiet-danger" data-state="letter-gated" hidden>{{.T "letter.gate.hint"}}</span>
     <button class="quiet" type="button" data-share data-copied="{{.T "post.copied"}}">{{.T "post.share"}}</button>
   </footer>
 </article>
 
-<div data-anonymous-only>
+<div data-anonymous-only hidden>
   <section class="capture">
     {{if .Post.Subscribed}}
       <p class="capture-lead">{{.T "post.subscribe.sent"}}</p>

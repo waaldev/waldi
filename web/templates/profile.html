@@ -10,7 +10,7 @@
   {{end}}
 
   <div data-public-state data-username="{{.Blog.Username}}">
-    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous">{{.T "post.follow" .Blog.WriterLabel}}</a>
+    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous" hidden>{{.T "post.follow" .Blog.WriterLabel}}</a>
     <form class="inline-form" method="post" action="/follow/{{.Blog.Username}}" data-state="follow" hidden>
       <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
     </form>

@@ -19,10 +19,22 @@
     if (element) element.hidden = false
   }
 
+  function showAnonymous() {
+    root.querySelectorAll('[data-state^="anonymous"]').forEach(function (element) {
+      element.hidden = false
+    })
+    document.querySelectorAll('[data-anonymous-only]').forEach(function (element) {
+      element.hidden = false
+    })
+  }
+
   fetch(url, { credentials: 'same-origin' })
     .then(function (response) { return response.ok ? response.json() : null })
     .then(function (state) {
-      if (!state || !state.authenticated) return
+      if (!state || !state.authenticated) {
+        showAnonymous()
+        return
+      }
 
       hide('[data-state]')
       hide('[data-anonymous-only]')
@@ -37,5 +49,5 @@
         }
       }
     })
-    .catch(function () {})
+    .catch(showAnonymous)
 })()
