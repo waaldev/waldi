@@ -108,6 +108,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /unsubscribe/digest", s.handleUnsubscribeDigest)
 	s.mux.HandleFunc("GET /resume-digest", s.handleResumeDigest)
 	s.mux.HandleFunc("GET /api/me", s.handleAPIMe)
+	s.mux.HandleFunc("GET /api/public-state", s.handlePublicState)
 	s.mux.HandleFunc("OPTIONS /api/me", s.handleAPIMe)
 	s.mux.HandleFunc("GET /api/auth/bridge", s.handleAPIAuthBridge)
 	s.mux.HandleFunc("OPTIONS /api/auth/bridge", s.handleAPIAuthBridge)

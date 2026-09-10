@@ -269,22 +269,6 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 	view.Subscribed = r.URL.Query().Get("subscribed") == "1"
 	view.LetterSent = r.URL.Query().Get("letter") == "sent"
 	user := currentUser(r)
-	if user != nil {
-		view.CanFollow = user.ID != p.UserID
-		if view.CanFollow {
-			following, err := s.store.IsFollowing(r.Context(), user.ID, p.UserID)
-			if err != nil {
-				s.logger.Error("loading follow state", "err", err)
-			}
-			view.Following = following
-
-			completed, err := s.store.CompletedReadingsCount(r.Context(), user.ID)
-			if err != nil {
-				s.logger.Error("checking completed readings", "err", err)
-			}
-			view.CanSendLetters = completed >= minCompletedReadingsForLetters
-		}
-	}
 
 	owner, err := s.store.UserByUsername(r.Context(), username)
 	if err != nil {
@@ -295,6 +279,7 @@ func (s *Server) servePublicPost(w http.ResponseWriter, r *http.Request, usernam
 	}
 
 	pd := s.publicBlogPageData(r, owner, user)
+	pd.CurrentUser = nil
 	pd.Title = p.Title
 	pd.SEO = postSEO(r, s.baseDomain, owner, p)
 	blogTitle := username + "." + s.baseDomain
@@ -332,7 +317,7 @@ func (s *Server) renderPublicProfile(w http.ResponseWriter, r *http.Request, use
 		return
 	}
 
-	blogView, err := s.buildBlogView(r, owner, viewer, false)
+	blogView, err := s.buildBlogView(r, owner, nil, false)
 	if errors.Is(err, errBadCursor) {
 		pd := s.publicBlogPageData(r, owner, viewer)
 		http.Error(w, pd.T("error.bad_cursor"), http.StatusBadRequest)
@@ -346,6 +331,7 @@ func (s *Server) renderPublicProfile(w http.ResponseWriter, r *http.Request, use
 	}
 
 	pd := s.publicBlogPageData(r, owner, viewer)
+	pd.CurrentUser = nil
 	pd.Title = pd.T("profile.title", blogView.DisplayName)
 	pd.SEO = blogSEO(r, s.baseDomain, owner)
 	pd.Blog = &blogView

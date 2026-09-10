@@ -2,7 +2,7 @@
 {{template "layout-start" .}}
 {{template "public-blog-bar-post" .}}
 
-<article data-reading-root data-post-id="{{.Post.ID}}" lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
+<article data-reading-root data-post-id="{{.Post.ID}}" data-public-state data-username="{{.Post.Username}}" data-state-post lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
   <header class="article-head">
     <h1 class="article-title">{{.Post.Title}}</h1>
     <p class="article-meta"><a href="/">{{.Post.WriterLabel}}</a>{{if .Post.PublishedAtISO}} · <time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{else if .Post.PublishedAt}} · {{.Post.PublishedAt}}{{end}}</p>
@@ -15,36 +15,22 @@
   <p class="endmark" role="presentation"></p>
 
   <footer class="post-actions">
-    {{if .Post.CanFollow}}
-      {{if .Post.Following}}
-        <form class="inline-form" method="post" action="/unfollow/{{.Post.Username}}">
-          <button class="quiet" type="submit">{{.T "post.unfollow"}}</button>
-        </form>
-      {{else}}
-        <form class="inline-form" method="post" action="/follow/{{.Post.Username}}">
-          <input type="hidden" name="source_post_id" value="{{.Post.ID}}">
-          <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
-        </form>
-      {{end}}
-    {{else if not .CurrentUser}}
-      <a class="btn-follow" href="{{.LoginURL}}">{{.T "post.follow" .Blog.WriterLabel}}</a>
-    {{end}}
-    {{if .CurrentUser}}
-      {{if ne .CurrentUser.Username .Post.Username}}
-        {{if .Post.CanSendLetters}}
-          <button class="quiet" type="button" data-letter-open>{{.T "letter.send"}}</button>
-        {{else}}
-          <span class="quiet-danger">{{.T "letter.gate.hint"}}</span>
-        {{end}}
-      {{end}}
-    {{else}}
-      <a class="quiet" href="{{.LoginURL}}">{{.T "letter.send"}}</a>
-    {{end}}
+    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous-follow">{{.T "post.follow" .Blog.WriterLabel}}</a>
+    <form class="inline-form" method="post" action="/follow/{{.Post.Username}}" data-state="follow" hidden>
+      <input type="hidden" name="source_post_id" value="{{.Post.ID}}">
+      <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
+    </form>
+    <form class="inline-form" method="post" action="/unfollow/{{.Post.Username}}" data-state="unfollow" hidden>
+      <button class="quiet" type="submit">{{.T "post.unfollow"}}</button>
+    </form>
+    <a class="quiet" href="{{.LoginURL}}" data-state="anonymous-letter">{{.T "letter.send"}}</a>
+    <button class="quiet" type="button" data-letter-open data-state="letter" hidden>{{.T "letter.send"}}</button>
+    <span class="quiet-danger" data-state="letter-gated" hidden>{{.T "letter.gate.hint"}}</span>
     <button class="quiet" type="button" data-share>{{.T "post.share"}}</button>
   </footer>
 </article>
 
-{{if not .CurrentUser}}
+<div data-anonymous-only>
   <section class="capture">
     {{if .Post.Subscribed}}
       <p class="capture-lead">{{.T "post.subscribe.sent"}}</p>
@@ -62,32 +48,29 @@
   {{if .Post.FromRandom}}
     <p class="another"><a class="quiet-link" href="{{.AppBaseURL}}/read?not={{.Post.ID}}">{{.T "post.another"}}</a></p>
   {{end}}
-{{end}}
+</div>
 
-{{if .CurrentUser}}
-  {{if and (ne .CurrentUser.Username .Post.Username) .Post.CanSendLetters}}
-    <section class="form-page letter-composer" id="letter" dir="{{.Dir}}" lang="{{.Lang}}" {{if not .Post.LetterSent}}hidden{{end}}>
-      {{if .Post.LetterSent}}
-        <p class="capture-lead">{{.T "letter.sent"}}</p>
-      {{else}}
-        <h2 class="form-title">{{.T "letter.kicker"}}</h2>
-        <form method="post" action="/letters">
-          <input type="hidden" name="post_id" value="{{.Post.ID}}">
-          <div class="field">
-            <label for="letter-body">{{.T "letter.dear.before"}}<a href="{{.Post.BlogURL}}">{{.Post.WriterLabel}}</a>{{.T "letter.dear.after"}}</label>
-            <textarea id="letter-body" name="body" rows="8" required minlength="2" maxlength="5000"></textarea>
-            <p class="field-help">{{.T "letter.body.help"}}</p>
-          </div>
-          <button class="btn-primary" type="submit">{{.T "letter.submit"}}</button>
-        </form>
-      {{end}}
-    </section>
+<section class="form-page letter-composer" id="letter" dir="{{.Dir}}" lang="{{.Lang}}" hidden>
+  {{if .Post.LetterSent}}
+    <p class="capture-lead">{{.T "letter.sent"}}</p>
+  {{else}}
+    <h2 class="form-title">{{.T "letter.kicker"}}</h2>
+    <form method="post" action="/letters">
+      <input type="hidden" name="post_id" value="{{.Post.ID}}">
+      <div class="field">
+        <label for="letter-body">{{.T "letter.dear.before"}}<a href="{{.Post.BlogURL}}">{{.Post.WriterLabel}}</a>{{.T "letter.dear.after"}}</label>
+        <textarea id="letter-body" name="body" rows="8" required minlength="2" maxlength="5000"></textarea>
+        <p class="field-help">{{.T "letter.body.help"}}</p>
+      </div>
+      <button class="btn-primary" type="submit">{{.T "letter.submit"}}</button>
+    </form>
   {{end}}
-{{end}}
+</section>
 
 {{template "public-blog-finish" .}}
 
 <script src="/static/js/reading.js?v={{assetVersion}}" defer></script>
+<script src="/static/js/public-state.js?v={{assetVersion}}" defer></script>
 {{if .Inline}}
 <script>{{sitePostJS}}</script>
 {{else}}

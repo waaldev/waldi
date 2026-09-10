@@ -9,19 +9,15 @@
     <p class="blog-bio">{{.Blog.Bio}}</p>
   {{end}}
 
-  {{if .Blog.CanFollow}}
-    {{if .Blog.Following}}
-      <form class="inline-form" method="post" action="/unfollow/{{.Blog.Username}}">
-        <button class="quiet" type="submit">{{.T "post.unfollow"}}</button>
-      </form>
-    {{else}}
-      <form class="inline-form" method="post" action="/follow/{{.Blog.Username}}">
-        <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
-      </form>
-    {{end}}
-  {{else if not .CurrentUser}}
-    <a class="btn-follow" href="{{.LoginURL}}">{{.T "post.follow" .Blog.WriterLabel}}</a>
-  {{end}}
+  <div data-public-state data-username="{{.Blog.Username}}">
+    <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous">{{.T "post.follow" .Blog.WriterLabel}}</a>
+    <form class="inline-form" method="post" action="/follow/{{.Blog.Username}}" data-state="follow" hidden>
+      <button class="btn-follow" type="submit">{{.T "post.follow" .Blog.WriterLabel}}</button>
+    </form>
+    <form class="inline-form" method="post" action="/unfollow/{{.Blog.Username}}" data-state="unfollow" hidden>
+      <button class="quiet" type="submit">{{.T "post.unfollow"}}</button>
+    </form>
+  </div>
 
   {{if .Blog.Pages}}
     <nav class="blog-nav">
@@ -59,6 +55,7 @@
 
 </main>
 {{template "public-blog-finish" .}}
+<script src="/static/js/public-state.js?v={{assetVersion}}" defer></script>
 {{if .BridgeSession}}
 <script src="/static/js/session.js?v={{assetVersion}}" defer data-app-base="{{.AppBaseURL}}"></script>
 {{end}}
