@@ -12,7 +12,7 @@ COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 ENV_FILE="${ENV_FILE:-.env}"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/deploy/backups}"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
-AWS_CLI_IMAGE="${AWS_CLI_IMAGE:-amazon/aws-cli:2}"
+AWS_CLI_IMAGE="${AWS_CLI_IMAGE:-amazon/aws-cli:latest}"
 
 log() {
 	printf '[%s] %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$*"
