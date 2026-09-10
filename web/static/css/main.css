@@ -818,6 +818,19 @@ a.quiet:hover { color: var(--ink); }
 }
 .date-edit.open { display: flex; }
 
+.delete-confirm {
+  margin-block-start: var(--s3);
+  display: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s3);
+}
+.delete-confirm.open { display: flex; }
+.delete-confirm .note {
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+}
+
 .date-edit .note { flex-basis: 100%; }
 
 .date-edit input {
@@ -1220,8 +1233,6 @@ a.btn-secondary:hover {
 .confirm-delete summary { font-size: var(--text-meta); cursor: pointer; }
 .confirm-delete .hint { margin-block: var(--s2); }
 .confirm-delete form { margin: 0; }
-.owner-row .confirm-delete,
-.owner-row .confirm-delete .hint { display: inline; }
 
 .domain-panel {
   background: var(--paper-raised);

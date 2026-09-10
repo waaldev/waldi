@@ -11,7 +11,7 @@
       <a href="{{.Post.URL}}" target="_blank" rel="noopener">{{.T "post.owner.badge"}}</a>
       <span class="sep">·</span>&nbsp;<a href="/write/{{.Post.ID}}">{{.T "post.owner.edit"}}</a>
       <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.date-edit').classList.toggle('open')">{{.T "you.post.edit_date"}}</button>
-      <span class="sep">·</span>&nbsp;<details class="confirm-delete"><summary class="quiet-danger">{{.T "post.owner.delete"}}</summary> <span class="hint">{{.T "post.owner.delete_confirm"}}</span> <form class="inline-form" method="post" action="/write/{{.Post.ID}}/delete"><button class="quiet-danger" type="submit">{{.T "post.owner.delete_confirm_submit"}}</button></form></details>
+      <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" onclick="document.querySelector('form.delete-confirm').classList.toggle('open')">{{.T "post.owner.delete"}}</button>
     </div>
 
     <form class="date-edit{{if .Post.DateError}} open{{end}}" method="post" action="/write/{{.Post.ID}}/published-at">
@@ -22,6 +22,11 @@
       <button class="apply" type="submit">{{.T "you.post.date_apply"}}</button>
       <button class="cancel" type="button" onclick="this.closest('.date-edit').classList.remove('open')">{{.T "you.post.date_cancel"}}</button>
       <span class="note">{{if .Post.DateError}}{{.T "you.post.date_error"}}{{else}}{{.T "you.post.date_note"}}{{end}}</span>
+    </form>
+
+    <form class="delete-confirm" method="post" action="/write/{{.Post.ID}}/delete">
+      <span class="note">{{.T "post.owner.delete_confirm"}}</span>
+      <button class="quiet-danger" type="submit">{{.T "post.owner.delete_confirm_submit"}}</button>
     </form>
   </header>
 
