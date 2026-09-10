@@ -49,3 +49,44 @@ func TestHandleSetLocaleAutoUnsupportedLang(t *testing.T) {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNotFound)
 	}
 }
+
+func TestHandleSetLocaleAutoLeavesPinnedChoice(t *testing.T) {
+	s := testServer(t)
+	req := httptest.NewRequest(http.MethodPost, "/lang/fa?auto=1", nil)
+	req.Host = "waldi.blog"
+	req.AddCookie(&http.Cookie{Name: localeCookie, Value: "en"})
+	req.AddCookie(&http.Cookie{Name: localePinnedCookie, Value: "1"})
+	req.SetPathValue("code", "fa")
+	rec := httptest.NewRecorder()
+
+	s.handleSetLocale(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNoContent)
+	}
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == localeCookie {
+			t.Fatalf("locale cookie overwritten with %q", c.Value)
+		}
+	}
+}
+
+func TestHandleSetLocaleByHandPins(t *testing.T) {
+	s := testServer(t)
+	req := httptest.NewRequest(http.MethodPost, "/lang/fa", nil)
+	req.Host = "waldi.blog"
+	req.SetPathValue("code", "fa")
+	rec := httptest.NewRecorder()
+
+	s.handleSetLocale(rec, req)
+
+	pinned := false
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == localePinnedCookie && c.Value == "1" {
+			pinned = true
+		}
+	}
+	if !pinned {
+		t.Fatal("expected waldi_lang_pinned cookie to be set")
+	}
+}

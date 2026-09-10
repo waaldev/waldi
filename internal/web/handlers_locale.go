@@ -15,17 +15,22 @@ func (s *Server) handleSetLocale(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setLocaleCookie(w, r, s.baseDomain, lang)
-
 	// locale.js posts here in the background to silently correct the
 	// server's CF-IPCountry guess against the visitor's real OS timezone
 	// (common for Iranian/Afghan visitors on a VPN, whose IP country isn't
 	// Iran/Afghanistan). It only needs the cookie set for the next
-	// request - no DB write, no cache purge, no redirect.
+	// request - no DB write, no cache purge, no redirect. A visitor who
+	// picked a language by hand keeps it: the guess never overrides them.
 	if r.URL.Query().Get("auto") == "1" {
+		if !localePinned(r) {
+			setLocaleCookie(w, r, s.baseDomain, lang)
+		}
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+
+	setLocaleCookie(w, r, s.baseDomain, lang)
+	setLocalePinnedCookie(w, r, s.baseDomain)
 
 	if user := currentUser(r); user != nil && s.store != nil {
 		if err := s.store.UpdateUserLocale(r.Context(), user.ID, lang); err != nil {
@@ -56,6 +61,7 @@ func (s *Server) handleSettingsLocale(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setLocaleCookie(w, r, s.baseDomain, lang)
+	setLocalePinnedCookie(w, r, s.baseDomain)
 
 	if s.store != nil {
 		if err := s.store.UpdateUserLocale(r.Context(), user.ID, lang); err != nil {

@@ -6,6 +6,10 @@
 // audience. Never reloads the current page; the correction applies from
 // the next page view onward.
 (function () {
+  if (document.cookie.indexOf("waldi_lang_pinned=1") !== -1) {
+    return;
+  }
+
   var persian = { "Asia/Tehran": 1, "Asia/Kabul": 1 };
 
   var tz;

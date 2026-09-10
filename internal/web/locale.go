@@ -6,7 +6,10 @@ import (
 	"waldi/internal/store"
 )
 
-const localeCookie = "waldi_lang"
+const (
+	localeCookie       = "waldi_lang"
+	localePinnedCookie = "waldi_lang_pinned"
+)
 
 // resolveLocale picks the UI language for a request: the signed-in user's
 // saved preference, then the language cookie, then Cloudflare's CF-IPCountry
@@ -28,10 +31,23 @@ func resolveLocale(r *http.Request, user *store.User) (lang, dir string) {
 	return lang, i18n.Dir(lang)
 }
 
+func localePinned(r *http.Request) bool {
+	c, err := r.Cookie(localePinnedCookie)
+	return err == nil && c.Value == "1"
+}
+
+func setLocalePinnedCookie(w http.ResponseWriter, r *http.Request, baseDomain string) {
+	http.SetCookie(w, localeCookieOf(r, baseDomain, localePinnedCookie, "1"))
+}
+
 func setLocaleCookie(w http.ResponseWriter, r *http.Request, baseDomain, lang string) {
+	http.SetCookie(w, localeCookieOf(r, baseDomain, localeCookie, lang))
+}
+
+func localeCookieOf(r *http.Request, baseDomain, name, value string) *http.Cookie {
 	c := &http.Cookie{
-		Name:     localeCookie,
-		Value:    lang,
+		Name:     name,
+		Value:    value,
 		Path:     "/",
 		MaxAge:   365 * 24 * 60 * 60,
 		SameSite: http.SameSiteLaxMode,
@@ -40,5 +56,5 @@ func setLocaleCookie(w http.ResponseWriter, r *http.Request, baseDomain, lang st
 	if domain := sessionCookieDomain(r.Host, baseDomain); domain != "" {
 		c.Domain = domain
 	}
-	http.SetCookie(w, c)
+	return c
 }
