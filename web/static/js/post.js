@@ -16,22 +16,39 @@
   }
 
   const shareBtn = document.querySelector('[data-share]')
-  if (shareBtn && navigator.share) {
-    shareBtn.addEventListener('click', async () => {
-      try {
-        await navigator.share({ url: window.location.href, title: document.title })
-      } catch {
-        /* user cancelled */
-      }
-    })
-  } else if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
+  async function copyLink() {
+    let copied = false
+    if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(window.location.href)
-        shareBtn.textContent = shareBtn.dataset.copied || shareBtn.textContent
-      } catch {
-        /* clipboard unavailable */
+        copied = true
+      } catch (e) {}
+    }
+    if (!copied) {
+      const input = document.createElement('textarea')
+      input.value = window.location.href
+      input.setAttribute('readonly', '')
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      input.select()
+      copied = document.execCommand('copy')
+      input.remove()
+    }
+    if (copied) shareBtn.textContent = shareBtn.dataset.copied || shareBtn.textContent
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: window.location.href, title: document.title })
+          return
+        } catch (error) {
+          if (error && error.name === 'AbortError') return
+        }
       }
+      await copyLink()
     })
   }
 })()

@@ -180,12 +180,12 @@ The ask endpoint strictly accepts requests from the private Docker network. If y
 
 ## Cloudflare CDN Cache
 
-Waldi serves anonymous HTML with `max-age=0` for immediate browser revalidation and `s-maxage=86400` for one day of shared CDN caching. Content ETags make unchanged browser revalidation return a small `304 Not Modified` response.
+Waldi serves public HTML with `max-age=0` for immediate browser revalidation and `s-maxage=2592000` for 30 days of shared CDN caching. Content ETags make unchanged browser revalidation return a small `304 Not Modified` response, while publish and settings changes purge affected CDN entries immediately.
 
 ### Setup in Cloudflare Dashboard
 
 1. **Cache Rules** → Cache responses where the `Cache-Control` header contains `public`.
-2. **Cache Rules** → Bypass cache when the `Cookie` header contains `waldi_session`. This ensures logged-in writers hit the origin database.
+2. **Cache Rules** → On the app hostname only, bypass cache when the `Cookie` header contains `waldi_session`. Public blog hosts serve the same cacheable shell to every reader and load private controls separately.
 3. Locate your **Zone ID** under Overview → API. Set `WALDI_CF_ZONE_ID` in `.env`.
 4. Attach `Zone:Cache Purge` permissions to your API token.
 

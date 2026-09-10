@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	publicCacheControl  = "public, max-age=0, must-revalidate, s-maxage=86400"
+	publicCacheControl  = "public, max-age=0, must-revalidate, s-maxage=2592000"
 	privateCacheControl = "private, max-age=0, must-revalidate"
 )
 
@@ -50,7 +50,21 @@ func (s *Server) withCacheHeaders(w http.ResponseWriter, r *http.Request, next f
 		next(w, r)
 		return
 	}
+	s.captureCacheableHTML(w, r, next, cacheControlForLocale(r), "Cookie, CF-IPCountry", false)
+}
 
+// withPublicBlogCacheHeaders caches the identity-neutral public blog shell
+// equally for anonymous and signed-in readers. Reader-specific controls are
+// loaded separately from no-store endpoints.
+func (s *Server) withPublicBlogCacheHeaders(w http.ResponseWriter, r *http.Request, next func(http.ResponseWriter, *http.Request)) {
+	if r.Method != http.MethodGet {
+		next(w, r)
+		return
+	}
+	s.captureCacheableHTML(w, r, next, publicCacheControl, "", true)
+}
+
+func (s *Server) captureCacheableHTML(w http.ResponseWriter, r *http.Request, next func(http.ResponseWriter, *http.Request), cacheControl, vary string, stripCookies bool) {
 	capture := newCacheCapture(w)
 	next(capture, r)
 
@@ -64,8 +78,13 @@ func (s *Server) withCacheHeaders(w http.ResponseWriter, r *http.Request, next f
 			w.Header().Add(k, v)
 		}
 	}
-	w.Header().Set("Cache-Control", cacheControlForLocale(r))
-	w.Header().Set("Vary", "Cookie, CF-IPCountry")
+	if stripCookies {
+		w.Header().Del("Set-Cookie")
+	}
+	w.Header().Set("Cache-Control", cacheControl)
+	if vary != "" {
+		w.Header().Set("Vary", vary)
+	}
 	etag := etagForBody(capture.buf.Bytes())
 	w.Header().Set("ETag", etag)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {

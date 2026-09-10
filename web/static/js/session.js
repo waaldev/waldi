@@ -15,8 +15,9 @@
   const returnTo = window.location.href
   const opts = { credentials: 'include' }
 
-  fetch(appBase + '/api/me', opts)
-    .then((response) => (response.ok ? response.json() : null))
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then((response) => (response.ok ? null : fetch(appBase + '/api/me', opts)))
+    .then((response) => (response && response.ok ? response.json() : null))
     .then((data) => {
       if (!data || !data.username) return
       const url =

@@ -73,7 +73,7 @@ func (s *Server) publicBlogPageData(r *http.Request, owner store.User, viewer *s
 		AppBaseURL:       appBaseURL(r, s.baseDomain),
 		PageURL:          pageURL(r),
 		LoginURL:         s.loginURL(r, s.baseDomain, pageURL(r)),
-		BridgeSession:    onCustomDomain && viewer == nil,
+		BridgeSession:    onCustomDomain,
 		DevSessionBridge: isLocalDevHost(r.Host),
 		Inline:           true,
 	}

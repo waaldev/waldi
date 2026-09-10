@@ -26,7 +26,7 @@
     <a class="quiet" href="{{.LoginURL}}" data-state="anonymous-letter">{{.T "letter.send"}}</a>
     <button class="quiet" type="button" data-letter-open data-state="letter" hidden>{{.T "letter.send"}}</button>
     <span class="quiet-danger" data-state="letter-gated" hidden>{{.T "letter.gate.hint"}}</span>
-    <button class="quiet" type="button" data-share>{{.T "post.share"}}</button>
+    <button class="quiet" type="button" data-share data-copied="{{.T "post.copied"}}">{{.T "post.share"}}</button>
   </footer>
 </article>
 

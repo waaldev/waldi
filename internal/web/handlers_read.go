@@ -14,7 +14,7 @@ import (
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	blog := s.isBlogHost(r.Context(), r.Host)
 	if blog != nil {
-		s.withCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
+		s.withPublicBlogCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
 			s.renderPublicProfile(w, r, blog.Username)
 		})
 		return
@@ -232,7 +232,7 @@ func (s *Server) handlePublicPost(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	s.withCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
+	s.withPublicBlogCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
 		s.servePublicPost(w, r, blog.Username, r.PathValue("slug"))
 	})
 }
