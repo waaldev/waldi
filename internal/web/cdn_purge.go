@@ -17,22 +17,13 @@ func (s *Server) purgePublicCache(username string, extraHosts ...string) {
 		return
 	}
 
-	prefixes := s.cdnPurgePrefixes(username, extraHosts...)
-	urls := s.cdnPurgeURLs(hosts)
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 		defer cancel()
 		if err := retryCachePurge(ctx, func(ctx context.Context) error {
-			return s.cdnPurger.PurgePrefixes(ctx, prefixes)
+			return s.cdnPurger.PurgeHosts(ctx, hosts)
 		}); err != nil {
-			s.logger.Error("purging cdn cache", "err", err, "prefixes", prefixes)
-		}
-		if len(urls) > 0 {
-			if err := retryCachePurge(ctx, func(ctx context.Context) error {
-				return s.cdnPurger.PurgeURLs(ctx, urls)
-			}); err != nil {
-				s.logger.Error("purging cdn urls", "err", err, "urls", urls)
-			}
+			s.logger.Error("purging cdn cache", "err", err, "hosts", hosts)
 		}
 	}()
 }
@@ -87,40 +78,6 @@ func (s *Server) blogPublicHosts(username string, extraHosts ...string) []string
 	return uniqueHosts(append(hosts, extraHosts...))
 }
 
-func (s *Server) cdnPurgePrefixes(username string, extraHosts ...string) []string {
-	base := strings.ToLower(strings.TrimSpace(s.baseDomain))
-	if base == "" {
-		return nil
-	}
-
-	prefixes := []string{base + "/"}
-	if username == "" {
-		return prefixes
-	}
-
-	for _, host := range s.blogPublicHosts(username, extraHosts...) {
-		prefixes = append(prefixes, host+"/")
-	}
-	return uniquePrefixes(prefixes)
-}
-
-func (s *Server) cdnPurgeURLs(hosts []string) []string {
-	urls := make([]string, 0, len(hosts)*4)
-	for _, host := range hosts {
-		host = strings.TrimSpace(host)
-		if host == "" {
-			continue
-		}
-		urls = append(urls,
-			"https://"+host+"/",
-			"https://"+host+"/feed.xml",
-			"https://"+host+"/sitemap.xml",
-			"https://"+host+"/robots.txt",
-		)
-	}
-	return uniqueURLs(urls)
-}
-
 func uniqueHosts(hosts []string) []string {
 	out := make([]string, 0, len(hosts))
 	seen := make(map[string]struct{}, len(hosts))
@@ -134,48 +91,6 @@ func uniqueHosts(hosts []string) []string {
 		}
 		seen[host] = struct{}{}
 		out = append(out, host)
-	}
-	return out
-}
-
-func uniquePrefixes(prefixes []string) []string {
-	out := make([]string, 0, len(prefixes))
-	seen := make(map[string]struct{}, len(prefixes))
-	for _, prefix := range prefixes {
-		prefix = strings.TrimSpace(prefix)
-		if prefix == "" {
-			continue
-		}
-		prefix = strings.TrimPrefix(prefix, "https://")
-		prefix = strings.TrimPrefix(prefix, "http://")
-		if !strings.HasSuffix(prefix, "/") {
-			prefix += "/"
-		}
-		if _, ok := seen[prefix]; ok {
-			continue
-		}
-		seen[prefix] = struct{}{}
-		out = append(out, prefix)
-	}
-	return out
-}
-
-func uniqueURLs(urls []string) []string {
-	out := make([]string, 0, len(urls))
-	seen := make(map[string]struct{}, len(urls))
-	for _, u := range urls {
-		u = strings.TrimSpace(u)
-		if u == "" {
-			continue
-		}
-		if !strings.HasPrefix(u, "https://") && !strings.HasPrefix(u, "http://") {
-			u = "https://" + u
-		}
-		if _, ok := seen[u]; ok {
-			continue
-		}
-		seen[u] = struct{}{}
-		out = append(out, u)
 	}
 	return out
 }

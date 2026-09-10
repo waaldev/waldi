@@ -30,12 +30,12 @@ func NewCloudflarePurger(zoneID, apiToken string) *CloudflarePurger {
 	}
 }
 
-func (p *CloudflarePurger) PurgePrefixes(ctx context.Context, prefixes []string) error {
-	prefixes = normalizePrefixes(prefixes)
-	if len(prefixes) == 0 {
+func (p *CloudflarePurger) PurgeHosts(ctx context.Context, hosts []string) error {
+	hosts = normalizeHosts(hosts)
+	if len(hosts) == 0 {
 		return nil
 	}
-	return p.purge(ctx, map[string][]string{"prefixes": prefixes})
+	return p.purge(ctx, map[string][]string{"hosts": hosts})
 }
 
 func (p *CloudflarePurger) PurgeURLs(ctx context.Context, urls []string) error {
@@ -101,24 +101,22 @@ func (p *CloudflarePurger) purge(ctx context.Context, body map[string][]string) 
 	return nil
 }
 
-func normalizePrefixes(prefixes []string) []string {
-	out := make([]string, 0, len(prefixes))
-	seen := make(map[string]struct{}, len(prefixes))
-	for _, prefix := range prefixes {
-		prefix = strings.TrimSpace(prefix)
-		if prefix == "" {
+func normalizeHosts(hosts []string) []string {
+	out := make([]string, 0, len(hosts))
+	seen := make(map[string]struct{}, len(hosts))
+	for _, host := range hosts {
+		host = strings.ToLower(strings.TrimSpace(host))
+		host = strings.TrimPrefix(host, "https://")
+		host = strings.TrimPrefix(host, "http://")
+		host = strings.TrimSuffix(host, "/")
+		if host == "" {
 			continue
 		}
-		prefix = strings.TrimPrefix(prefix, "https://")
-		prefix = strings.TrimPrefix(prefix, "http://")
-		if !strings.HasSuffix(prefix, "/") {
-			prefix += "/"
-		}
-		if _, ok := seen[prefix]; ok {
+		if _, ok := seen[host]; ok {
 			continue
 		}
-		seen[prefix] = struct{}{}
-		out = append(out, prefix)
+		seen[host] = struct{}{}
+		out = append(out, host)
 	}
 	return out
 }

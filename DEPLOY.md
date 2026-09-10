@@ -184,20 +184,19 @@ Waldi serves public HTML with `max-age=0` for immediate browser revalidation and
 
 ### Setup in Cloudflare Dashboard
 
-1. **Cache Rules** → Cache responses where the `Cache-Control` header contains `public`.
-2. **Cache Rules** → On the app hostname only, bypass cache when the `Cookie` header contains `waldi_session`. Public blog hosts serve the same cacheable shell to every reader and load private controls separately.
+1. **Cache Rules** → Create a rule matching `GET` and `HEAD` requests on public blog hostnames (`*.waldi.blog`) and set **Cache eligibility** to **Eligible for cache**. Cache Rules evaluate the incoming request, not the origin response headers.
+2. Keep **Origin Cache Control** enabled and do not override the edge or browser TTL. Waldi's response headers remain authoritative: public blog shells are cacheable for every reader, while private APIs and signed-in app responses use `private, no-store`.
 3. Locate your **Zone ID** under Overview → API. Set `WALDI_CF_ZONE_ID` in `.env`.
 4. Attach `Zone:Cache Purge` permissions to your API token.
 
-Every time a writer publishes, updates settings, or links a custom domain, Waldi aggressively purges:
+Every time a writer publishes, updates settings, or links a custom domain, Waldi sends one purge-by-hostname request containing:
 
-- `https://waldi.blog/` (The home feed)
-- `https://username.waldi.blog/` (The writer's blog)
-- `https://custom-domain/` (If they have a verified custom domain on your zone)
+- `username.waldi.blog` (The writer's entire public blog)
+- The verified custom domain, when it is served through the same Cloudflare zone
 
-These purges fire asynchronously against the Cloudflare Purge Cache API. Waldi does not operate its own internal HTML cache. The edge is the only caching layer. When we purge it, the old content dies.
+The purge fires asynchronously against the Cloudflare Purge Cache API and retries temporary failures. It clears the blog HTML, feed, sitemap, and robots response without unnecessarily evicting the app hostname or other writers' caches. Waldi does not operate its own internal HTML cache; the edge is the only caching layer.
 
-**Note:** Custom domains use a CNAME to `cname.waldi.blog`. If the user enables the orange proxy cloud on their DNS, the purge-by-prefix logic still successfully hits the custom domain hostname.
+**Note:** A custom domain only receives this zone's CDN caching and purge behavior when it is onboarded through Cloudflare for SaaS/custom hostnames. A CNAME that terminates directly at Caddy remains outside the Waldi Cloudflare zone.
 
 ## Local Development
 

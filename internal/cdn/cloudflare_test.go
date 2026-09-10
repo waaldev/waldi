@@ -9,10 +9,10 @@ import (
 	"testing"
 )
 
-func TestCloudflarePurgerPurgePrefixes(t *testing.T) {
-	t.Run("sends prefix purge request", func(t *testing.T) {
+func TestCloudflarePurgerPurgeHosts(t *testing.T) {
+	t.Run("sends hostname purge request", func(t *testing.T) {
 		var got struct {
-			Prefixes []string `json:"prefixes"`
+			Hosts []string `json:"hosts"`
 		}
 
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,24 +43,24 @@ func TestCloudflarePurgerPurgePrefixes(t *testing.T) {
 		t.Cleanup(func() { cloudflareAPIBase = orig })
 		cloudflareAPIBase = srv.URL + "/client/v4"
 
-		if err := p.PurgePrefixes(context.Background(), []string{"alice.waldi.blog"}); err != nil {
+		if err := p.PurgeHosts(context.Background(), []string{"alice.waldi.blog"}); err != nil {
 			t.Fatal(err)
 		}
-		if len(got.Prefixes) != 1 || got.Prefixes[0] != "alice.waldi.blog/" {
-			t.Fatalf("prefixes = %#v", got.Prefixes)
+		if len(got.Hosts) != 1 || got.Hosts[0] != "alice.waldi.blog" {
+			t.Fatalf("hosts = %#v", got.Hosts)
 		}
 	})
 
-	t.Run("no-op on empty prefixes", func(t *testing.T) {
+	t.Run("no-op on empty hosts", func(t *testing.T) {
 		p := NewCloudflarePurger("zone123", "token123")
-		if err := p.PurgePrefixes(context.Background(), nil); err != nil {
+		if err := p.PurgeHosts(context.Background(), nil); err != nil {
 			t.Fatal(err)
 		}
 	})
 }
 
-func TestNormalizePrefixes(t *testing.T) {
-	got := normalizePrefixes([]string{
+func TestNormalizeHosts(t *testing.T) {
+	got := normalizeHosts([]string{
 		"alice.waldi.blog",
 		"https://waldi.blog",
 		"https://waldi.blog/",
@@ -69,7 +69,7 @@ func TestNormalizePrefixes(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("len = %d, want 2: %#v", len(got), got)
 	}
-	if got[0] != "alice.waldi.blog/" || got[1] != "waldi.blog/" {
-		t.Fatalf("prefixes = %#v", got)
+	if got[0] != "alice.waldi.blog" || got[1] != "waldi.blog" {
+		t.Fatalf("hosts = %#v", got)
 	}
 }

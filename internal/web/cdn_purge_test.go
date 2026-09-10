@@ -4,7 +4,23 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 )
+
+type recordingPurger struct {
+	hosts chan []string
+	urls  chan []string
+}
+
+func (p *recordingPurger) PurgeHosts(_ context.Context, hosts []string) error {
+	p.hosts <- hosts
+	return nil
+}
+
+func (p *recordingPurger) PurgeURLs(_ context.Context, urls []string) error {
+	p.urls <- urls
+	return nil
+}
 
 func TestBlogPublicHosts(t *testing.T) {
 	s := &Server{baseDomain: "waldi.blog"}
@@ -26,50 +42,32 @@ func TestBlogPublicHostsExtra(t *testing.T) {
 	}
 }
 
-func TestCDNPurgePrefixes(t *testing.T) {
-	s := &Server{baseDomain: "waldi.blog"}
+func TestPurgePublicCacheUsesOneHostnameRequest(t *testing.T) {
+	purger := &recordingPurger{
+		hosts: make(chan []string, 1),
+		urls:  make(chan []string, 1),
+	}
+	s := &Server{
+		baseDomain:    "waldi.blog",
+		cdnPurger:     purger,
+		customDomains: newCustomDomainCache(),
+	}
 
-	got := s.cdnPurgePrefixes("sara")
-	want := []string{
-		"waldi.blog/",
-		"sara.waldi.blog/",
-	}
-	if len(got) != len(want) {
-		t.Fatalf("len = %d, want %d: %#v", len(got), len(want), got)
-	}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("prefix[%d] = %q, want %q", i, got[i], want[i])
+	s.purgePublicCache("sara")
+
+	select {
+	case hosts := <-purger.hosts:
+		if len(hosts) != 1 || hosts[0] != "sara.waldi.blog" {
+			t.Fatalf("hosts = %#v, want only the writer hostname", hosts)
 		}
+	case <-time.After(time.Second):
+		t.Fatal("hostname purge was not called")
 	}
-}
 
-func TestCDNPurgePrefixesWithRemovedDomain(t *testing.T) {
-	s := &Server{baseDomain: "waldi.blog"}
-	got := s.cdnPurgePrefixes("sara", "blog.example.com")
-	if len(got) != 3 {
-		t.Fatalf("len = %d, want 3: %#v", len(got), got)
-	}
-	if got[2] != "blog.example.com/" {
-		t.Fatalf("prefix[2] = %q", got[2])
-	}
-}
-
-func TestCDNPurgePrefixesHomeOnly(t *testing.T) {
-	s := &Server{baseDomain: "waldi.blog"}
-	got := s.cdnPurgePrefixes("")
-	if len(got) != 1 || got[0] != "waldi.blog/" {
-		t.Fatalf("prefixes = %#v", got)
-	}
-}
-
-func TestCDNPurgeURLs(t *testing.T) {
-	got := (&Server{}).cdnPurgeURLs([]string{"sara.waldi.blog"})
-	if len(got) != 4 {
-		t.Fatalf("len = %d, want 4: %#v", len(got), got)
-	}
-	if got[1] != "https://sara.waldi.blog/feed.xml" {
-		t.Fatalf("feed url = %q", got[1])
+	select {
+	case urls := <-purger.urls:
+		t.Fatalf("unexpected URL purge: %#v", urls)
+	default:
 	}
 }
 
