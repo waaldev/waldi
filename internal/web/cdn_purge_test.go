@@ -1,6 +1,10 @@
 package web
 
-import "testing"
+import (
+	"context"
+	"errors"
+	"testing"
+)
 
 func TestBlogPublicHosts(t *testing.T) {
 	s := &Server{baseDomain: "waldi.blog"}
@@ -66,5 +70,22 @@ func TestCDNPurgeURLs(t *testing.T) {
 	}
 	if got[1] != "https://sara.waldi.blog/feed.xml" {
 		t.Fatalf("feed url = %q", got[1])
+	}
+}
+
+func TestRetryCachePurge(t *testing.T) {
+	attempts := 0
+	err := retryCachePurgeWithDelay(context.Background(), 0, func(context.Context) error {
+		attempts++
+		if attempts < 3 {
+			return errors.New("temporary failure")
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attempts != 3 {
+		t.Fatalf("attempts = %d, want 3", attempts)
 	}
 }

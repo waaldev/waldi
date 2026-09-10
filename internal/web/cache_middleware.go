@@ -112,6 +112,19 @@ func etagMatches(header, etag string) bool {
 	return false
 }
 
+func writePublicResource(w http.ResponseWriter, r *http.Request, contentType string, body []byte) {
+	w.Header().Del("Set-Cookie")
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", publicCacheControl)
+	etag := etagForBody(body)
+	w.Header().Set("ETag", etag)
+	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	_, _ = w.Write(body)
+}
+
 func hasSessionCookie(r *http.Request) bool {
 	c, err := r.Cookie(sessionCookie)
 	return err == nil && c.Value != ""

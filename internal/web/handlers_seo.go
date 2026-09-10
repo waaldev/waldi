@@ -10,15 +10,14 @@ import (
 )
 
 func (s *Server) handleRobots(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	if blog := s.isBlogHost(r.Context(), r.Host); blog != nil && s.store != nil {
 		owner, err := s.store.UserByUsername(r.Context(), blog.Username)
 		if err == nil {
-			_, _ = fmt.Fprint(w, robotsTxtForBlog(r, s.baseDomain, owner))
+			writePublicResource(w, r, "text/plain; charset=utf-8", []byte(robotsTxtForBlog(r, s.baseDomain, owner)))
 			return
 		}
 	}
-	_, _ = fmt.Fprint(w, robotsTxtForApp(r, s.baseDomain))
+	writePublicResource(w, r, "text/plain; charset=utf-8", []byte(robotsTxtForApp(r, s.baseDomain)))
 }
 
 func (s *Server) handleBlogFeed(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +80,7 @@ func (s *Server) handleBlogFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b.WriteString("</channel></rss>")
-	w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
-	_, _ = w.Write([]byte(b.String()))
+	writePublicResource(w, r, "application/rss+xml; charset=utf-8", []byte(b.String()))
 }
 
 func (s *Server) handleBlogSitemap(w http.ResponseWriter, r *http.Request) {
@@ -125,8 +123,7 @@ func (s *Server) handleBlogSitemap(w http.ResponseWriter, r *http.Request) {
 	}
 	b.WriteString("</urlset>")
 
-	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
-	_, _ = w.Write([]byte(b.String()))
+	writePublicResource(w, r, "application/xml; charset=utf-8", []byte(b.String()))
 }
 
 func (s *Server) handleBlogSitemapOrApp(w http.ResponseWriter, r *http.Request) {

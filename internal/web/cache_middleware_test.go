@@ -40,6 +40,28 @@ func TestCacheHeadersReturnNotModified(t *testing.T) {
 	}
 }
 
+func TestPublicResourceCacheHeadersReturnNotModified(t *testing.T) {
+	body := []byte("<rss></rss>")
+	firstRequest := httptest.NewRequest(http.MethodGet, "/feed.xml", nil)
+	first := httptest.NewRecorder()
+	writePublicResource(first, firstRequest, "application/rss+xml; charset=utf-8", body)
+
+	r := httptest.NewRequest(http.MethodGet, "/feed.xml", nil)
+	r.Header.Set("If-None-Match", first.Header().Get("ETag"))
+	w := httptest.NewRecorder()
+	writePublicResource(w, r, "application/rss+xml; charset=utf-8", body)
+
+	if w.Code != http.StatusNotModified {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusNotModified)
+	}
+	if got := w.Header().Get("Cache-Control"); got != publicCacheControl {
+		t.Fatalf("Cache-Control = %q, want %q", got, publicCacheControl)
+	}
+	if w.Body.Len() != 0 {
+		t.Fatalf("304 response has %d body bytes", w.Body.Len())
+	}
+}
+
 func TestPublicBlogCacheHeadersIncludeSignedInReaders(t *testing.T) {
 	s := &Server{}
 	r := httptest.NewRequest(http.MethodGet, "/", nil)

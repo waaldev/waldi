@@ -80,9 +80,11 @@ func (s *Server) purgeLocalePage(r *http.Request, dest string) {
 
 	purgeURL := requestScheme(r) + "://" + r.Host + dest
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 		defer cancel()
-		if err := s.cdnPurger.PurgeURLs(ctx, []string{purgeURL}); err != nil {
+		if err := retryCachePurge(ctx, func(ctx context.Context) error {
+			return s.cdnPurger.PurgeURLs(ctx, []string{purgeURL})
+		}); err != nil {
 			s.logger.Error("purging cdn cache after locale change", "err", err, "url", purgeURL)
 		}
 	}()

@@ -20,17 +20,45 @@ func (s *Server) purgePublicCache(username string, extraHosts ...string) {
 	prefixes := s.cdnPurgePrefixes(username, extraHosts...)
 	urls := s.cdnPurgeURLs(hosts)
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 		defer cancel()
-		if err := s.cdnPurger.PurgePrefixes(ctx, prefixes); err != nil {
+		if err := retryCachePurge(ctx, func(ctx context.Context) error {
+			return s.cdnPurger.PurgePrefixes(ctx, prefixes)
+		}); err != nil {
 			s.logger.Error("purging cdn cache", "err", err, "prefixes", prefixes)
 		}
 		if len(urls) > 0 {
-			if err := s.cdnPurger.PurgeURLs(ctx, urls); err != nil {
+			if err := retryCachePurge(ctx, func(ctx context.Context) error {
+				return s.cdnPurger.PurgeURLs(ctx, urls)
+			}); err != nil {
 				s.logger.Error("purging cdn urls", "err", err, "urls", urls)
 			}
 		}
 	}()
+}
+
+func retryCachePurge(ctx context.Context, purge func(context.Context) error) error {
+	return retryCachePurgeWithDelay(ctx, 250*time.Millisecond, purge)
+}
+
+func retryCachePurgeWithDelay(ctx context.Context, delay time.Duration, purge func(context.Context) error) error {
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if err = purge(ctx); err == nil {
+			return nil
+		}
+		if attempt == 2 {
+			break
+		}
+		timer := time.NewTimer(delay << attempt)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
+	return err
 }
 
 func (s *Server) blogPublicHosts(username string, extraHosts ...string) []string {
