@@ -14,19 +14,24 @@ type PostEngagement struct {
 	Letters int
 }
 
-func (s *Store) PostEngagementByUser(ctx context.Context, userID int64) (map[int64]PostEngagement, error) {
+func (s *Store) PostEngagementForPosts(ctx context.Context, userID int64, postIDs []int64) (map[int64]PostEngagement, error) {
+	if len(postIDs) == 0 {
+		return map[int64]PostEngagement{}, nil
+	}
+
 	rows, err := s.pool.Query(ctx, `
 		select p.id,
-		       count(distinct i.reader_key) filter (
-		         where i.reader_key <> ('user:' || p.user_id::text)
-		       )::int as readers,
-		       count(distinct l.id)::int as letters
+		       (select count(distinct i.reader_key)::int
+		          from impressions i
+		         where i.post_id = p.id
+		           and i.reader_key <> ('user:' || p.user_id::text)) as readers,
+		       (select count(*)::int
+		          from letters l
+		         where l.post_id = p.id) as letters
 		from posts p
-		left join impressions i on i.post_id = p.id
-		left join letters l on l.post_id = p.id
 		where p.user_id = $1 and p.status = 'published' and p.type = 'post'
-		group by p.id
-	`, userID)
+		  and p.id = any($2::bigint[])
+	`, userID, postIDs)
 	if err != nil {
 		return nil, fmt.Errorf("loading post engagement: %w", err)
 	}

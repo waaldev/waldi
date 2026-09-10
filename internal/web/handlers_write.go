@@ -11,6 +11,7 @@ import (
 	"waldi/internal/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	"golang.org/x/sync/errgroup"
 )
 
 func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
@@ -31,26 +32,36 @@ func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	drafts, err := s.store.DraftsByUser(r.Context(), user.ID, writePageSize)
-	if err != nil {
-		s.logger.Error("listing user drafts", "err", err)
-		s.renderWriteError(w, r, "write.error.list")
-		return
-	}
-
 	cursor, err := parsePageCursor(r)
 	if err != nil {
 		s.renderWriteError(w, r, "error.bad_cursor")
 		return
 	}
-	rawPublished, err := s.store.PublishedPostsByUser(r.Context(), user.ID, publishedPageSize+1, cursor)
-	if err != nil {
-		s.logger.Error("listing user published posts", "err", err)
+
+	var drafts, rawPublished []store.Post
+	group, ctx := errgroup.WithContext(r.Context())
+	group.Go(func() error {
+		var err error
+		drafts, err = s.store.DraftsByUser(ctx, user.ID, writePageSize)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		rawPublished, err = s.store.PublishedPostsByUser(ctx, user.ID, publishedPageSize+1, cursor)
+		return err
+	})
+	if err := group.Wait(); err != nil {
+		s.logger.Error("loading write dashboard posts", "err", err)
 		s.renderWriteError(w, r, "write.error.list")
 		return
 	}
+
 	published, hasMore := trimPage(rawPublished, publishedPageSize)
-	engagement, err := s.store.PostEngagementByUser(r.Context(), user.ID)
+	postIDs := make([]int64, len(published))
+	for i := range published {
+		postIDs[i] = published[i].ID
+	}
+	engagement, err := s.store.PostEngagementForPosts(r.Context(), user.ID, postIDs)
 	if err != nil {
 		s.logger.Error("loading post engagement", "err", err)
 		s.renderWriteError(w, r, "write.error.list")

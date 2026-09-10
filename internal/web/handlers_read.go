@@ -9,6 +9,8 @@ import (
 	"waldi/internal/i18n"
 	"waldi/internal/jobs"
 	"waldi/internal/store"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -355,10 +357,22 @@ func (s *Server) buildBlogView(r *http.Request, owner store.User, viewer *store.
 		return BlogView{}, errBadCursor
 	}
 
-	rawPosts, err := s.store.PublishedPostsByUsername(r.Context(), owner.Username, pageSize+1, cursor)
-	if err != nil {
+	var rawPosts, pages []store.Post
+	group, ctx := errgroup.WithContext(r.Context())
+	group.Go(func() error {
+		var err error
+		rawPosts, err = s.store.PublishedPostsByUsername(ctx, owner.Username, pageSize+1, cursor)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		pages, err = s.store.PublishedPagesByUsername(ctx, owner.Username)
+		return err
+	})
+	if err := group.Wait(); err != nil {
 		return BlogView{}, err
 	}
+
 	posts, hasMore := trimPage(rawPosts, pageSize)
 	blogView.Posts = postViewsForBlog(posts, blogView.Lang)
 	for i := range blogView.Posts {
@@ -376,10 +390,6 @@ func (s *Server) buildBlogView(r *http.Request, owner store.User, viewer *store.
 	}
 	blogView.OlderURL = publishedOlderURL(olderPath, posts, hasMore)
 
-	pages, err := s.store.PublishedPagesByUsername(r.Context(), owner.Username)
-	if err != nil {
-		return BlogView{}, err
-	}
 	for _, p := range pages {
 		blogView.Pages = append(blogView.Pages, PageNavView{
 			Title: p.Title,
