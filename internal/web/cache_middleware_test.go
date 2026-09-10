@@ -79,10 +79,29 @@ func TestAppCacheHeadersBypassSignedInReaders(t *testing.T) {
 	r.AddCookie(&http.Cookie{Name: sessionCookie, Value: "session-token"})
 	w := httptest.NewRecorder()
 
-	s.withCacheHeaders(w, r, renderCachedTestPage)
+	handler := s.withSession(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.withCacheHeaders(w, r, renderCachedTestPage)
+	}))
+	handler.ServeHTTP(w, r)
 
-	if got := w.Header().Get("Cache-Control"); got != "" {
-		t.Fatalf("Cache-Control = %q, want empty", got)
+	if got := w.Header().Get("Cache-Control"); got != privateSessionCacheControl {
+		t.Fatalf("Cache-Control = %q, want %q", got, privateSessionCacheControl)
+	}
+}
+
+func TestPublicBlogCacheOverridesSignedInPrivatePolicy(t *testing.T) {
+	s := &Server{}
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.AddCookie(&http.Cookie{Name: sessionCookie, Value: "session-token"})
+	w := httptest.NewRecorder()
+
+	handler := s.withSession(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.withPublicBlogCacheHeaders(w, r, renderCachedTestPage)
+	}))
+	handler.ServeHTTP(w, r)
+
+	if got := w.Header().Get("Cache-Control"); got != publicCacheControl {
+		t.Fatalf("Cache-Control = %q, want %q", got, publicCacheControl)
 	}
 }
 

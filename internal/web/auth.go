@@ -29,13 +29,14 @@ func currentUser(r *http.Request) *store.User {
 
 func (s *Server) withSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if s.store == nil {
+		cookie, err := r.Cookie(sessionCookie)
+		if err != nil || cookie.Value == "" {
 			next.ServeHTTP(w, r)
 			return
 		}
+		w.Header().Set("Cache-Control", privateSessionCacheControl)
 
-		cookie, err := r.Cookie(sessionCookie)
-		if err != nil || cookie.Value == "" {
+		if s.store == nil {
 			next.ServeHTTP(w, r)
 			return
 		}

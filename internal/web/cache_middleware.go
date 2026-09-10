@@ -12,6 +12,7 @@ import (
 const (
 	publicCacheControl           = "public, max-age=0, must-revalidate, s-maxage=2592000"
 	privateCacheControl          = "private, max-age=0, must-revalidate"
+	privateSessionCacheControl   = "private, no-store"
 	staticRevalidateCacheControl = "public, max-age=86400, must-revalidate"
 )
 
