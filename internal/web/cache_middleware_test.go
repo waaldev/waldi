@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+func TestETagForBodyIsStrong(t *testing.T) {
+	if got, want := etagForBody([]byte("hello")), `"2cf24dba5fb0a30e"`; got != want {
+		t.Fatalf("etagForBody() = %q, want %q", got, want)
+	}
+}
+
 func TestCacheHeadersSeparateBrowserAndCDNLifetimes(t *testing.T) {
 	s := &Server{}
 	r := httptest.NewRequest(http.MethodGet, "/", nil)

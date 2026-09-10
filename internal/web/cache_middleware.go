@@ -99,7 +99,7 @@ func (s *Server) captureCacheableHTML(w http.ResponseWriter, r *http.Request, ne
 
 func etagForBody(body []byte) string {
 	sum := sha256.Sum256(body)
-	return `W/"` + hex.EncodeToString(sum[:8]) + `"`
+	return `"` + hex.EncodeToString(sum[:8]) + `"`
 }
 
 func etagMatches(header, etag string) bool {
