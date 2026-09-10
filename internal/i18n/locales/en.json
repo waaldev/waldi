@@ -186,6 +186,8 @@
   "you.post.date_apply": "Apply",
   "you.post.date_cancel": "Cancel",
   "you.post.date_note": "Only the displayed date changes; feed placement and readers who already saw it aren't affected.",
+  "you.post.stats.empty": "No one has read this yet.",
+  "you.post.stats.caption": "Only you can see this.",
   "you.post.date_error": "That date couldn't be used - check the format (YYYY/MM/DD) and that it isn't in the future.",
 
   "letter.page.title": "Letter from %s",

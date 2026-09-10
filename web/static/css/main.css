@@ -1325,6 +1325,9 @@ a.btn-secondary:hover {
 }
 .stats-narrative:lang(fa) { font-feature-settings: "ss01" 1; }
 .stats-narrative p { margin: 0 0 var(--s2); }
+.post-stats {
+  margin-block-start: var(--s7);
+}
 .stats-narrative .caption {
   color: var(--ink-soft);
   font-size: var(--text-meta);

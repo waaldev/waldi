@@ -32,5 +32,10 @@
   <p class="endmark" role="presentation"></p>
 </article>
 
+<section class="stats-narrative post-stats">
+  <p>{{if .Post.Stats}}{{.Post.Stats}}{{else}}{{.T "you.post.stats.empty"}}{{end}}</p>
+  <p class="caption">{{.T "you.post.stats.caption"}}</p>
+</section>
+
 {{template "layout-end" .}}
 {{end}}

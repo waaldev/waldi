@@ -252,6 +252,7 @@ type PostView struct {
 	DateError      bool
 	Subscribed     bool
 	LetterSent     bool
+	Stats          string
 }
 
 type FeedView struct {

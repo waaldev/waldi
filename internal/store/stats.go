@@ -2,8 +2,11 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type PostEngagement struct {
@@ -111,6 +114,46 @@ func (s *Store) PostStatsForUser(ctx context.Context, userID int64, since time.T
 		return nil, fmt.Errorf("iterating post stats: %w", err)
 	}
 	return stats, nil
+}
+
+func (s *Store) PostStatsByID(ctx context.Context, userID, postID int64) (PostStats, error) {
+	var stat PostStats
+	err := s.pool.QueryRow(ctx, `
+		select p.id,
+		       p.title,
+		       count(distinct i.reader_key) filter (
+		         where i.reader_key <> ('user:' || p.user_id::text)
+		       )::int as readers,
+		       count(distinct i.reader_key) filter (
+		         where i.reader_key <> ('user:' || p.user_id::text)
+		           and r.completed
+		       )::int as completed,
+		       count(distinct f.follower_id)::int as follows,
+		       count(distinct l.id)::int as letters,
+		       p.published_at
+		from posts p
+		left join impressions i on i.post_id = p.id
+		left join readings r on r.impression_id = i.id
+		left join follows f on f.source_post_id = p.id
+		left join letters l on l.post_id = p.id
+		where p.id = $1 and p.user_id = $2
+		group by p.id, p.title, p.published_at, p.user_id
+	`, postID, userID).Scan(
+		&stat.PostID,
+		&stat.PostTitle,
+		&stat.Readers,
+		&stat.Completed,
+		&stat.Follows,
+		&stat.Letters,
+		publishedAtStatDest(&stat),
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return PostStats{}, ErrNotFound
+	}
+	if err != nil {
+		return PostStats{}, fmt.Errorf("loading post stats: %w", err)
+	}
+	return stat, nil
 }
 
 func (s *Store) UsersWithDigestActivity(ctx context.Context, since time.Time, limit int) ([]User, error) {

@@ -179,6 +179,14 @@ func (s *Server) handleYouPost(w http.ResponseWriter, r *http.Request) {
 	view.DateError = r.URL.Query().Get("date_error") == "1"
 
 	pd := s.newPageData(r, user)
+
+	stat, err := s.store.PostStatsByID(r.Context(), user.ID, p.ID)
+	if err == nil {
+		view.Stats = jobs.DigestSentence(pd.Lang, stat)
+	} else if !errors.Is(err, store.ErrNotFound) {
+		s.logger.Error("loading post stats", "err", err)
+	}
+
 	pd.Title = p.Title
 	pd.SEO = noindexSEO()
 	pd.Blog = &BlogView{
