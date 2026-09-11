@@ -23,7 +23,8 @@
   data-ui-saved="{{.T "editor.status.saved"}}"
   data-ui-error="{{.T "editor.status.error"}}"
   data-ui-link-prompt="{{.T "editor.link.prompt"}}"
-  data-ui-footnote-prompt="{{.T "editor.footnote.prompt"}}"
+  data-ui-footnote-title="{{.T "editor.footnote.title"}}"
+  data-ui-footnote-placeholder="{{.T "editor.footnote.placeholder"}}"
   data-ui-embed-prompt="{{.T "editor.embed.prompt"}}"
   data-ui-embed-invalid="{{.T "editor.embed.invalid"}}"
   data-ui-words-one="{{.T "editor.words.one"}}"
@@ -63,6 +64,27 @@
           <button type="button" data-command="image">{{.T "editor.toolbar.image"}}</button>
           <button type="button" data-command="embed">{{.T "editor.toolbar.embed"}}</button>
           <button type="button" data-command="divider">{{.T "editor.toolbar.divider"}}</button>
+        </div>
+      </div>
+
+      <div class="fn-popover" role="dialog" aria-label="{{.T "editor.footnote.title"}}" data-fn-popover hidden>
+        <div class="fn-popover-head">
+          <span class="fn-popover-title" data-fn-title>{{.T "editor.footnote.title"}}</span>
+          <div class="fn-popover-tools" role="toolbar" aria-label="{{.T "editor.toolbar.aria"}}">
+            <button type="button" data-fn-command="bold" aria-label="{{.T "editor.toolbar.bold"}}"><strong>B</strong></button>
+            <button type="button" data-fn-command="italic" aria-label="{{.T "editor.toolbar.italic"}}"><em>i</em></button>
+            <button type="button" data-fn-command="link" aria-label="{{.T "editor.toolbar.link"}}">↗</button>
+          </div>
+        </div>
+        <div class="fn-popover-link" data-fn-link hidden>
+          <input type="text" inputmode="url" dir="ltr" autocomplete="off" spellcheck="false" placeholder="{{.T "editor.footnote.link_placeholder"}}" aria-label="{{.T "editor.link.prompt"}}" data-fn-link-input>
+          <button type="button" data-fn-command="link-apply">{{.T "editor.footnote.link_apply"}}</button>
+        </div>
+        <div class="fn-popover-body" data-fn-mount></div>
+        <div class="fn-popover-foot">
+          <span class="fn-popover-hint">{{.T "editor.footnote.hint"}}</span>
+          <button type="button" data-fn-command="remove">{{.T "editor.footnote.remove"}}</button>
+          <button type="button" class="fn-done" data-fn-command="done">{{.T "editor.footnote.done"}}</button>
         </div>
       </div>
     </div>

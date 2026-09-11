@@ -21682,6 +21682,7 @@ ${prefix}
   var min = Math.min;
   var max = Math.max;
   var round = Math.round;
+  var floor = Math.floor;
   var createCoords = (v) => ({
     x: v,
     y: v
@@ -21770,12 +21771,12 @@ ${prefix}
     return oppositeSideMap[side] + placement.slice(side.length);
   }
   function expandPaddingObject(padding) {
+    var _padding$top, _padding$right, _padding$bottom, _padding$left;
     return {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      ...padding
+      top: (_padding$top = padding.top) != null ? _padding$top : 0,
+      right: (_padding$right = padding.right) != null ? _padding$right : 0,
+      bottom: (_padding$bottom = padding.bottom) != null ? _padding$bottom : 0,
+      left: (_padding$left = padding.left) != null ? _padding$left : 0
     };
   }
   function getPaddingObject(padding) {
@@ -21851,13 +21852,9 @@ ${prefix}
           y: reference.y
         };
     }
-    switch (getAlignment(placement)) {
-      case "start":
-        coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1);
-        break;
-      case "end":
-        coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1);
-        break;
+    const alignment = getAlignment(placement);
+    if (alignment) {
+      coords[alignmentAxis] += commonAlign * (alignment === "end" ? 1 : -1) * (rtl && isVertical ? -1 : 1);
     }
     return coords;
   }
@@ -21897,10 +21894,7 @@ ${prefix}
       height: rects.floating.height
     } : rects.reference;
     const offsetParent = await (platform2.getOffsetParent == null ? void 0 : platform2.getOffsetParent(elements.floating));
-    const offsetScale = await (platform2.isElement == null ? void 0 : platform2.isElement(offsetParent)) ? await (platform2.getScale == null ? void 0 : platform2.getScale(offsetParent)) || {
-      x: 1,
-      y: 1
-    } : {
+    const offsetScale = await (platform2.isElement == null ? void 0 : platform2.isElement(offsetParent)) && await (platform2.getScale == null ? void 0 : platform2.getScale(offsetParent)) || {
       x: 1,
       y: 1
     };
@@ -22048,12 +22042,11 @@ ${prefix}
       const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1;
       const minPadding = min(paddingObject[minProp], largestPossiblePadding);
       const maxPadding = min(paddingObject[maxProp], largestPossiblePadding);
-      const min$1 = minPadding;
       const max2 = clientSize - arrowDimensions[length] - maxPadding;
       const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
-      const offset3 = clamp(min$1, center, max2);
-      const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset3 && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
-      const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max2 : 0;
+      const offset3 = clamp(minPadding, center, max2);
+      const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset3 && rects.reference[length] / 2 - (center < minPadding ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+      const alignmentOffset = shouldAddOffset ? center < minPadding ? center - minPadding : center - max2 : 0;
       return {
         [axis]: coords[axis] + alignmentOffset,
         data: {
@@ -22100,13 +22093,11 @@ ${prefix}
           ...detectOverflowOptions
         } = evaluate(options, state);
         const placements$1 = alignment !== void 0 || allowedPlacements === placements ? getPlacementList(alignment || null, autoAlignment, allowedPlacements) : allowedPlacements;
-        const overflow = await platform2.detectOverflow(state, detectOverflowOptions);
         const currentIndex = ((_middlewareData$autoP = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP.index) || 0;
         const currentPlacement = placements$1[currentIndex];
         if (currentPlacement == null) {
           return {};
         }
-        const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform2.isRTL == null ? void 0 : platform2.isRTL(elements.floating)));
         if (placement !== currentPlacement) {
           return {
             reset: {
@@ -22114,6 +22105,8 @@ ${prefix}
             }
           };
         }
+        const overflow = await platform2.detectOverflow(state, detectOverflowOptions);
+        const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform2.isRTL == null ? void 0 : platform2.isRTL(elements.floating)));
         const currentOverflows = [overflow[getSide2(currentPlacement)], overflow[alignmentSides[0]], overflow[alignmentSides[1]]];
         const allOverflows = [...((_middlewareData$autoP2 = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP2.overflows) || [], {
           placement: currentPlacement,
@@ -22381,11 +22374,14 @@ ${prefix}
           y
         } = evaluate(options, state);
         const nativeClientRects = Array.from(await (platform2.getClientRects == null ? void 0 : platform2.getClientRects(elements.reference)) || []);
+        if (!nativeClientRects.length) {
+          return {};
+        }
         const clientRects = getRectsByLine(nativeClientRects);
         const fallback = rectToClientRect(getBoundingRect(nativeClientRects));
         const paddingObject = getPaddingObject(padding);
         function getBoundingClientRect2() {
-          if (clientRects.length === 2 && clientRects[0].left > clientRects[1].right && x != null && y != null) {
+          if (clientRects.length === 2 && (clientRects[0].left > clientRects[1].right || clientRects[1].left > clientRects[0].right) && x != null && y != null) {
             return clientRects.find((rect) => x > rect.left - paddingObject.left && x < rect.right + paddingObject.right && y > rect.top - paddingObject.top && y < rect.bottom + paddingObject.bottom) || fallback;
           }
           if (clientRects.length >= 2) {
@@ -22395,20 +22391,14 @@ ${prefix}
               const isTop = getSide2(placement) === "top";
               const top2 = firstRect.top;
               const bottom2 = lastRect.bottom;
-              const left2 = isTop ? firstRect.left : lastRect.left;
-              const right2 = isTop ? firstRect.right : lastRect.right;
-              const width2 = right2 - left2;
-              const height2 = bottom2 - top2;
-              return {
-                top: top2,
-                bottom: bottom2,
-                left: left2,
-                right: right2,
-                width: width2,
-                height: height2,
-                x: left2,
-                y: top2
-              };
+              const left = isTop ? firstRect.left : lastRect.left;
+              const right = isTop ? firstRect.right : lastRect.right;
+              return rectToClientRect({
+                x: left,
+                y: top2,
+                width: right - left,
+                height: bottom2 - top2
+              });
             }
             const isLeftSide = getSide2(placement) === "left";
             const maxRight = max(...clientRects.map((rect) => rect.right));
@@ -22416,20 +22406,12 @@ ${prefix}
             const measureRects = clientRects.filter((rect) => isLeftSide ? rect.left === minLeft : rect.right === maxRight);
             const top = measureRects[0].top;
             const bottom = measureRects[measureRects.length - 1].bottom;
-            const left = minLeft;
-            const right = maxRight;
-            const width = right - left;
-            const height = bottom - top;
-            return {
-              top,
-              bottom,
-              left,
-              right,
-              width,
-              height,
-              x: left,
-              y: top
-            };
+            return rectToClientRect({
+              x: minLeft,
+              y: top,
+              width: maxRight - minLeft,
+              height: bottom - top
+            });
           }
           return fallback;
         }
@@ -22555,23 +22537,16 @@ ${prefix}
           y
         };
         const overflow = await platform2.detectOverflow(state, detectOverflowOptions);
-        const crossAxis = getSideAxis(getSide2(placement));
+        const crossAxis = getSideAxis(placement);
         const mainAxis = getOppositeAxis(crossAxis);
         let mainAxisCoord = coords[mainAxis];
         let crossAxisCoord = coords[crossAxis];
+        const clampCoord = (axis, coord) => clamp(coord + overflow[axis === "y" ? "top" : "left"], coord, coord - overflow[axis === "y" ? "bottom" : "right"]);
         if (checkMainAxis) {
-          const minSide = mainAxis === "y" ? "top" : "left";
-          const maxSide = mainAxis === "y" ? "bottom" : "right";
-          const min2 = mainAxisCoord + overflow[minSide];
-          const max2 = mainAxisCoord - overflow[maxSide];
-          mainAxisCoord = clamp(min2, mainAxisCoord, max2);
+          mainAxisCoord = clampCoord(mainAxis, mainAxisCoord);
         }
         if (checkCrossAxis) {
-          const minSide = crossAxis === "y" ? "top" : "left";
-          const maxSide = crossAxis === "y" ? "bottom" : "right";
-          const min2 = crossAxisCoord + overflow[minSide];
-          const max2 = crossAxisCoord - overflow[maxSide];
-          crossAxisCoord = clamp(min2, crossAxisCoord, max2);
+          crossAxisCoord = clampCoord(crossAxis, crossAxisCoord);
         }
         const limitedCoords = limiter.fn({
           ...state,
@@ -22600,7 +22575,6 @@ ${prefix}
       name: "size",
       options,
       async fn(state) {
-        var _state$middlewareData, _state$middlewareData2;
         const {
           placement,
           rects,
@@ -22633,24 +22607,21 @@ ${prefix}
         const maximumClippingWidth = width - overflow.left - overflow.right;
         const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
         const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
-        const noShift = !state.middlewareData.shift;
+        const shiftData = state.middlewareData.shift;
+        const noShift = !shiftData;
         let availableHeight = overflowAvailableHeight;
         let availableWidth = overflowAvailableWidth;
-        if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
+        if (shiftData != null && shiftData.enabled.x) {
           availableWidth = maximumClippingWidth;
         }
-        if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
+        if (shiftData != null && shiftData.enabled.y) {
           availableHeight = maximumClippingHeight;
         }
         if (noShift && !alignment) {
-          const xMin = max(overflow.left, 0);
-          const xMax = max(overflow.right, 0);
-          const yMin = max(overflow.top, 0);
-          const yMax = max(overflow.bottom, 0);
           if (isYAxis) {
-            availableWidth = width - 2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : max(overflow.left, overflow.right));
+            availableWidth = width - 2 * max(overflow.left, overflow.right);
           } else {
-            availableHeight = height - 2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : max(overflow.top, overflow.bottom));
+            availableHeight = height - 2 * max(overflow.top, overflow.bottom);
           }
         }
         await apply2({
@@ -22798,7 +22769,7 @@ ${prefix}
   function getNearestOverflowAncestor(node) {
     const parentNode2 = getParentNode(node);
     if (isLastTraversableNode(parentNode2)) {
-      return node.ownerDocument ? node.ownerDocument.body : node.body;
+      return (node.ownerDocument || node).body;
     }
     if (isHTMLElement(parentNode2) && isOverflowElement(parentNode2)) {
       return parentNode2;
@@ -22888,10 +22859,7 @@ ${prefix}
     if (isFixed === void 0) {
       isFixed = false;
     }
-    if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) {
-      return false;
-    }
-    return isFixed;
+    return !!floatingOffsetParent && isFixed && floatingOffsetParent === getWindow(element);
   }
   function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
     if (includeScale === void 0) {
@@ -22917,12 +22885,12 @@ ${prefix}
     let y = (clientRect2.top + visualOffsets.y) / scale.y;
     let width = clientRect2.width / scale.x;
     let height = clientRect2.height / scale.y;
-    if (domElement) {
+    if (domElement && offsetParent) {
       const win = getWindow(domElement);
-      const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
+      const offsetWin = isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
       let currentWin = win;
       let currentIFrame = getFrameElement(currentWin);
-      while (currentIFrame && offsetParent && offsetWin !== currentWin) {
+      while (currentIFrame && offsetWin !== currentWin) {
         const iframeScale = getScale(currentIFrame);
         const iframeRect = currentIFrame.getBoundingClientRect();
         const css = getComputedStyle2(currentIFrame);
@@ -22981,7 +22949,7 @@ ${prefix}
     let scale = createCoords(1);
     const offsets = createCoords(0);
     const isOffsetParentAnElement = isHTMLElement(offsetParent);
-    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (isOffsetParentAnElement || !isFixed) {
       if (getNodeName(offsetParent) !== "body" || isOverflowElement(documentElement)) {
         scroll = getNodeScroll(offsetParent);
       }
@@ -23001,15 +22969,14 @@ ${prefix}
     };
   }
   function getClientRects(element) {
-    return Array.from(element.getClientRects());
+    return element.getClientRects ? Array.from(element.getClientRects()) : [];
   }
-  function getDocumentRect(element) {
-    const html = getDocumentElement(element);
-    const scroll = getNodeScroll(element);
-    const body = element.ownerDocument.body;
+  function getDocumentRect(html) {
+    const scroll = getNodeScroll(html);
+    const body = html.ownerDocument.body;
     const width = max(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth);
     const height = max(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight);
-    let x = -scroll.scrollLeft + getWindowScrollBarX(element);
+    let x = -scroll.scrollLeft + getWindowScrollBarX(html);
     const y = -scroll.scrollTop;
     if (getComputedStyle2(body).direction === "rtl") {
       x += max(html.clientWidth, body.clientWidth) - width;
@@ -23022,7 +22989,11 @@ ${prefix}
     };
   }
   var SCROLLBAR_MAX = 25;
-  function getViewportRect(element, strategy) {
+  function getViewportRect(element, strategy, rootBoundary) {
+    if (rootBoundary === void 0) {
+      rootBoundary = "viewport";
+    }
+    const isLayoutViewport = rootBoundary === "layoutViewport";
     const win = getWindow(element);
     const html = getDocumentElement(element);
     const visualViewport = win.visualViewport;
@@ -23031,12 +23002,19 @@ ${prefix}
     let x = 0;
     let y = 0;
     if (visualViewport) {
-      width = visualViewport.width;
-      height = visualViewport.height;
-      const visualViewportBased = isWebKit();
-      if (!visualViewportBased || visualViewportBased && strategy === "fixed") {
-        x = visualViewport.offsetLeft;
-        y = visualViewport.offsetTop;
+      const layoutRelativeClientCoords = !isWebKit() || strategy === "fixed";
+      if (isLayoutViewport) {
+        if (!layoutRelativeClientCoords) {
+          x = -visualViewport.offsetLeft;
+          y = -visualViewport.offsetTop;
+        }
+      } else {
+        width = visualViewport.width;
+        height = visualViewport.height;
+        if (layoutRelativeClientCoords) {
+          x = visualViewport.offsetLeft;
+          y = visualViewport.offsetTop;
+        }
       }
     }
     const windowScrollbarX = getWindowScrollBarX(html);
@@ -23045,12 +23023,11 @@ ${prefix}
       const body = doc3.body;
       const bodyStyles = getComputedStyle(body);
       const bodyMarginInline = doc3.compatMode === "CSS1Compat" ? parseFloat(bodyStyles.marginLeft) + parseFloat(bodyStyles.marginRight) || 0 : 0;
-      const clippingStableScrollbarWidth = Math.abs(html.clientWidth - body.clientWidth - bodyMarginInline);
-      if (clippingStableScrollbarWidth <= SCROLLBAR_MAX) {
-        width -= clippingStableScrollbarWidth;
+      const reservedWidth = Math.abs(html.clientWidth - body.clientWidth - bodyMarginInline);
+      const gutter = getComputedStyle(html).scrollbarGutter === "stable both-edges" ? reservedWidth / 2 : reservedWidth;
+      if (gutter <= SCROLLBAR_MAX) {
+        width -= gutter;
       }
-    } else if (windowScrollbarX <= SCROLLBAR_MAX) {
-      width += windowScrollbarX;
     }
     return {
       width,
@@ -23063,7 +23040,7 @@ ${prefix}
     const clientRect2 = getBoundingClientRect(element, true, strategy === "fixed");
     const top = clientRect2.top + element.clientTop;
     const left = clientRect2.left + element.clientLeft;
-    const scale = isHTMLElement(element) ? getScale(element) : createCoords(1);
+    const scale = getScale(element);
     const width = element.clientWidth * scale.x;
     const height = element.clientHeight * scale.y;
     const x = left * scale.x;
@@ -23077,8 +23054,8 @@ ${prefix}
   }
   function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) {
     let rect;
-    if (clippingAncestor === "viewport") {
-      rect = getViewportRect(element, strategy);
+    if (clippingAncestor === "viewport" || clippingAncestor === "layoutViewport") {
+      rect = getViewportRect(element, strategy, clippingAncestor);
     } else if (clippingAncestor === "document") {
       rect = getDocumentRect(getDocumentElement(element));
     } else if (isElement(clippingAncestor)) {
@@ -23094,33 +23071,24 @@ ${prefix}
     }
     return rectToClientRect(rect);
   }
-  function hasFixedPositionAncestor(element, stopNode) {
-    const parentNode2 = getParentNode(element);
-    if (parentNode2 === stopNode || !isElement(parentNode2) || isLastTraversableNode(parentNode2)) {
-      return false;
-    }
-    return getComputedStyle2(parentNode2).position === "fixed" || hasFixedPositionAncestor(parentNode2, stopNode);
-  }
   function getClippingElementAncestors(element, cache) {
     const cachedResult2 = cache.get(element);
     if (cachedResult2) {
       return cachedResult2;
     }
     let result = getOverflowAncestors(element, [], false).filter((el) => isElement(el) && getNodeName(el) !== "body");
-    let currentContainingBlockComputedStyle = null;
+    let lastKeptComputedStyle = null;
     const elementIsFixed = getComputedStyle2(element).position === "fixed";
     let currentNode = elementIsFixed ? getParentNode(element) : element;
     while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
       const computedStyle = getComputedStyle2(currentNode);
       const currentNodeIsContaining = isContainingBlock(currentNode);
-      if (!currentNodeIsContaining && computedStyle.position === "fixed") {
-        currentContainingBlockComputedStyle = null;
-      }
-      const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === "static" && !!currentContainingBlockComputedStyle && (currentContainingBlockComputedStyle.position === "absolute" || currentContainingBlockComputedStyle.position === "fixed") || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
+      const lastPosition = lastKeptComputedStyle ? lastKeptComputedStyle.position : elementIsFixed ? "fixed" : "";
+      const shouldDropCurrentNode = !currentNodeIsContaining && (lastPosition === "fixed" || lastPosition === "absolute" && computedStyle.position === "static");
       if (shouldDropCurrentNode) {
         result = result.filter((ancestor) => ancestor !== currentNode);
       } else {
-        currentContainingBlockComputedStyle = computedStyle;
+        lastKeptComputedStyle = computedStyle;
       }
       currentNode = getParentNode(currentNode);
     }
@@ -23175,10 +23143,7 @@ ${prefix}
       scrollTop: 0
     };
     const offsets = createCoords(0);
-    function setLeftRTLScrollbarOffset() {
-      offsets.x = getWindowScrollBarX(documentElement);
-    }
-    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (isOffsetParentAnElement || !isFixed) {
       if (getNodeName(offsetParent) !== "body" || isOverflowElement(documentElement)) {
         scroll = getNodeScroll(offsetParent);
       }
@@ -23186,12 +23151,10 @@ ${prefix}
         const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent);
         offsets.x = offsetRect.x + offsetParent.clientLeft;
         offsets.y = offsetRect.y + offsetParent.clientTop;
-      } else if (documentElement) {
-        setLeftRTLScrollbarOffset();
       }
     }
-    if (isFixed && !isOffsetParentAnElement && documentElement) {
-      setLeftRTLScrollbarOffset();
+    if (!isOffsetParentAnElement && documentElement) {
+      offsets.x = getWindowScrollBarX(documentElement);
     }
     const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
     const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
@@ -23272,6 +23235,157 @@ ${prefix}
     isElement,
     isRTL
   };
+  function rectsAreEqual(a, b) {
+    return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+  }
+  function observeMove(element, onMove, ancestorResize) {
+    let io = null;
+    let timeoutId;
+    const root2 = getDocumentElement(element);
+    function cleanup() {
+      var _io;
+      clearTimeout(timeoutId);
+      (_io = io) == null || _io.disconnect();
+      io = null;
+    }
+    function refresh(skip, threshold) {
+      if (skip === void 0) {
+        skip = false;
+      }
+      if (threshold === void 0) {
+        threshold = 1;
+      }
+      cleanup();
+      const elementRectForRootMargin = element.getBoundingClientRect();
+      const {
+        left,
+        top,
+        width,
+        height
+      } = elementRectForRootMargin;
+      if (!skip) {
+        onMove();
+      }
+      if (!width || !height) {
+        return;
+      }
+      const insetTop = floor(top);
+      const insetRight = floor(root2.clientWidth - (left + width));
+      const insetBottom = floor(root2.clientHeight - (top + height));
+      const insetLeft = floor(left);
+      const rootMargin = -insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px";
+      const options = {
+        rootMargin,
+        threshold: max(0, min(1, threshold)) || 1
+      };
+      let isFirstUpdate = true;
+      function handleObserve(entries) {
+        const ratio = entries[0].intersectionRatio;
+        if (!rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) {
+          return refresh();
+        }
+        if (ratio !== threshold) {
+          if (!isFirstUpdate) {
+            return refresh();
+          }
+          if (!ratio) {
+            timeoutId = setTimeout(() => {
+              refresh(false, 1e-7);
+            }, 1e3);
+          } else {
+            refresh(false, ratio);
+          }
+        }
+        isFirstUpdate = false;
+      }
+      try {
+        io = new IntersectionObserver(handleObserve, {
+          ...options,
+          // Handle <iframe>s
+          root: root2.ownerDocument
+        });
+      } catch (_e) {
+        io = new IntersectionObserver(handleObserve, options);
+      }
+      io.observe(element);
+    }
+    const win = getWindow(element);
+    const handleResize = () => refresh(ancestorResize);
+    win.addEventListener("resize", handleResize);
+    refresh(true);
+    return () => {
+      win.removeEventListener("resize", handleResize);
+      cleanup();
+    };
+  }
+  function autoUpdate(reference, floating, update, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    const {
+      ancestorScroll = true,
+      ancestorResize = true,
+      elementResize = typeof ResizeObserver === "function",
+      layoutShift = typeof IntersectionObserver === "function",
+      animationFrame = false
+    } = options;
+    const referenceEl = unwrapElement(reference);
+    const ancestors = ancestorScroll || ancestorResize ? [...referenceEl ? getOverflowAncestors(referenceEl) : [], ...floating ? getOverflowAncestors(floating) : []] : [];
+    ancestors.forEach((ancestor) => {
+      ancestorScroll && ancestor.addEventListener("scroll", update);
+      ancestorResize && ancestor.addEventListener("resize", update);
+    });
+    const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update, ancestorResize) : null;
+    let reobserveFrame = -1;
+    let resizeObserver = null;
+    if (elementResize) {
+      resizeObserver = new ResizeObserver((_ref) => {
+        let [firstEntry] = _ref;
+        if (firstEntry && firstEntry.target === referenceEl && resizeObserver && floating) {
+          resizeObserver.unobserve(floating);
+          cancelAnimationFrame(reobserveFrame);
+          reobserveFrame = requestAnimationFrame(() => {
+            var _resizeObserver;
+            (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
+          });
+        }
+        update();
+      });
+      if (referenceEl && !animationFrame) {
+        resizeObserver.observe(referenceEl);
+      }
+      if (floating) {
+        resizeObserver.observe(floating);
+      }
+    }
+    let frameId;
+    let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null;
+    if (animationFrame) {
+      frameLoop();
+    }
+    function frameLoop() {
+      const nextRefRect = getBoundingClientRect(reference);
+      if (prevRefRect && !rectsAreEqual(prevRefRect, nextRefRect)) {
+        update();
+      }
+      prevRefRect = nextRefRect;
+      frameId = requestAnimationFrame(frameLoop);
+    }
+    update();
+    return () => {
+      var _resizeObserver2;
+      ancestors.forEach((ancestor) => {
+        ancestorScroll && ancestor.removeEventListener("scroll", update);
+        ancestorResize && ancestor.removeEventListener("resize", update);
+      });
+      cleanupIo == null || cleanupIo();
+      (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
+      resizeObserver = null;
+      if (animationFrame) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }
   var offset2 = offset;
   var autoPlacement2 = autoPlacement;
   var shift3 = shift2;
@@ -23282,11 +23396,9 @@ ${prefix}
   var inline2 = inline;
   var computePosition2 = (reference, floating, options) => {
     const cache = /* @__PURE__ */ new Map();
-    const mergedOptions = {
-      platform,
-      ...options
-    };
+    const mergedOptions = options != null ? options : {};
     const platformWithCache = {
+      ...platform,
       ...mergedOptions.platform,
       _c: cache
     };
@@ -29849,8 +29961,94 @@ ${prefix}
   }
 
   // footnote.ts
+  var footnotePluginKey = new PluginKey("footnote");
+  function footnoteRuns(doc3) {
+    const runs = [];
+    doc3.descendants((node, pos) => {
+      if (!node.isTextblock) return true;
+      let current = null;
+      let offset3 = pos + 1;
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        const mark = child.marks.find((m) => m.type.name === "footnote");
+        const id = mark ? String(mark.attrs.id || "") : "";
+        const end = offset3 + child.nodeSize;
+        if (current && current.id === id) {
+          current.to = end;
+        } else if (mark && id) {
+          current = { id, from: offset3, to: end, attrs: mark.attrs };
+          runs.push(current);
+        } else {
+          current = null;
+        }
+        offset3 = end;
+      }
+      return false;
+    });
+    return runs;
+  }
+  function footnoteNumbers(runs) {
+    const numbers = /* @__PURE__ */ new Map();
+    for (const run4 of runs) {
+      if (!numbers.has(run4.id)) numbers.set(run4.id, numbers.size + 1);
+    }
+    return numbers;
+  }
+  function footnoteNumberAt(runs, pos) {
+    return footnoteNumbers(runs.filter((run4) => run4.from < pos)).size + 1;
+  }
+  function nextFootnoteId(runs) {
+    let max2 = 0;
+    for (const run4 of runs) {
+      const match = /^fn(\d+)$/.exec(run4.id);
+      if (match) max2 = Math.max(max2, Number(match[1]));
+    }
+    return `fn${max2 + 1}`;
+  }
+  function footnoteText(content) {
+    return content.map((paragraph) => (paragraph.content ?? []).map((node) => node.text ?? "").join("").trim()).filter(Boolean).join("\n");
+  }
+  function footnoteContentFromAttrs(attrs) {
+    if (Array.isArray(attrs.content) && attrs.content.length > 0) {
+      return attrs.content;
+    }
+    return String(attrs.text || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line) => ({ type: "paragraph", content: [{ type: "text", text: line }] }));
+  }
+  function parseContent(raw) {
+    if (!raw) return null;
+    try {
+      const value = JSON.parse(raw);
+      return Array.isArray(value) ? value : null;
+    } catch {
+      return null;
+    }
+  }
+  function numberWidget(pos, id, num) {
+    return Decoration.widget(
+      pos,
+      () => {
+        const marker = document.createElement("sup");
+        marker.className = "fn-ref fn-num";
+        marker.contentEditable = "false";
+        marker.dataset.fnId = id;
+        marker.textContent = String(num);
+        return marker;
+      },
+      { side: -1, key: `fn-${id}-${num}`, ignoreSelection: true }
+    );
+  }
+  function buildDecorations(doc3, active) {
+    const runs = footnoteRuns(doc3);
+    const numbers = footnoteNumbers(runs);
+    const decorations = runs.map((run4) => numberWidget(run4.to, run4.id, numbers.get(run4.id) ?? 0));
+    if (active && active.from < active.to) {
+      decorations.push(Decoration.inline(active.from, active.to, { class: "fn-editing" }));
+    }
+    return DecorationSet.create(doc3, decorations);
+  }
   var Footnote = Mark2.create({
     name: "footnote",
+    priority: 1001,
     inclusive: false,
     excludes: "link footnote",
     addAttributes() {
@@ -29864,16 +30062,288 @@ ${prefix}
           default: null,
           parseHTML: (element) => element.getAttribute("data-fn-text"),
           renderHTML: (attributes) => attributes.text ? { "data-fn-text": attributes.text } : {}
+        },
+        content: {
+          default: null,
+          parseHTML: (element) => parseContent(element.getAttribute("data-fn-content")),
+          renderHTML: (attributes) => Array.isArray(attributes.content) && attributes.content.length > 0 ? { "data-fn-content": JSON.stringify(attributes.content) } : {}
         }
       };
     },
     parseHTML() {
-      return [{ tag: "sup.fn-ref" }];
+      return [{ tag: "span[data-fn-id]" }, { tag: "sup.fn-ref[data-fn-id]" }];
     },
     renderHTML({ HTMLAttributes }) {
-      return ["sup", mergeAttributes({ class: "fn-ref" }, HTMLAttributes), 0];
+      return ["span", mergeAttributes({ class: "fn-anchor" }, HTMLAttributes), 0];
+    },
+    addProseMirrorPlugins() {
+      return [
+        new Plugin({
+          key: footnotePluginKey,
+          state: {
+            init: (_, state) => ({ active: null, decorations: buildDecorations(state.doc, null) }),
+            apply: (tr2, prev) => {
+              const meta = tr2.getMeta(footnotePluginKey);
+              if (!meta && !tr2.docChanged) return prev;
+              let active = meta ? meta.active : prev.active;
+              if (!meta && active) {
+                const from2 = tr2.mapping.map(active.from, 1);
+                const to = tr2.mapping.map(active.to, -1);
+                active = from2 < to ? { from: from2, to } : null;
+              }
+              return { active, decorations: buildDecorations(tr2.doc, active) };
+            }
+          },
+          props: {
+            decorations: (state) => footnotePluginKey.getState(state)?.decorations
+          }
+        })
+      ];
     }
   });
+
+  // footnote-popover.ts
+  var TOOL_MARKS = ["bold", "italic", "link"];
+  function cleanContent(content) {
+    if (!Array.isArray(content)) return [];
+    return content.filter((paragraph) => footnoteText([paragraph]) !== "");
+  }
+  function normalizeHref(value) {
+    const href = value.trim();
+    if (href === "" || /^[a-z][a-z0-9+.-]*:/i.test(href)) return href;
+    return `https://${href}`;
+  }
+  function createFootnotePopover(editor, popover, options) {
+    const mount = popover.querySelector("[data-fn-mount]");
+    const title = popover.querySelector("[data-fn-title]");
+    const linkRow = popover.querySelector("[data-fn-link]");
+    const linkInput = popover.querySelector("[data-fn-link-input]");
+    const removeButton = popover.querySelector('[data-fn-command="remove"]');
+    if (!mount || !title || !linkRow || !linkInput || !removeButton) return null;
+    let session = null;
+    const activeRange = () => footnotePluginKey.getState(editor.state)?.active ?? null;
+    const reference = {
+      contextElement: editor.view.dom,
+      getBoundingClientRect: () => {
+        const range = activeRange();
+        return range ? posToDOMRect(editor.view, range.from, range.to) : editor.view.dom.getBoundingClientRect();
+      }
+    };
+    const docked = window.matchMedia("(max-width: 600px)");
+    const position = () => {
+      popover.classList.toggle("is-docked", docked.matches);
+      if (docked.matches) {
+        const viewport = window.visualViewport;
+        const keyboard = viewport ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+        popover.style.removeProperty("left");
+        popover.style.removeProperty("top");
+        popover.style.setProperty("--fn-dock-offset", `${keyboard}px`);
+        return;
+      }
+      void computePosition2(reference, popover, {
+        placement: "bottom",
+        middleware: [offset2(10), flip2({ padding: 8 }), shift3({ padding: 8 })]
+      }).then(({ x, y }) => {
+        popover.style.left = `${x}px`;
+        popover.style.top = `${y}px`;
+      });
+    };
+    const updateTools = () => {
+      const note = session?.note;
+      for (const mark of TOOL_MARKS) {
+        const button = popover.querySelector(`[data-fn-command="${mark}"]`);
+        button?.classList.toggle("is-active", Boolean(note?.isActive(mark)));
+      }
+    };
+    const showLinkRow = () => {
+      if (!session) return;
+      linkInput.value = String(session.note.getAttributes("link").href ?? "");
+      linkRow.hidden = false;
+      linkInput.focus();
+      linkInput.select();
+    };
+    const hideLinkRow = () => {
+      linkRow.hidden = true;
+      session?.note.commands.focus();
+    };
+    const applyLink = () => {
+      if (!session) return;
+      const { note } = session;
+      const href = normalizeHref(linkInput.value);
+      linkRow.hidden = true;
+      if (href === "") {
+        note.chain().focus().extendMarkRange("link").unsetLink().run();
+        return;
+      }
+      if (note.state.selection.empty && !note.isActive("link")) {
+        note.chain().focus().insertContent({ type: "text", text: href, marks: [{ type: "link", attrs: { href } }] }).run();
+        return;
+      }
+      note.chain().focus().extendMarkRange("link").setLink({ href }).run();
+    };
+    const finish = (action, restoreFocus) => {
+      if (!session) return;
+      const { id, existing, initial, note, stopPositioning } = session;
+      session = null;
+      const range = activeRange();
+      const content = action === "remove" ? [] : cleanContent(note.getJSON().content);
+      stopPositioning();
+      popover.hidden = true;
+      linkRow.hidden = true;
+      mount.replaceChildren();
+      window.setTimeout(() => note.destroy(), 0);
+      const type = editor.schema.marks.footnote;
+      const tr2 = editor.state.tr.setMeta(footnotePluginKey, { active: null });
+      if (range && JSON.stringify(content) !== initial) {
+        if (content.length > 0) {
+          tr2.addMark(range.from, range.to, type.create({ id, text: footnoteText(content), content }));
+        } else if (existing) {
+          tr2.removeMark(range.from, range.to, type);
+        }
+      }
+      if (!tr2.docChanged) tr2.setMeta("addToHistory", false);
+      if (restoreFocus && range) tr2.setSelection(TextSelection.create(tr2.doc, range.to));
+      editor.view.dispatch(tr2);
+      if (restoreFocus) editor.view.focus();
+    };
+    const open = (range, id, content, existing, num) => {
+      const host = document.createElement("div");
+      mount.replaceChildren(host);
+      const note = new Editor({
+        element: host,
+        content: { type: "doc", content: content.length > 0 ? content : [{ type: "paragraph" }] },
+        editorProps: {
+          attributes: { class: "editor-surface fn-note", dir: options.dir, lang: options.lang }
+        },
+        extensions: [
+          index_default3,
+          index_default12,
+          index_default13,
+          index_default2,
+          index_default10,
+          index_default7,
+          index_default14,
+          index_default11.configure({
+            openOnClick: false,
+            autolink: true,
+            defaultProtocol: "https",
+            protocols: ["http", "https", "mailto"]
+          }),
+          Placeholder.configure({ placeholder: options.placeholder }),
+          Extension.create({
+            name: "footnoteKeys",
+            priority: 1e3,
+            addKeyboardShortcuts: () => ({
+              "Mod-Enter": () => {
+                finish("save", true);
+                return true;
+              },
+              Escape: () => {
+                finish("save", true);
+                return true;
+              },
+              "Mod-k": () => {
+                showLinkRow();
+                return true;
+              }
+            })
+          })
+        ],
+        onTransaction: () => updateTools()
+      });
+      session = { id, existing, initial: JSON.stringify(content), note, stopPositioning: () => {
+      } };
+      title.textContent = `${options.title} ${options.formatNumber(num)}`;
+      removeButton.hidden = !existing;
+      linkRow.hidden = true;
+      popover.hidden = false;
+      note.commands.focus("end");
+      editor.view.dispatch(
+        editor.state.tr.setMeta(footnotePluginKey, { active: { from: range.from, to: range.to } }).setMeta("addToHistory", false)
+      );
+      const stopAutoUpdate = autoUpdate(reference, popover, position);
+      const viewport = window.visualViewport;
+      viewport?.addEventListener("resize", position);
+      viewport?.addEventListener("scroll", position);
+      session.stopPositioning = () => {
+        stopAutoUpdate();
+        viewport?.removeEventListener("resize", position);
+        viewport?.removeEventListener("scroll", position);
+      };
+      updateTools();
+    };
+    const openForSelection = () => {
+      finish("save", false);
+      const { selection, doc: doc3 } = editor.state;
+      const runs = footnoteRuns(doc3);
+      const current = runs.find((run4) => run4.from < selection.to && selection.from < run4.to);
+      if (current) {
+        const num = footnoteNumbers(runs).get(current.id) ?? 1;
+        open(current, current.id, footnoteContentFromAttrs(current.attrs), true, num);
+        return;
+      }
+      const { from: from2, $from } = selection;
+      const to = Math.min(selection.to, $from.end());
+      if (!$from.parent.isTextblock || from2 >= to) return;
+      open({ from: from2, to }, nextFootnoteId(runs), [], false, footnoteNumberAt(runs, from2));
+    };
+    const openAt = (id, pos) => {
+      finish("save", false);
+      const runs = footnoteRuns(editor.state.doc);
+      const run4 = runs.find((candidate) => candidate.id === id && candidate.from <= pos && pos <= candidate.to) ?? runs.find((candidate) => candidate.id === id);
+      if (!run4) return;
+      open(run4, id, footnoteContentFromAttrs(run4.attrs), true, footnoteNumbers(runs).get(id) ?? 1);
+    };
+    popover.addEventListener("mousedown", (event) => {
+      if (event.target.closest("button")) event.preventDefault();
+    });
+    popover.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-fn-command]");
+      if (!button || !session) return;
+      event.preventDefault();
+      const { note } = session;
+      switch (button.dataset.fnCommand) {
+        case "bold":
+          note.chain().focus().toggleBold().run();
+          break;
+        case "italic":
+          note.chain().focus().toggleItalic().run();
+          break;
+        case "link":
+          if (linkRow.hidden) showLinkRow();
+          else hideLinkRow();
+          break;
+        case "link-apply":
+          applyLink();
+          break;
+        case "done":
+          finish("save", true);
+          break;
+        case "remove":
+          finish("remove", true);
+          break;
+      }
+    });
+    linkInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        applyLink();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        hideLinkRow();
+      }
+    });
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (!session || popover.contains(event.target)) return;
+        finish("save", false);
+      },
+      true
+    );
+    return { openForSelection, openAt };
+  }
 
   // main.ts
   var ImageBubbleMenu = BubbleMenu.extend({ name: "imageBubbleMenu" });
@@ -29922,7 +30392,8 @@ ${prefix}
       saved: root.dataset.uiSaved || "Saved",
       error: root.dataset.uiError || "Save failed",
       linkPrompt: root.dataset.uiLinkPrompt || "Link URL",
-      footnotePrompt: root.dataset.uiFootnotePrompt || "Footnote text",
+      footnoteTitle: root.dataset.uiFootnoteTitle || "Footnote",
+      footnotePlaceholder: root.dataset.uiFootnotePlaceholder || "Footnote",
       embedPrompt: root.dataset.uiEmbedPrompt || "YouTube, Spotify, or SoundCloud URL",
       embedInvalid: root.dataset.uiEmbedInvalid || "That URL isn't a supported embed",
       wordsOne: root.dataset.uiWordsOne || "%d word",
@@ -29946,7 +30417,8 @@ ${prefix}
     const publishForm = root.querySelector("[data-publish-form]");
     const draftForm = root.querySelector("[data-draft-form]");
     const wordCount = root.querySelector("[data-editor-words]");
-    if (form && titleInput && docJSON && docInput && canvas && mount && status && bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput && (publishForm || draftForm) && form.dataset.saveUrl) {
+    const footnotePopover = root.querySelector("[data-fn-popover]");
+    if (form && titleInput && docJSON && docInput && canvas && mount && status && bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput && footnotePopover && (publishForm || draftForm) && form.dataset.saveUrl) {
       const saveURL = form.dataset.saveUrl;
       const rawDoc = docJSON.textContent?.trim() ?? docInput.value.trim();
       let initialContent;
@@ -30097,6 +30569,13 @@ ${prefix}
       const syncDoc = () => {
         docInput.value = JSON.stringify(editor.getJSON());
       };
+      const footnotes = createFootnotePopover(editor, footnotePopover, {
+        lang,
+        dir,
+        title: ui.footnoteTitle,
+        placeholder: ui.footnotePlaceholder,
+        formatNumber: (value) => uiDigits(pageLang, String(value))
+      });
       const runCommand = (command2) => {
         switch (command2) {
           case "bold":
@@ -30130,7 +30609,7 @@ ${prefix}
             setLink(editor, ui.linkPrompt);
             break;
           case "footnote":
-            setFootnote(editor, ui.footnotePrompt);
+            footnotes?.openForSelection();
             break;
           case "ltr":
           case "rtl":
@@ -30305,6 +30784,13 @@ ${prefix}
         focusParagraphAfterBlock(editor);
         syncDoc();
       });
+      editor.view.dom.addEventListener("mousedown", (event) => {
+        const marker = event.target.closest(".fn-num");
+        const id = marker?.dataset.fnId;
+        if (!marker || !id) return;
+        event.preventDefault();
+        footnotes?.openAt(id, editor.view.posAtDOM(marker, 0));
+      });
       form.addEventListener("submit", (event) => {
         event.preventDefault();
         void save();
@@ -30388,29 +30874,5 @@ ${prefix}
       return;
     }
     editor.chain().focus().updateAttributes(type, { dir }).run();
-  }
-  function nextFootnoteId(editor) {
-    let max2 = 0;
-    editor.state.doc.descendants((node) => {
-      if (!node.isText) return;
-      for (const mark of node.marks) {
-        if (mark.type.name !== "footnote") continue;
-        const id = String(mark.attrs.id || "");
-        const match = /^fn(\d+)$/.exec(id);
-        if (match) max2 = Math.max(max2, Number(match[1]));
-      }
-    });
-    return `fn${max2 + 1}`;
-  }
-  function setFootnote(editor, footnotePrompt) {
-    const current = editor.getAttributes("footnote");
-    const text = window.prompt(footnotePrompt, current.text || "");
-    if (text === null) return;
-    if (text.trim() === "") {
-      editor.chain().focus().extendMarkRange("footnote").unsetMark("footnote").run();
-      return;
-    }
-    const id = current.id || nextFootnoteId(editor);
-    editor.chain().focus().extendMarkRange("footnote").setMark("footnote", { id, text: text.trim() }).run();
   }
 })();

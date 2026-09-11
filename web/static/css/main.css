@@ -561,6 +561,8 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   margin-inline-start: 0.25em;
 }
 .prose .fn-back:hover { color: var(--ink); }
+.prose ol.footnotes > li > p { margin: 0 0 var(--s2); }
+.prose ol.footnotes > li > p:last-child { margin-bottom: 0; }
 
 .prose ul,
 .prose ol {
@@ -1713,11 +1715,131 @@ a.btn-secondary:hover {
 }
 .editor-surface hr::before { content: "※"; }
 
-.editor-surface .fn-ref {
-  font-family: var(--font-sans);
-  font-size: 0.75em;
-  vertical-align: super;
+.editor-surface .fn-num {
   color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms;
+}
+.editor-surface .fn-num:hover { color: var(--accent-ink); }
+.editor-surface .fn-editing { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+
+/* footnote editor: same material as the other editor menus - paper, one hairline, no shadow */
+
+.fn-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  width: min(24rem, calc(100vw - 2 * var(--s4)));
+  padding: var(--s2) var(--s3) var(--s3);
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+.fn-popover.is-docked {
+  position: fixed;
+  top: auto;
+  inset-inline: 0;
+  bottom: var(--fn-dock-offset, 0px);
+  width: auto;
+  padding-inline: max(var(--s4), env(safe-area-inset-left, 0px))
+                  max(var(--s4), env(safe-area-inset-right, 0px));
+  border-inline: 0;
+  border-block-end: 0;
+  border-radius: 0;
+}
+
+.fn-popover-head,
+.fn-popover-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+
+.fn-popover-title,
+.fn-popover-hint {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+}
+
+.fn-popover button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  min-width: 1.625rem;
+  height: 1.625rem;
+  padding: 0 var(--s2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 120ms, background 120ms;
+}
+.fn-popover-tools { display: inline-flex; gap: 1px; }
+.fn-popover-tools button:hover { color: var(--ink); background: var(--paper-raised); }
+.fn-popover-tools button.is-active {
+  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--accent) 10%, var(--paper));
+}
+.fn-popover-foot button:hover { color: var(--ink); }
+.fn-popover-foot [data-fn-command="remove"] { color: var(--ink-faint); }
+.fn-popover-foot [data-fn-command="remove"]:hover { color: var(--ink-soft); }
+.fn-popover-foot .fn-done { color: var(--ink); }
+
+.fn-popover-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+.fn-popover-link input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--s2) var(--s3);
+}
+.fn-popover-link input::placeholder { color: var(--ink-faint); }
+.fn-popover-link input:focus-visible { outline-offset: 0; }
+
+.fn-popover-body {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+/* the note is typeset exactly like the rendered footnote list */
+.fn-note {
+  font-family: var(--font-serif);
+  font-size: var(--text-ui);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  min-height: 3.2em;
+}
+.fn-note p { margin: 0 0 var(--s2); min-height: 1.6em; }
+.fn-note p:last-child { margin-bottom: 0; }
+.fn-note a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 601px) {
+  .fn-note:lang(fa) { font-size: 1.0625rem; }
 }
 
 .word-count {
@@ -1764,7 +1886,8 @@ a.btn-secondary:hover {
   .field textarea,
   .field select,
   .new-draft input,
-  .capture-form input {
+  .capture-form input,
+  .fn-popover-link input {
     font-size: 1rem;
   }
 }
@@ -1797,6 +1920,12 @@ a.btn-secondary:hover {
     width: 2.75rem;
     height: 2.75rem;
   }
+
+  .fn-popover button {
+    min-width: 2.75rem;
+    height: 2.75rem;
+  }
+  .fn-popover-hint { visibility: hidden; }
 }
 
 /* ---------- print ---------- */

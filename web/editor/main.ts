@@ -22,6 +22,7 @@ import { Aside } from './aside'
 import { Direction, DirectionMark } from './direction'
 import { Embed, parseEmbedURL } from './embed'
 import { Footnote } from './footnote'
+import { createFootnotePopover } from './footnote-popover'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -85,7 +86,8 @@ if (root) {
     saved: root.dataset.uiSaved || 'Saved',
     error: root.dataset.uiError || 'Save failed',
     linkPrompt: root.dataset.uiLinkPrompt || 'Link URL',
-    footnotePrompt: root.dataset.uiFootnotePrompt || 'Footnote text',
+    footnoteTitle: root.dataset.uiFootnoteTitle || 'Footnote',
+    footnotePlaceholder: root.dataset.uiFootnotePlaceholder || 'Footnote',
     embedPrompt: root.dataset.uiEmbedPrompt || 'YouTube, Spotify, or SoundCloud URL',
     embedInvalid: root.dataset.uiEmbedInvalid || "That URL isn't a supported embed",
     wordsOne: root.dataset.uiWordsOne || '%d word',
@@ -110,10 +112,12 @@ if (root) {
   const publishForm = root.querySelector<HTMLFormElement>('[data-publish-form]')
   const draftForm = root.querySelector<HTMLFormElement>('[data-draft-form]')
   const wordCount = root.querySelector<HTMLElement>('[data-editor-words]')
+  const footnotePopover = root.querySelector<HTMLElement>('[data-fn-popover]')
 
   if (
     form && titleInput && docJSON && docInput && canvas && mount && status &&
     bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput &&
+    footnotePopover &&
     (publishForm || draftForm) &&
     form.dataset.saveUrl
   ) {
@@ -274,6 +278,14 @@ if (root) {
       docInput.value = JSON.stringify(editor.getJSON())
     }
 
+    const footnotes = createFootnotePopover(editor, footnotePopover, {
+      lang,
+      dir,
+      title: ui.footnoteTitle,
+      placeholder: ui.footnotePlaceholder,
+      formatNumber: (value) => uiDigits(pageLang, String(value)),
+    })
+
     const runCommand = (command: string) => {
       switch (command) {
         case 'bold':
@@ -307,7 +319,7 @@ if (root) {
           setLink(editor, ui.linkPrompt)
           break
         case 'footnote':
-          setFootnote(editor, ui.footnotePrompt)
+          footnotes?.openForSelection()
           break
         case 'ltr':
         case 'rtl':
@@ -525,6 +537,14 @@ if (root) {
       syncDoc()
     })
 
+    editor.view.dom.addEventListener('mousedown', (event) => {
+      const marker = (event.target as HTMLElement).closest<HTMLElement>('.fn-num')
+      const id = marker?.dataset.fnId
+      if (!marker || !id) return
+      event.preventDefault()
+      footnotes?.openAt(id, editor.view.posAtDOM(marker, 0))
+    })
+
     form.addEventListener('submit', (event) => {
       event.preventDefault()
       void save()
@@ -622,35 +642,4 @@ function toggleDirection(editor: Editor, dir: 'ltr' | 'rtl') {
     return
   }
   editor.chain().focus().updateAttributes(type, { dir }).run()
-}
-
-function nextFootnoteId(editor: Editor): string {
-  let max = 0
-  editor.state.doc.descendants((node) => {
-    if (!node.isText) return
-    for (const mark of node.marks) {
-      if (mark.type.name !== 'footnote') continue
-      const id = String(mark.attrs.id || '')
-      const match = /^fn(\d+)$/.exec(id)
-      if (match) max = Math.max(max, Number(match[1]))
-    }
-  })
-  return `fn${max + 1}`
-}
-
-function setFootnote(editor: Editor, footnotePrompt: string) {
-  const current = editor.getAttributes('footnote') as { id?: string; text?: string }
-  const text = window.prompt(footnotePrompt, current.text || '')
-  if (text === null) return
-  if (text.trim() === '') {
-    editor.chain().focus().extendMarkRange('footnote').unsetMark('footnote').run()
-    return
-  }
-  const id = current.id || nextFootnoteId(editor)
-  editor
-    .chain()
-    .focus()
-    .extendMarkRange('footnote')
-    .setMark('footnote', { id, text: text.trim() })
-    .run()
 }
