@@ -31,6 +31,7 @@ type Attrs struct {
 	Text     string `json:"text,omitempty"`
 	Provider string `json:"provider,omitempty"`
 	Dir      string `json:"dir,omitempty"`
+	Content  []Node `json:"content,omitempty"`
 }
 
 type Mark struct {
@@ -208,7 +209,10 @@ func validateInline(node Node) error {
 			if !validFootnoteID(mark.Attrs.ID) {
 				return errors.New("footnote id is invalid")
 			}
-			text := strings.TrimSpace(mark.Attrs.Text)
+			if err := validateFootnoteContent(mark.Attrs.Content); err != nil {
+				return err
+			}
+			text := footnoteText(mark.Attrs)
 			if text == "" {
 				return errors.New("footnote text is required")
 			}
@@ -280,4 +284,57 @@ var footnoteIDPattern = regexp.MustCompile(`^fn[1-9][0-9]*$`)
 
 func validFootnoteID(id string) bool {
 	return footnoteIDPattern.MatchString(strings.TrimSpace(id))
+}
+
+const maxFootnoteParagraphs = 50
+
+func validateFootnoteContent(content []Node) error {
+	if len(content) > maxFootnoteParagraphs {
+		return errors.New("footnote has too many paragraphs")
+	}
+	for i, paragraph := range content {
+		if paragraph.Type != "paragraph" {
+			return fmt.Errorf("footnote content[%d]: unsupported node %q", i, paragraph.Type)
+		}
+		for j, child := range paragraph.Content {
+			for _, mark := range child.Marks {
+				if mark.Type == "footnote" {
+					return fmt.Errorf("footnote content[%d] child[%d]: nested footnote", i, j)
+				}
+			}
+			if err := validateInline(child); err != nil {
+				return fmt.Errorf("footnote content[%d] child[%d]: %w", i, j, err)
+			}
+		}
+	}
+	return nil
+}
+
+func footnoteText(attrs Attrs) string {
+	if len(attrs.Content) == 0 {
+		return strings.TrimSpace(attrs.Text)
+	}
+	paragraphs := make([]string, 0, len(attrs.Content))
+	for _, paragraph := range footnoteParagraphs(attrs) {
+		paragraphs = append(paragraphs, paragraphText(paragraph))
+	}
+	return strings.Join(paragraphs, "\n")
+}
+
+func footnoteParagraphs(attrs Attrs) []Node {
+	paragraphs := make([]Node, 0, len(attrs.Content))
+	for _, paragraph := range attrs.Content {
+		if paragraphText(paragraph) != "" {
+			paragraphs = append(paragraphs, paragraph)
+		}
+	}
+	return paragraphs
+}
+
+func paragraphText(paragraph Node) string {
+	var b strings.Builder
+	for _, child := range paragraph.Content {
+		b.WriteString(child.Text)
+	}
+	return strings.TrimSpace(b.String())
 }

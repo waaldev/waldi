@@ -54,8 +54,8 @@ type footnoteIndex struct {
 }
 
 type footnoteEntry struct {
-	num  int
-	text string
+	num   int
+	attrs Attrs
 }
 
 func collectFootnotes(doc Document) footnoteIndex {
@@ -66,7 +66,7 @@ func collectFootnotes(doc Document) footnoteIndex {
 			if node.Type == "text" {
 				for _, mark := range node.Marks {
 					if mark.Type == "footnote" {
-						idx.add(mark.Attrs.ID, mark.Attrs.Text)
+						idx.add(mark.Attrs)
 					}
 				}
 			}
@@ -77,10 +77,9 @@ func collectFootnotes(doc Document) footnoteIndex {
 	return idx
 }
 
-func (idx *footnoteIndex) add(id, text string) {
-	id = strings.TrimSpace(id)
-	text = strings.TrimSpace(text)
-	if id == "" || text == "" {
+func (idx *footnoteIndex) add(attrs Attrs) {
+	id := strings.TrimSpace(attrs.ID)
+	if id == "" || footnoteText(attrs) == "" {
 		return
 	}
 	if _, ok := idx.byID[id]; ok {
@@ -88,9 +87,18 @@ func (idx *footnoteIndex) add(id, text string) {
 	}
 	idx.order = append(idx.order, id)
 	idx.byID[id] = footnoteEntry{
-		num:  len(idx.order),
-		text: text,
+		num:   len(idx.order),
+		attrs: attrs,
 	}
+}
+
+func footnoteMarkID(node Node) string {
+	for _, mark := range node.Marks {
+		if mark.Type == "footnote" {
+			return strings.TrimSpace(mark.Attrs.ID)
+		}
+	}
+	return ""
 }
 
 func RenderHTML(doc Document) (string, error) {
@@ -205,7 +213,7 @@ func renderEmbed(buf *bytes.Buffer, attrs Attrs) {
 }
 
 func renderInline(buf *bytes.Buffer, nodes []Node, footnotes *footnoteIndex) {
-	for _, node := range nodes {
+	for i, node := range nodes {
 		text := html.EscapeString(node.Text)
 		for _, mark := range node.Marks {
 			switch mark.Type {
@@ -219,17 +227,21 @@ func renderInline(buf *bytes.Buffer, nodes []Node, footnotes *footnoteIndex) {
 				}
 			case "link":
 				text = `<a href="` + escapeAttr(mark.Attrs.Href) + `">` + text + "</a>"
-			case "footnote":
-				if entry, ok := footnotes.byID[mark.Attrs.ID]; ok {
-					num := strconv.Itoa(entry.num)
-					text += fmt.Sprintf(
-						`<sup class="fn-ref"><a href="#fn-%s" id="fnref-%s">%s</a></sup>`,
-						num, num, num,
-					)
-				}
 			}
 		}
 		buf.WriteString(text)
+
+		id := footnoteMarkID(node)
+		if id == "" || (i+1 < len(nodes) && footnoteMarkID(nodes[i+1]) == id) {
+			continue
+		}
+		if entry, ok := footnotes.byID[id]; ok {
+			num := strconv.Itoa(entry.num)
+			fmt.Fprintf(buf,
+				`<sup class="fn-ref"><a href="#fn-%s" id="fnref-%s">%s</a></sup>`,
+				num, num, num,
+			)
+		}
 	}
 }
 
@@ -238,13 +250,22 @@ func renderFootnotesList(buf *bytes.Buffer, footnotes *footnoteIndex) {
 	for _, id := range footnotes.order {
 		entry := footnotes.byID[id]
 		num := strconv.Itoa(entry.num)
-		buf.WriteString(`<li id="fn-`)
-		buf.WriteString(num)
-		buf.WriteString(`">`)
-		buf.WriteString(html.EscapeString(entry.text))
-		buf.WriteString(` <a href="#fnref-`)
-		buf.WriteString(num)
-		buf.WriteString(`" class="fn-back">↩</a></li>`)
+		back := ` <a href="#fnref-` + num + `" class="fn-back">↩</a>`
+		buf.WriteString(`<li id="fn-` + num + `">`)
+		paragraphs := footnoteParagraphs(entry.attrs)
+		if len(paragraphs) == 0 {
+			buf.WriteString(html.EscapeString(strings.TrimSpace(entry.attrs.Text)))
+			buf.WriteString(back)
+		}
+		for i, paragraph := range paragraphs {
+			buf.WriteString("<p>")
+			renderInline(buf, paragraph.Content, footnotes)
+			if i == len(paragraphs)-1 {
+				buf.WriteString(back)
+			}
+			buf.WriteString("</p>")
+		}
+		buf.WriteString("</li>")
 	}
 	buf.WriteString(`</ol>`)
 }

@@ -275,6 +275,62 @@ func TestParseRejectsInvalidFootnote(t *testing.T) {
 	}
 }
 
+func TestRenderHTMLFootnoteRichContent(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hello","marks":[{"type":"footnote","attrs":{"id":"fn1","text":"Bold and link\nSecond","content":[{"type":"paragraph","content":[{"type":"text","text":"Bold","marks":[{"type":"bold"}]},{"type":"text","text":" and "},{"type":"text","text":"link","marks":[{"type":"link","attrs":{"href":"https://example.com"}}]}]},{"type":"paragraph"},{"type":"paragraph","content":[{"type":"text","text":"Second <b>"}]}]}}]}]}]}`)
+	doc, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := RenderHTML(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`<li id="fn-1"><p><strong>Bold</strong> and <a href="https://example.com"`,
+		`<p>Second &lt;b&gt; <a href="#fnref-1" class="fn-back"`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("missing %q in %s", want, got)
+		}
+	}
+	if strings.Contains(got, "<p></p>") {
+		t.Fatalf("empty footnote paragraph rendered: %s", got)
+	}
+}
+
+func TestRenderHTMLFootnoteAcrossMarkedText(t *testing.T) {
+	raw := json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"plain ","marks":[{"type":"footnote","attrs":{"id":"fn1","text":"note"}}]},{"type":"text","text":"bold","marks":[{"type":"footnote","attrs":{"id":"fn1","text":"note"}},{"type":"bold"}]},{"type":"text","text":" after"}]}]}`)
+	doc, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := RenderHTML(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := strings.Count(got, `class="fn-ref"`); n != 1 {
+		t.Fatalf("got %d footnote references, want 1: %s", n, got)
+	}
+	if !strings.Contains(got, `<strong>bold</strong><sup class="fn-ref">`) {
+		t.Fatalf("reference not placed after anchor: %s", got)
+	}
+}
+
+func TestParseRejectsUnsafeFootnoteContent(t *testing.T) {
+	cases := map[string]string{
+		"unsafe link":     `[{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"link","attrs":{"href":"javascript:alert(1)"}}]}]}]`,
+		"nested footnote": `[{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"footnote","attrs":{"id":"fn2","text":"y"}}]}]}]`,
+		"block node":      `[{"type":"blockquote","content":[{"type":"paragraph","content":[{"type":"text","text":"x"}]}]}]`,
+		"empty content":   `[{"type":"paragraph"}]`,
+	}
+	for name, content := range cases {
+		raw := json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"footnote","attrs":{"id":"fn1","text":"fallback","content":` + content + `}}]}]}]}`)
+		if _, err := Parse(raw); err == nil {
+			t.Fatalf("%s: expected error", name)
+		}
+	}
+}
+
 func TestRenderHTMLEmbedYouTube(t *testing.T) {
 	doc := Document{
 		Type: "doc",
