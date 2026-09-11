@@ -4,6 +4,7 @@
     "watch": "esbuild main.ts --bundle --format=iife --target=es2020 --outfile=../static/js/editor.js --watch"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.8.0",
     "@tiptap/core": "^3.14.0",
     "@tiptap/extension-blockquote": "^3.14.0",
     "@tiptap/extension-bold": "^3.14.0",
