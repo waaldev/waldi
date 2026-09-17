@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"html/template"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 type Renderer struct {
 	templates *template.Template
+	files     fs.FS
 }
 
 // inlineAssets are small static files whose content is embedded directly
@@ -88,6 +90,12 @@ type PageData struct {
 	// the HTML. Blog and app pages keep versioned external assets so navigation
 	// reuses one shared browser-cache entry.
 	Inline bool
+	Export *ExportView
+}
+
+type ExportView struct {
+	Root   string
+	Drafts []PostView
 }
 
 type UserView struct {
@@ -423,7 +431,7 @@ func NewRenderer(files fs.FS) (*Renderer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Renderer{templates: tmpl}, nil
+	return &Renderer{templates: tmpl, files: files}, nil
 }
 
 func (r *Renderer) Render(w http.ResponseWriter, name string, data PageData) {
@@ -442,6 +450,16 @@ func (r *Renderer) RenderStatus(w http.ResponseWriter, status int, name string, 
 	if err := r.templates.ExecuteTemplate(w, name, data); err != nil {
 		http.Error(w, i18n.T(data.Lang, "error.render"), http.StatusInternalServerError)
 	}
+}
+
+func (r *Renderer) Execute(w io.Writer, name string, data PageData) error {
+	if data.Lang == "" {
+		data.Lang = i18n.Default
+	}
+	if data.Dir == "" {
+		data.Dir = i18n.Dir(data.Lang)
+	}
+	return r.templates.ExecuteTemplate(w, name, data)
 }
 
 // T translates a catalog key into the page's resolved language, for use

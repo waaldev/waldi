@@ -166,6 +166,7 @@
   "blog.settings.ui_lang.en": "English",
   "blog.settings.account.export": "Download all your posts",
   "blog.settings.account.export.body": "- everything, in one file. Your writing is yours; take it with you whenever you'd like.",
+  "export.drafts": "Drafts",
 
   "blog.settings.password.link": "Change password",
   "blog.settings.password.current": "Current password",

@@ -18,7 +18,6 @@ Shipped, building, never done.
 - Report link on letters
 - Stranger Post on the main landing
 - Blogfa / Persianblog / WordPress import
-- Export (zip of posts)
 
 ## Never (by principle)
 

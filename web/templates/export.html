@@ -1,0 +1,102 @@
+{{define "export-start"}}
+<!doctype html>
+<html lang="{{.Lang}}" dir="{{.Dir}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="icon" href="{{.Export.Root}}assets/favicon.png" type="image/png">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="{{.Export.Root}}assets/style.css">
+  <script src="{{.Export.Root}}assets/theme.js"></script>
+</head>
+<body>
+<div class="page">
+{{end}}
+
+{{define "export-finish"}}
+<footer class="finish">
+  <p>{{.T "profile.finish"}}</p>
+  <small class="profile-finish-sub">{{.T "profile.finish.sub.before" .Blog.Attribution}}<a href="{{.AppBaseURL}}/">{{.T "brand"}}</a>{{.T "profile.finish.sub.after"}}</small>
+</footer>
+</div>
+</body>
+</html>
+{{end}}
+
+{{define "export-feed"}}
+<ul class="feed">
+  {{range .}}
+    <li lang="{{.Lang}}" dir="{{.Dir}}">
+      <a class="feed-item" href="{{.URL}}">
+        {{if .FeedDate}}<p class="feed-writer">{{.FeedDate}}</p>{{end}}
+        <h2 class="feed-title">{{.Title}}</h2>
+        {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+      </a>
+    </li>
+  {{end}}
+</ul>
+{{end}}
+
+{{define "export-index.html"}}
+{{template "export-start" .}}
+<header class="bar bar-minimal" aria-label="{{.T "nav.aria"}}">
+  <nav>
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<main>
+<section class="blog-head">
+  <h1 class="blog-name">{{.Blog.DisplayName}}</h1>
+  {{if .Blog.Bio}}
+    <p class="blog-bio">{{.Blog.Bio}}</p>
+  {{end}}
+  {{if .Blog.Pages}}
+    <nav class="blog-nav">
+      {{range .Blog.Pages}}
+        <a href="{{.URL}}">{{.Title}}</a>
+      {{end}}
+    </nav>
+  {{end}}
+</section>
+
+{{range .Blog.Archives}}
+  <p class="archive-year" lang="{{$.Blog.Lang}}">{{.Year}}</p>
+  {{template "export-feed" .Posts}}
+{{else}}
+  <div class="empty-state">
+    <h2>{{.T "profile.empty.heading"}}</h2>
+  </div>
+{{end}}
+
+{{if .Export.Drafts}}
+  <p class="archive-year">{{.T "export.drafts"}}</p>
+  {{template "export-feed" .Export.Drafts}}
+{{end}}
+</main>
+{{template "export-finish" .}}
+{{end}}
+
+{{define "export-post.html"}}
+{{template "export-start" .}}
+<header class="bar bar-minimal" aria-label="{{.T "nav.aria"}}">
+  <nav>
+    <a href="{{.Export.Root}}index.html">{{.T "nav.home"}}</a>
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+
+<article lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
+  <header class="article-head">
+    <h1 class="article-title">{{.Post.Title}}</h1>
+    <p class="article-meta"><a href="{{.Export.Root}}index.html">{{.Post.WriterLabel}}</a>{{if .Post.PublishedAtISO}} · <time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{end}}</p>
+  </header>
+
+  <div class="prose">
+    {{.Post.HTML}}
+  </div>
+
+  <p class="endmark" role="presentation"></p>
+</article>
+{{template "export-finish" .}}
+{{end}}
