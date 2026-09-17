@@ -151,3 +151,55 @@ func (l LocalStore) Save(_ context.Context, username, name string, data []byte, 
 	}
 	return "/static/uploads/" + username + "/" + name, nil
 }
+
+type UploadReader interface {
+	OpenUpload(ctx context.Context, username, publicURL string) (io.ReadCloser, error)
+}
+
+func uploadName(publicURL string, prefixes ...string) (string, bool) {
+	for _, prefix := range prefixes {
+		name, ok := strings.CutPrefix(publicURL, prefix)
+		if ok && name != "" && !strings.ContainsAny(name, "/\\?#") && name != "." && name != ".." {
+			return name, true
+		}
+	}
+	return "", false
+}
+
+func (s *S3Store) OpenUpload(ctx context.Context, username, publicURL string) (io.ReadCloser, error) {
+	prefixes := []string{"/media/" + objectKey(username, "")}
+	if s.publicURL != "" {
+		prefixes = append(prefixes, s.publicURL+"/"+url.PathEscape(username)+"/")
+	}
+	name, ok := uploadName(publicURL, prefixes...)
+	if !ok {
+		return nil, ErrNotFound
+	}
+	obj, err := s.client.GetObject(ctx, s.bucket, objectKey(username, name), minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("getting object: %w", err)
+	}
+	if _, err := obj.Stat(); err != nil {
+		_ = obj.Close()
+		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("stat object: %w", err)
+	}
+	return obj, nil
+}
+
+func (l LocalStore) OpenUpload(_ context.Context, username, publicURL string) (io.ReadCloser, error) {
+	name, ok := uploadName(publicURL, "/static/uploads/"+username+"/")
+	if !ok {
+		return nil, ErrNotFound
+	}
+	f, err := os.Open(filepath.Join(l.RootDir, username, name))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("opening upload: %w", err)
+	}
+	return f, nil
+}

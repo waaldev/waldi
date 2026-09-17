@@ -122,9 +122,9 @@ func TestBuildFeedDaysGroupsByCalendarDay(t *testing.T) {
 		return time.Date(y, m, d, h, 0, 0, 0, time.UTC).Format(time.RFC3339)
 	}
 	posts := []PostView{
-		{Title: "a", PublishedAtISO: iso(2026, time.June, 20, 10)},
-		{Title: "b", PublishedAtISO: iso(2026, time.June, 20, 8)},
-		{Title: "c", PublishedAtISO: iso(2026, time.June, 19, 20)},
+		{Title: "a", PublishedAtISO: iso(2026, time.June, 20, 12)},
+		{Title: "b", PublishedAtISO: iso(2026, time.June, 20, 12)},
+		{Title: "c", PublishedAtISO: iso(2026, time.June, 18, 12)},
 	}
 
 	days := buildFeedDays(posts, "en")

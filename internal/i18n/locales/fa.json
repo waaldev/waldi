@@ -160,6 +160,7 @@
   "blog.settings.ui_lang.en": "English",
   "blog.settings.account.export": "گرفتن نسخه‌ی همه‌ی نوشته‌ها",
   "blog.settings.account.export.body": "- همه‌چیز، در یک فایل. نوشته‌هایت مال خودت است؛ هر وقت خواستی، با خودت ببر.",
+  "export.drafts": "پیش‌نویس‌ها",
 
   "blog.settings.password.link": "تغییر گذرواژه",
   "blog.settings.password.current": "گذرواژه‌ی فعلی",
