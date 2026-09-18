@@ -59,7 +59,7 @@ func TestPostSEO(t *testing.T) {
 	if seo.JSONLD == "" {
 		t.Fatal("expected json-ld")
 	}
-	if seo.OGImage != "http://waldi.test/static/favicon.png" {
+	if seo.OGImage != "http://waldi.test/static/og.png" {
 		t.Fatalf("og image %q", seo.OGImage)
 	}
 	if seo.TwitterCard != "summary_large_image" {
@@ -80,7 +80,7 @@ func TestBlogSEO(t *testing.T) {
 	if seo.RSSURL != "http://alice.waldi.test/feed.xml" {
 		t.Fatalf("rss %q", seo.RSSURL)
 	}
-	if seo.OGImage != "http://waldi.test/static/favicon.png" {
+	if seo.OGImage != "http://waldi.test/static/og.png" {
 		t.Fatalf("og image %q", seo.OGImage)
 	}
 }

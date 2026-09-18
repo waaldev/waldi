@@ -100,8 +100,12 @@ func logoURL(r *http.Request, baseDomain string) string {
 	return strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/static/apple-touch-icon.png"
 }
 
-func defaultOGImageURL(r *http.Request, baseDomain string) string {
-	return strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/static/favicon.png"
+func defaultOGImageURL(r *http.Request, baseDomain, lang string) string {
+	name := "og.png"
+	if lang == "fa" {
+		name = "og-fa.png"
+	}
+	return strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/static/" + name
 }
 
 func postDocumentTitle(title, blogTitle string) string {
@@ -138,7 +142,7 @@ func postSEO(r *http.Request, baseDomain string, owner store.User, post store.Po
 	docTitle := postDocumentTitle(post.Title, blogTitle)
 	image := absoluteAssetURL(r, baseDomain, owner, firstImageSrc(post.HTML))
 	if image == "" {
-		image = defaultOGImageURL(r, baseDomain)
+		image = defaultOGImageURL(r, baseDomain, lang)
 	}
 
 	seo := &SEOView{
@@ -172,7 +176,7 @@ func blogSEO(r *http.Request, baseDomain string, owner store.User) *SEOView {
 	lang := blogPageLang(owner)
 	description := blogDescription(lang, displayName, owner.Bio)
 	canonical := absolutePublicURL(r, baseDomain, owner, "/")
-	ogImage := defaultOGImageURL(r, baseDomain)
+	ogImage := defaultOGImageURL(r, baseDomain, lang)
 
 	return &SEOView{
 		Title:         i18n.T(lang, "profile.title", displayName),
@@ -198,7 +202,7 @@ func landingSEO(r *http.Request, baseDomain, lang string) *SEOView {
 	canonical := strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/"
 	description := i18n.T(lang, "seo.landing.description")
 	title := i18n.T(lang, "seo.landing.title")
-	ogImage := defaultOGImageURL(r, baseDomain)
+	ogImage := defaultOGImageURL(r, baseDomain, lang)
 	return &SEOView{
 		Title:         title,
 		Description:   description,
@@ -211,7 +215,7 @@ func landingSEO(r *http.Request, baseDomain, lang string) *SEOView {
 		OGImage:       ogImage,
 		OGLocale:      ogLocale(lang),
 		SiteName:      i18n.T(lang, "brand"),
-		TwitterCard:   "summary",
+		TwitterCard:   "summary_large_image",
 		JSONLD:        landingJSONLD(title, description, canonical, lang, logoURL(r, baseDomain)),
 	}
 }
@@ -251,7 +255,8 @@ func publicPageSEO(r *http.Request, baseDomain, lang, path, titleKey, descriptio
 		Title: title, Description: description, CanonicalURL: canonical,
 		Robots: "index, follow", OGType: "website", OGTitle: title,
 		OGDescription: description, OGURL: canonical, OGLocale: ogLocale(lang),
-		SiteName: i18n.T(lang, "brand"), TwitterCard: "summary",
+		OGImage:  defaultOGImageURL(r, baseDomain, lang),
+		SiteName: i18n.T(lang, "brand"), TwitterCard: "summary_large_image",
 	}
 }
 
