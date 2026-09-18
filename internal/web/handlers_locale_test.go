@@ -90,3 +90,29 @@ func TestHandleSetLocaleByHandPins(t *testing.T) {
 		t.Fatal("expected waldi_lang_pinned cookie to be set")
 	}
 }
+
+func TestHandleSetLocaleLinkPinsWithoutRedirect(t *testing.T) {
+	s := testServer(t)
+	req := httptest.NewRequest(http.MethodPost, "/lang/fa?link=1", nil)
+	req.Host = "waldi.blog"
+	req.SetPathValue("code", "fa")
+	req.AddCookie(&http.Cookie{Name: localePinnedCookie, Value: "1"})
+	req.AddCookie(&http.Cookie{Name: localeCookie, Value: "en"})
+	rec := httptest.NewRecorder()
+
+	s.handleSetLocale(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNoContent)
+	}
+	if loc := rec.Header().Get("Location"); loc != "" {
+		t.Fatalf("unexpected redirect to %q", loc)
+	}
+	got := map[string]string{}
+	for _, c := range rec.Result().Cookies() {
+		got[c.Name] = c.Value
+	}
+	if got[localeCookie] != "fa" || got[localePinnedCookie] != "1" {
+		t.Fatalf("cookies = %v", got)
+	}
+}

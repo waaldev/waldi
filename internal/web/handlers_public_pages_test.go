@@ -106,6 +106,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 				`<link rel="alternate" hreflang="fa" href="https://waldi.blog/fa/how-it-works">`,
 				`<link rel="alternate" hreflang="x-default" href="https://waldi.blog/how-it-works">`,
 				`href="/fa/explore"`,
+				`/static/js/lang-link.js`,
 				`<a class="lang-toggle" href="/how-it-works" hreflang="en">`,
 			},
 		},
