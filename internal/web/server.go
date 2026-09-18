@@ -95,6 +95,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /read", s.handleReadRandom)
 	s.mux.HandleFunc("GET /why", s.handleWhy)
 	s.mux.HandleFunc("GET /how-it-works", s.handleHowItWorks)
+	s.mux.HandleFunc("GET /explore", s.handleExplore)
 	s.mux.HandleFunc("GET /signup", s.handleSignupForm)
 	s.mux.HandleFunc("POST /signup", s.handleSignup)
 	s.mux.HandleFunc("GET /login", s.handleLoginForm)

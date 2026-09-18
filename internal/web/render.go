@@ -76,6 +76,7 @@ type PageData struct {
 	Post             *PostView
 	Feed             *FeedView
 	LandingSample    *PostView
+	Explore          *ExploreView
 	Inbox            *InboxView
 	Kept             *KeptView
 	SEO              *SEOView

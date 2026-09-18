@@ -142,6 +142,7 @@ func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	writeSitemapURL(&b, base, now)
 	writeSitemapURL(&b, base+"/how-it-works", now)
+	writeSitemapURL(&b, base+"/explore", now)
 	writeSitemapURL(&b, base+"/write/invite", now)
 	b.WriteString("</urlset>")
 

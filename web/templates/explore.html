@@ -1,0 +1,50 @@
+{{define "explore.html"}}
+{{template "layout-start" .}}
+{{template "platform-page-bar" .}}
+<main class="public-guide explore">
+  <header class="public-essay-head">
+    <h1>{{.T "explore.heading"}}</h1>
+    <p>{{.T "explore.lead"}}</p>
+  </header>
+
+  {{if or .Explore.Posts .Explore.Writers}}
+  {{if .Explore.Posts}}
+  <section aria-labelledby="explore-posts-heading">
+    <h2 id="explore-posts-heading">{{.T "explore.posts.heading"}}</h2>
+    <ul class="feed">
+      {{range .Explore.Posts}}
+        <li lang="{{.Lang}}" dir="{{.Dir}}">
+          <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a>{{if .PublishedAt}} <span class="sep">·</span> <time datetime="{{.PublishedAtISO}}">{{.PublishedAt}}</time>{{end}}</p>
+          <a class="feed-item" href="{{.URL}}">
+            <h3 class="feed-title">{{.Title}}</h3>
+            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          </a>
+        </li>
+      {{end}}
+    </ul>
+  </section>
+  {{end}}
+
+  {{if .Explore.Writers}}
+  <section class="explore-writers" aria-labelledby="explore-writers-heading">
+    <h2 id="explore-writers-heading">{{.T "explore.writers.heading"}}</h2>
+    <ul class="feed">
+      {{range .Explore.Writers}}
+        <li>
+          <a class="feed-item" href="{{.URL}}" lang="{{.Lang}}" dir="{{.Dir}}">
+            <h3 class="feed-title">{{.Name}}</h3>
+            {{if .Bio}}<p class="feed-excerpt">{{.Bio}}</p>{{end}}
+          </a>
+          <p class="feed-writer">{{$.TN "explore.writer.posts" .PostCount}}</p>
+        </li>
+      {{end}}
+    </ul>
+  </section>
+  {{end}}
+  {{else}}
+  <p>{{.T "explore.empty"}}</p>
+  {{end}}
+</main>
+{{template "platform-footer" .}}
+{{template "layout-end" .}}
+{{end}}

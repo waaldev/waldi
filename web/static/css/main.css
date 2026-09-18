@@ -515,6 +515,10 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 }
 .note-ending,
 .write-invite-gate { margin-block: var(--s5); }
+.explore section { margin-block-end: var(--s6); }
+.explore .feed-item,
+.explore .feed-writer a { text-decoration: none; }
+.explore .feed-writer a:hover { text-decoration: underline; }
 .faq { margin-block-start: var(--s6); }
 .faq dl { margin: 0; }
 .faq dl div { margin-block: var(--s4); }

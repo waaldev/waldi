@@ -39,6 +39,7 @@ var reservedPageSlugs = map[string]bool{
 	"wildcard":        true,
 	"inbox":           true,
 	"letters":         true,
+	"explore":         true,
 }
 
 func slugFromTitle(title string) string {
