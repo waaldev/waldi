@@ -1,11 +1,13 @@
 package web
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"waldi/internal/store"
 )
 
 func TestPublicInformationPages(t *testing.T) {
@@ -184,5 +186,26 @@ func TestUnknownNestedPathsAreNotFound(t *testing.T) {
 		if rec.Code != http.StatusNotFound {
 			t.Errorf("%s status = %d, want 404", path, rec.Code)
 		}
+	}
+}
+
+func TestSignedInUsersOnlySeeWorkingLanguageSwitch(t *testing.T) {
+	s := testServer(t)
+	user := &store.User{ID: 1, Username: "ada", Locale: "fa"}
+
+	req := httptest.NewRequest(http.MethodGet, "https://waldi.blog/how-it-works", nil)
+	req = req.WithContext(context.WithValue(req.Context(), currentUserKey, user))
+	rec := httptest.NewRecorder()
+	s.defaultLocalized(s.handleHowItWorks)(rec, req)
+	if strings.Contains(rec.Body.String(), `action="/lang/`) || strings.Contains(rec.Body.String(), `<a class="lang-toggle"`) {
+		t.Error("signed-in user sees a language switch that cannot change their language")
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "https://waldi.blog/fa/how-it-works", nil)
+	req = req.WithContext(context.WithValue(req.Context(), currentUserKey, user))
+	rec = httptest.NewRecorder()
+	s.localized("fa", s.handleHowItWorks)(rec, req)
+	if !strings.Contains(rec.Body.String(), `<a class="lang-toggle" href="/how-it-works" hreflang="en">`) {
+		t.Error("signed-in user on /fa page is missing the language link")
 	}
 }

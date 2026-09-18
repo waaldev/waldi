@@ -135,7 +135,7 @@
 
 {{define "theme-toggle"}}<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="{{.T "theme.toggle"}}">☾</button>{{end}}
 
-{{define "lang-toggle"}}{{if .LangSwitchPath}}<a class="lang-toggle" href="{{.LangSwitchPath}}" hreflang="{{.T "lang.switch.code"}}">{{.T "lang.switch.label"}}</a>{{else}}<form class="inline-form lang-toggle" method="post" action="/lang/{{.T "lang.switch.code"}}"><button type="submit">{{.T "lang.switch.label"}}</button></form>{{end}}{{end}}
+{{define "lang-toggle"}}{{if .LangSwitchPath}}<a class="lang-toggle" href="{{.LangSwitchPath}}" hreflang="{{.T "lang.switch.code"}}">{{.T "lang.switch.label"}}</a>{{else if not .CurrentUser}}<form class="inline-form lang-toggle" method="post" action="/lang/{{.T "lang.switch.code"}}"><button type="submit">{{.T "lang.switch.label"}}</button></form>{{end}}{{end}}
 
 {{define "layout-end"}}
 </div>

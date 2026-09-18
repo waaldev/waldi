@@ -37,12 +37,6 @@ func (s *Server) handleSetLocale(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user := currentUser(r); user != nil && s.store != nil {
-		if err := s.store.UpdateUserLocale(r.Context(), user.ID, lang); err != nil {
-			s.logger.Error("updating user locale", "err", err)
-		}
-	}
-
 	dest := redirectBack(r)
 	s.purgeLocalePage(r, dest)
 	redirect(w, r, dest)
