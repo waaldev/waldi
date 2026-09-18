@@ -455,7 +455,7 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   overflow-wrap: anywhere;
 }
 .landing-intro:lang(fa),
-.landing-details:lang(fa),
+.landing-details:lang(fa) { line-height: 1.9; }
 .public-essay:lang(fa),
 .public-guide:lang(fa) { font-size: 1.3125rem; line-height: 1.9; }
 
@@ -2018,8 +2018,6 @@ a.btn-secondary:hover {
 
 @media (min-width: 601px) {
   .prose:lang(fa),
-  .landing-intro:lang(fa),
-  .landing-details:lang(fa),
   .public-essay:lang(fa),
   .public-guide:lang(fa) { font-size: 1.4375rem; }
   .prose ol.footnotes:lang(fa) { font-size: 1.0625rem; }
