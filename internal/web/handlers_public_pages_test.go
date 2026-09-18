@@ -171,3 +171,17 @@ func TestEnglishIsDefaultEvenWithPersianCookie(t *testing.T) {
 		t.Fatal("unprefixed public page is not English")
 	}
 }
+
+func TestUnknownNestedPathsAreNotFound(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+	for _, path := range []string{"/en/how-it-works", "/foo/bar", "/fa/unknown"} {
+		req := httptest.NewRequest(http.MethodGet, "https://waldi.blog"+path, nil)
+		rec := httptest.NewRecorder()
+		s.ServeHTTP(rec, req)
+		if rec.Code != http.StatusNotFound {
+			t.Errorf("%s status = %d, want 404", path, rec.Code)
+		}
+	}
+}

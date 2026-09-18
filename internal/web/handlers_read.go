@@ -14,6 +14,10 @@ import (
 )
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" && r.URL.Path != localizedPath(forcedLocale(r), "/") {
+		http.NotFound(w, r)
+		return
+	}
 	blog := s.isBlogHost(r.Context(), r.Host)
 	if blog != nil {
 		s.withPublicBlogCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
