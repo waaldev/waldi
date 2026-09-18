@@ -96,6 +96,10 @@ func absoluteAssetURL(r *http.Request, baseDomain string, owner store.User, src 
 	return absolutePublicURL(r, baseDomain, owner, src)
 }
 
+func logoURL(r *http.Request, baseDomain string) string {
+	return strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/static/apple-touch-icon.png"
+}
+
 func defaultOGImageURL(r *http.Request, baseDomain string) string {
 	return strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/static/favicon.png"
 }
@@ -158,7 +162,7 @@ func postSEO(r *http.Request, baseDomain string, owner store.User, post store.Po
 		seo.ArticlePublished = post.PublishedAt.UTC().Format(time.RFC3339)
 	}
 	seo.ArticleModified = post.UpdatedAt.UTC().Format(time.RFC3339)
-	seo.JSONLD = postJSONLD(seo, post, lang)
+	seo.JSONLD = postJSONLD(seo, post, lang, logoURL(r, baseDomain))
 	return seo
 }
 
@@ -208,18 +212,33 @@ func landingSEO(r *http.Request, baseDomain, lang string) *SEOView {
 		OGLocale:      ogLocale(lang),
 		SiteName:      i18n.T(lang, "brand"),
 		TwitterCard:   "summary",
-		JSONLD:        landingJSONLD(title, description, canonical, lang),
+		JSONLD:        landingJSONLD(title, description, canonical, lang, logoURL(r, baseDomain)),
 	}
 }
 
-func landingJSONLD(name, description, url, lang string) template.JS {
+func landingJSONLD(name, description, url, lang, logo string) template.JS {
+	orgID := url + "#organization"
 	payload := map[string]any{
-		"@context":    "https://schema.org",
-		"@type":       "WebSite",
-		"name":        name,
-		"description": description,
-		"url":         url,
-		"inLanguage":  lang,
+		"@context": "https://schema.org",
+		"@graph": []map[string]any{
+			{
+				"@type":       "WebSite",
+				"@id":         url + "#website",
+				"name":        name,
+				"description": description,
+				"url":         url,
+				"inLanguage":  lang,
+				"publisher":   map[string]string{"@id": orgID},
+			},
+			{
+				"@type":  "Organization",
+				"@id":    orgID,
+				"name":   i18n.T(lang, "brand"),
+				"url":    url,
+				"logo":   logo,
+				"sameAs": []string{"https://github.com/waaldev/waldi"},
+			},
+		},
 	}
 	return mustJSONLD(payload)
 }
@@ -236,7 +255,7 @@ func publicPageSEO(r *http.Request, baseDomain, lang, path, titleKey, descriptio
 	}
 }
 
-func postJSONLD(seo *SEOView, post store.Post, lang string) template.JS {
+func postJSONLD(seo *SEOView, post store.Post, lang, logo string) template.JS {
 	payload := map[string]any{
 		"@context":    "https://schema.org",
 		"@type":       "BlogPosting",
@@ -248,9 +267,13 @@ func postJSONLD(seo *SEOView, post store.Post, lang string) template.JS {
 			"@type": "Person",
 			"name":  seo.Author,
 		},
-		"publisher": map[string]string{
+		"publisher": map[string]any{
 			"@type": "Organization",
 			"name":  i18n.T(lang, "brand"),
+			"logo": map[string]string{
+				"@type": "ImageObject",
+				"url":   logo,
+			},
 		},
 		"mainEntityOfPage": map[string]string{
 			"@type": "WebPage",

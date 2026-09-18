@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
@@ -109,5 +110,32 @@ func storePostFixture(published time.Time) store.Post {
 		PublishedAt: &published,
 		UpdatedAt:   published,
 		BlogLang:    "en",
+	}
+}
+
+func TestLandingJSONLDDescribesOrganization(t *testing.T) {
+	r := blogRequest("waldi.test", "/")
+	seo := landingSEO(r, "waldi.test", "en")
+
+	var payload struct {
+		Graph []map[string]any `json:"@graph"`
+	}
+	if err := json.Unmarshal([]byte(seo.JSONLD), &payload); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	types := map[string]map[string]any{}
+	for _, node := range payload.Graph {
+		types[node["@type"].(string)] = node
+	}
+	for _, want := range []string{"WebSite", "Organization"} {
+		if types[want] == nil {
+			t.Fatalf("missing %s node", want)
+		}
+	}
+	if types["WebApplication"] != nil {
+		t.Fatal("unexpected WebApplication node")
+	}
+	if types["Organization"]["logo"] != "http://waldi.test/static/apple-touch-icon.png" {
+		t.Fatalf("logo %v", types["Organization"]["logo"])
 	}
 }
