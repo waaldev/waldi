@@ -70,7 +70,7 @@ Every memorable product has one recurring mark. Waldi's is the **reference mark 
 
 1. **Beside "Today's stranger"** in the feed - the wildcard's only distinguishing decoration, set in `--accent`.
 2. **As the end-of-post mark** - where old books put ❦, every Waldi post ends with a small centered ※ in `--ink-faint`. The signal that you truly finished.
-3. **In the logo/wordmark** - `waldi ※` or the mark alone as favicon.
+3. **In the logo/wordmark** - `Waldi ※` («والدی ※» in Persian) or the mark alone as favicon.
 
 It costs nothing, renders everywhere, and after a week of use, ※ *means* "a small gift of writing." That's the lovely part - an owned symbol instead of an icon set.
 
@@ -88,7 +88,7 @@ It costs nothing, renders everywhere, and after a week of use, ※ *means* "a sm
 - Day groupings, if shown at all: a lone small-caps sans label ("today") - no rules, no pills.
 
 ### Reading view
-- Nothing above the title except a small back-arrow "waldi ※" wordmark and the writer's name. **No sticky header** - when you scroll into the text, the interface leaves the room.
+- Nothing above the title except a small back-arrow "Waldi ※" wordmark and the writer's name. **No sticky header** - when you scroll into the text, the interface leaves the room.
 - Title in display Newsreader, then the writer + date line in `--text-meta`, then 52px of air, then prose.
 - Images: full column width, 6px radius, optional caption in `--text-meta` italic centered. Dividers (the writer's `+` divider) render as a centered `※` - the mark again, doing real work.
 - At the end: the closing ※, then 84px of air, then the action row - **Follow · Write a letter · Share** - set as text buttons in the sans, Follow alone carrying the accent (solid accent bg, paper text, 6px radius; it's the single most important button in the product and the only solid button on the screen). After following, the button becomes quiet text: "Following ✓".
@@ -129,6 +129,7 @@ Everything else is instant. Hovers change color with a 120ms transition, nothing
 
 - **Focus rings:** 2px `--accent` outline with 2px offset, on everything, always visible. Keyboard users get the same considered product.
 - **Link style in prose:** `--accent` text with a subtle underline (`text-decoration-thickness: 1px; text-underline-offset: 3px`). Links in UI chrome: no underline until hover.
+- **Links on public pages** (landing, how it works, write invite): `--ink` text with the same 1px underline in `--ink-faint`, darkening to `currentColor` on hover. These pages carry several links at once, so ink keeps the accent within its one-or-two-per-screen budget.
 - **Selection color:** `--accent` at ~20% opacity - even selecting text feels on-palette.
 - **Buttons:** one solid style (accent bg) reserved for the primary act of a screen (Follow, Publish, Send letter). Everything else is text or ghost. Two button styles total in the product.
 - **Forms (login/signup):** labels above inputs in `--text-meta`, inputs on `--paper-raised` with 1px faint border, generous 12px padding. The signup page should be as considered as the reading page - it's the first impression.
@@ -175,21 +176,22 @@ Waldi is bilingual by design: direction is a property of a **post**, not the sit
 
 | Role | Persian face | Latin counterpart |
 |---|---|---|
-| Body / reading | **Markazi Text** (Borna Izadpanah; warm Naskh flavor, drawn for continuous screen reading) | Newsreader |
+| Body / reading | **IRMitra** (classic Naskh book face; one weight, self-hosted) | Newsreader |
 | UI chrome | **Vazirmatn** (variable, neutral, excellent Latin support) | system sans |
-| Fallback body | Noto Naskh Arabic | Literata |
+| Fallback body | Georgia, serif | Georgia, serif |
 
 Self-host all fonts - readers may not have reliable access to Google's CDN, and it's faster regardless. Font stacks list both scripts' faces so mixed-language text falls through correctly:
 
 ```css
---font-serif: "Newsreader", "Markazi Text", Georgia, serif;
---font-sans:  -apple-system, "Segoe UI", "Vazirmatn", sans-serif;
+--font-serif: "Newsreader", "IRMitra", Georgia, serif;
+--font-sans:  -apple-system, "Segoe UI", "Vazirmatn", system-ui, sans-serif;
 ```
 
 ### Rules
 
 - **Per-post direction:** store `lang` + `dir` on each post (auto-detected from content); set them on the `<article>`. The feed mixes directions naturally; feed items inherit the direction of their own post.
 - **Persian metrics:** at equal px sizes Persian reads smaller and denser. For `:lang(fa)` prose: body ~1.3125rem (21px), line-height 1.9. Same 34rem measure.
+- **Persian bold:** IRMitra has a single weight, so Persian headings (weight 700) add `-webkit-text-stroke: 0.4px currentColor` instead of relying on browser font synthesis.
 - **Never letter-space Persian** - it breaks the connected script. Any style using `letter-spacing` (small-caps labels) gets a `:lang(fa)` exception resetting it to 0.
 - **Digits:** Persian digits (۱۲۳) inside Persian prose; Latin digits in UI chrome and stats.
 - **Logical properties everywhere:** `margin-inline-start`, `padding-inline`, `text-align: start` - never left/right - so RTL costs zero extra CSS.
