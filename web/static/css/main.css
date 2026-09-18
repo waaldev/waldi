@@ -498,10 +498,16 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .landing-details a,
 .public-essay a,
 .public-guide a {
+  color: var(--ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--ink-faint);
+  transition: color 120ms, text-decoration-color 120ms;
 }
+.landing-details a:hover,
+.public-essay a:hover,
+.public-guide a:hover { text-decoration-color: currentColor; }
 .note-links {
   display: flex;
   flex-wrap: wrap;
@@ -524,7 +530,9 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .write-invite-page .form-note { color: var(--ink); }
 .explore section { margin-block-end: var(--s6); }
 .explore .feed-item,
+.explore .feed-item:hover,
 .explore .feed-writer a { text-decoration: none; }
+.explore .feed-writer a { color: inherit; }
 .explore .feed-writer a:hover { text-decoration: underline; }
 .explore-filter {
   display: flex;
@@ -582,12 +590,13 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   display: inline-flex;
   align-items: center;
   color: var(--ink);
-}
-.landing-actions a:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--ink-faint);
+  transition: color 120ms, text-decoration-color 120ms;
 }
+.landing-actions a:hover { text-decoration-color: currentColor; }
 .landing-intro .landing-caption {
   font-family: var(--font-sans);
   font-size: var(--text-meta);
