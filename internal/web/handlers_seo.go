@@ -135,15 +135,24 @@ func (s *Server) handleBlogSitemapOrApp(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
+	var latest time.Time
+	if s.store != nil {
+		posts, err := s.store.ExplorePosts(r.Context(), 1)
+		if err != nil {
+			s.logger.Error("loading sitemap latest post", "err", err)
+		} else if len(posts) > 0 && posts[0].PublishedAt != nil {
+			latest = *posts[0].PublishedAt
+		}
+	}
+
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`)
 	base := strings.TrimSuffix(appSiteURL(r, s.baseDomain), "/")
-	now := time.Now()
-	writeSitemapURL(&b, base, now)
-	writeSitemapURL(&b, base+"/how-it-works", now)
-	writeSitemapURL(&b, base+"/explore", now)
-	writeSitemapURL(&b, base+"/write/invite", now)
+	writeSitemapURL(&b, base+"/", time.Time{})
+	writeSitemapURL(&b, base+"/how-it-works", time.Time{})
+	writeSitemapURL(&b, base+"/explore", latest)
+	writeSitemapURL(&b, base+"/write/invite", time.Time{})
 	b.WriteString("</urlset>")
 
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
