@@ -599,6 +599,12 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   font-weight: 500;
   margin: var(--s5) 0 var(--s3);
 }
+.landing-details h2:lang(fa),
+.public-guide h2:lang(fa) {
+  font-size: 1.625rem;
+  font-weight: 700;
+  -webkit-text-stroke: 0.4px currentColor;
+}
 .landing-principles {
   font-family: var(--font-serif);
   color: var(--ink-soft);
