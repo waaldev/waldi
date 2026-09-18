@@ -519,6 +519,23 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .explore .feed-item,
 .explore .feed-writer a { text-decoration: none; }
 .explore .feed-writer a:hover { text-decoration: underline; }
+.explore-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--s4);
+  margin-block: calc(-1 * var(--s4)) var(--s5);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+}
+.explore .explore-filter a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.explore .explore-filter a:hover { color: var(--ink); text-decoration: underline; }
+.explore .explore-filter a[aria-current="page"] { color: var(--ink); font-weight: 500; }
 .faq { margin-block-start: var(--s6); }
 .faq dl { margin: 0; }
 .faq dl div { margin-block: var(--s4); }

@@ -86,8 +86,8 @@
   "explore.lead": "Recent writing and the blogs on Waldi. You do not need an account to read any of it.",
   "explore.posts.heading": "Recent writing",
   "explore.writers.heading": "Blogs",
-  "explore.writer.posts.one": "One post",
-  "explore.writer.posts.other": "%d posts",
+  "explore.filter.all": "All",
+  "explore.filter.aria": "Language",
   "explore.empty": "Nothing here yet.",
 
   "post.unfollow": "Unfollow",

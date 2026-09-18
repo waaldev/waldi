@@ -7,6 +7,12 @@
     <p>{{.T "explore.lead"}}</p>
   </header>
 
+  <nav class="explore-filter" aria-label="{{.T "explore.filter.aria"}}">
+    {{range .Explore.Filters}}
+      <a href="{{.URL}}" lang="{{.Lang}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a>
+    {{end}}
+  </nav>
+
   {{if or .Explore.Posts .Explore.Writers}}
   {{if .Explore.Posts}}
   <section aria-labelledby="explore-posts-heading">
@@ -14,7 +20,7 @@
     <ul class="feed">
       {{range .Explore.Posts}}
         <li lang="{{.Lang}}" dir="{{.Dir}}">
-          <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a>{{if .PublishedAt}} <span class="sep">·</span> <time datetime="{{.PublishedAtISO}}">{{.PublishedAt}}</time>{{end}}</p>
+          <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
           <a class="feed-item" href="{{.URL}}">
             <h3 class="feed-title">{{.Title}}</h3>
             {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
@@ -35,7 +41,6 @@
             <h3 class="feed-title">{{.Name}}</h3>
             {{if .Bio}}<p class="feed-excerpt">{{.Bio}}</p>{{end}}
           </a>
-          <p class="feed-writer">{{$.TN "explore.writer.posts" .PostCount}}</p>
         </li>
       {{end}}
     </ul>

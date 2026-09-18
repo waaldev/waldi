@@ -1121,7 +1121,6 @@ func (s publishedAtScanner) Scan(value any) error {
 
 type ExploreWriter struct {
 	User            User
-	PostCount       int
 	LastPublishedAt time.Time
 }
 
@@ -1133,17 +1132,18 @@ const exploreablePostFilter = `
 	and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 `
 
-func (s *Store) ExploreWriters(ctx context.Context, limit int) ([]ExploreWriter, error) {
+func (s *Store) ExploreWriters(ctx context.Context, lang string, limit int) ([]ExploreWriter, error) {
 	rows, err := s.pool.Query(ctx, `
 		select u.id, u.username, u.display_name, u.author_name, u.bio, u.blog_lang,
-		       u.custom_domain, u.custom_domain_verified_at, count(p.id), max(p.published_at)
+		       u.custom_domain, u.custom_domain_verified_at, max(p.published_at)
 		from users u
 		join posts p on p.user_id = u.id
 		where `+exploreablePostFilter+`
+		  and ($2 = '' or u.blog_lang = $2)
 		group by u.id
 		order by max(p.published_at) desc, u.id desc
 		limit $1
-	`, limit)
+	`, limit, lang)
 	if err != nil {
 		return nil, fmt.Errorf("listing explore writers: %w", err)
 	}
@@ -1153,7 +1153,7 @@ func (s *Store) ExploreWriters(ctx context.Context, limit int) ([]ExploreWriter,
 	for rows.Next() {
 		var w ExploreWriter
 		if err := rows.Scan(&w.User.ID, &w.User.Username, &w.User.DisplayName, &w.User.AuthorName, &w.User.Bio, &w.User.BlogLang,
-			&w.User.CustomDomain, &w.User.CustomDomainVerifiedAt, &w.PostCount, &w.LastPublishedAt); err != nil {
+			&w.User.CustomDomain, &w.User.CustomDomainVerifiedAt, &w.LastPublishedAt); err != nil {
 			return nil, fmt.Errorf("scanning explore writer: %w", err)
 		}
 		writers = append(writers, w)
@@ -1164,16 +1164,17 @@ func (s *Store) ExploreWriters(ctx context.Context, limit int) ([]ExploreWriter,
 	return writers, nil
 }
 
-func (s *Store) ExplorePosts(ctx context.Context, limit int) ([]Post, error) {
+func (s *Store) ExplorePosts(ctx context.Context, lang string, limit int) ([]Post, error) {
 	rows, err := s.pool.Query(ctx, `
 		select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
 		       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang
 		from posts p
 		join users u on u.id = p.user_id
 		where `+exploreablePostFilter+`
+		  and ($2 = '' or u.blog_lang = $2)
 		order by p.published_at desc, p.id desc
 		limit $1
-	`, limit)
+	`, limit, lang)
 	if err != nil {
 		return nil, fmt.Errorf("listing explore posts: %w", err)
 	}

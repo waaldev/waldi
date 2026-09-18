@@ -137,7 +137,7 @@ func (s *Server) handleBlogSitemapOrApp(w http.ResponseWriter, r *http.Request) 
 func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 	var latest time.Time
 	if s.store != nil {
-		posts, err := s.store.ExplorePosts(r.Context(), 1)
+		posts, err := s.store.ExplorePosts(r.Context(), "", 1)
 		if err != nil {
 			s.logger.Error("loading sitemap latest post", "err", err)
 		} else if len(posts) > 0 && posts[0].PublishedAt != nil {

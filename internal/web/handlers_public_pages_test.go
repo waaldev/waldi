@@ -61,3 +61,27 @@ func TestLandingExplainsReaderAndWriterPaths(t *testing.T) {
 		}
 	}
 }
+
+func TestExploreLanguageFilter(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+
+	req := httptest.NewRequest(http.MethodGet, "https://waldi.blog/explore?lang=fa", nil)
+	req.Header.Set("Accept-Language", "en")
+	rec := httptest.NewRecorder()
+	s.ServeHTTP(rec, req)
+	body := rec.Body.String()
+	for _, want := range []string{`href="/explore"`, `href="/explore?lang=en"`, `href="/explore?lang=fa" lang="fa" aria-current="page"`, `<link rel="canonical" href="https://waldi.blog/explore">`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("explore body does not contain %q", want)
+		}
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "https://waldi.blog/explore?lang=xx", nil)
+	rec = httptest.NewRecorder()
+	s.ServeHTTP(rec, req)
+	if rec.Code != http.StatusMovedPermanently || rec.Header().Get("Location") != "/explore" {
+		t.Fatalf("status %d location %q", rec.Code, rec.Header().Get("Location"))
+	}
+}

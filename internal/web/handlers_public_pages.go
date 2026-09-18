@@ -41,17 +41,24 @@ func (s *Server) serveBlogPostAt(w http.ResponseWriter, r *http.Request, slug st
 }
 
 type ExploreView struct {
+	Filters []ExploreFilterView
 	Posts   []PostView
 	Writers []ExploreWriterView
 }
 
+type ExploreFilterView struct {
+	Label   string
+	URL     string
+	Lang    string
+	Current bool
+}
+
 type ExploreWriterView struct {
-	Name      string
-	Bio       string
-	URL       string
-	Lang      string
-	Dir       string
-	PostCount int
+	Name string
+	Bio  string
+	URL  string
+	Lang string
+	Dir  string
 }
 
 func (s *Server) handleExplore(w http.ResponseWriter, r *http.Request) {
@@ -62,28 +69,42 @@ func (s *Server) handleExplore(w http.ResponseWriter, r *http.Request) {
 	pd.Inline = true
 	pd.Title = pd.T("explore.title")
 	pd.SEO = publicPageSEO(r, s.baseDomain, pd.Lang, r.URL.Path, "explore.title", "seo.explore.description")
-	explore, err := s.loadExplore(r)
+	filter := r.URL.Query().Get("lang")
+	if filter != "" && !i18n.Supported(filter) {
+		http.Redirect(w, r, r.URL.Path, http.StatusMovedPermanently)
+		return
+	}
+	explore, err := s.loadExplore(r, filter)
 	if err != nil {
 		s.logger.Error("loading explore", "err", err)
 		http.Error(w, "explore unavailable", http.StatusInternalServerError)
 		return
 	}
+	explore.Filters = exploreFilters(pd, r.URL.Path, filter)
 	pd.Explore = explore
 	s.withCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
 		s.renderer.Render(w, "explore.html", pd)
 	})
 }
 
-func (s *Server) loadExplore(r *http.Request) (*ExploreView, error) {
+func exploreFilters(pd PageData, path, current string) []ExploreFilterView {
+	return []ExploreFilterView{
+		{Label: pd.T("explore.filter.all"), URL: path, Lang: pd.Lang, Current: current == ""},
+		{Label: "English", URL: path + "?lang=en", Lang: "en", Current: current == "en"},
+		{Label: "فارسی", URL: path + "?lang=fa", Lang: "fa", Current: current == "fa"},
+	}
+}
+
+func (s *Server) loadExplore(r *http.Request, lang string) (*ExploreView, error) {
 	view := &ExploreView{}
 	if s.store == nil {
 		return view, nil
 	}
-	writers, err := s.store.ExploreWriters(r.Context(), exploreWriterLimit)
+	writers, err := s.store.ExploreWriters(r.Context(), lang, exploreWriterLimit)
 	if err != nil {
 		return nil, err
 	}
-	posts, err := s.store.ExplorePosts(r.Context(), explorePostLimit)
+	posts, err := s.store.ExplorePosts(r.Context(), lang, explorePostLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -91,14 +112,13 @@ func (s *Server) loadExplore(r *http.Request) (*ExploreView, error) {
 	owners := make(map[string]store.User, len(writers))
 	for _, wr := range writers {
 		owners[wr.User.Username] = wr.User
-		lang := postLang(blogPageLang(wr.User))
+		blogLang := postLang(blogPageLang(wr.User))
 		view.Writers = append(view.Writers, ExploreWriterView{
-			Name:      publicDisplayName(wr.User),
-			Bio:       metaDescription(wr.User.Bio),
-			URL:       PublicBlogURLForOwner(r, s.baseDomain, wr.User, "/"),
-			Lang:      lang,
-			Dir:       i18n.Dir(lang),
-			PostCount: wr.PostCount,
+			Name: publicDisplayName(wr.User),
+			Bio:  metaDescription(wr.User.Bio),
+			URL:  PublicBlogURLForOwner(r, s.baseDomain, wr.User, "/"),
+			Lang: blogLang,
+			Dir:  i18n.Dir(blogLang),
 		})
 	}
 	for _, p := range posts {
