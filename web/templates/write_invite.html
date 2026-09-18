@@ -30,15 +30,15 @@
     <p class="form-note">{{.WriteInvite.Message}}</p>
   {{end}}
 
-  <section class="settings-section" style="max-width: 24rem; margin-inline: auto;">
+  <section class="settings-section write-invite-form">
     <h2 class="settings-title">{{.T "write.invite.code.heading"}}</h2>
-    <form class="capture-form" method="post" action="/write/invite/redeem" style="max-width: none;">
+    <form class="capture-form" method="post" action="/write/invite/redeem">
       <input name="code" type="text" dir="ltr" placeholder="{{.T "write.invite.code.placeholder"}}" aria-label="{{.T "write.invite.code.label"}}" required>
       <button type="submit">{{.T "write.invite.code.submit"}}</button>
     </form>
   </section>
 
-  <section class="settings-section" style="max-width: 24rem; margin-inline: auto;">
+  <section class="settings-section write-invite-form">
     <h2 class="settings-title">{{.T "write.invite.request.heading"}}</h2>
     <p class="settings-sub">{{.T "write.invite.request.sub"}}</p>
     <form method="post" action="/write/invite/request">
@@ -52,7 +52,7 @@
         <textarea id="note" name="note" rows="2" placeholder="{{.T "write.invite.request.note.placeholder"}}" required></textarea>
       </div>
       <button class="btn-save" type="submit">{{.T "write.invite.request.submit"}}</button>
-      <p class="hint" style="margin-block-start: var(--s3)">{{.T "write.invite.request.hint"}}</p>
+      <p class="field-help write-invite-hint">{{.T "write.invite.request.hint"}}</p>
     </form>
   </section>
   {{end}}
