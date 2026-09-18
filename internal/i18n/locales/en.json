@@ -463,9 +463,9 @@
   "pagination.older": "Older",
 
   "seo.landing.title": "Waldi - a quiet place to write, and to be read",
-  "seo.landing.description": "Waldi is a personal project for reading and writing blogs, with a post from a stranger each morning.",
-  "seo.how.description": "A few things about reading, daily stranger posts, letters, and writing invitations on Waldi.",
-  "seo.write_invite.description": "Learn what writers receive on Waldi and how to request or redeem a writing invitation.",
+  "seo.landing.description": "Waldi is a free, minimal blogging platform. Keep a personal blog with RSS and your own domain, and find a stranger's post each morning.",
+  "seo.how.description": "How Waldi works: free, minimal blogs, reading without an account, a daily post from a stranger, private letters, and writing invitations.",
+  "seo.write_invite.description": "Start a free, minimal blog on Waldi in English or Persian, with RSS and your own domain. Request or redeem a writing invitation.",
   "seo.blog.description": "Read %s's writing on Waldi.",
   "seo.post.description": "%s - a post by %s on Waldi.",
 
