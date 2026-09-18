@@ -147,12 +147,19 @@ func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
-	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`)
-	base := strings.TrimSuffix(appSiteURL(r, s.baseDomain), "/")
-	writeSitemapURL(&b, base+"/", time.Time{})
-	writeSitemapURL(&b, base+"/how-it-works", time.Time{})
-	writeSitemapURL(&b, base+"/explore", latest)
-	writeSitemapURL(&b, base+"/write/invite", time.Time{})
+	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`)
+	for _, path := range append([]string{"/"}, localizedPaths...) {
+		lastMod := time.Time{}
+		if path == "/explore" {
+			lastMod = latest
+		}
+		alternates := langAlternates(r, s.baseDomain, path)
+		for _, alt := range alternates {
+			if alt.Lang != "x-default" {
+				writeSitemapURLWithAlternates(&b, alt.URL, lastMod, alternates)
+			}
+		}
+	}
 	b.WriteString("</urlset>")
 
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
@@ -164,6 +171,17 @@ func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 func cdataEscape(html string) string {
 	escaped := strings.ReplaceAll(html, "]]>", "]]]]><![CDATA[>")
 	return "<![CDATA[" + escaped + "]]>"
+}
+
+func writeSitemapURLWithAlternates(b *strings.Builder, loc string, lastMod time.Time, alternates []LangAlternate) {
+	fmt.Fprintf(b, "<url><loc>%s</loc>", xmlEscape(loc))
+	if !lastMod.IsZero() {
+		fmt.Fprintf(b, "<lastmod>%s</lastmod>", xmlEscape(lastMod.UTC().Format("2006-01-02")))
+	}
+	for _, alt := range alternates {
+		fmt.Fprintf(b, `<xhtml:link rel="alternate" hreflang="%s" href="%s"/>`, xmlEscape(alt.Lang), xmlEscape(alt.URL))
+	}
+	b.WriteString("</url>")
 }
 
 func writeSitemapURL(b *strings.Builder, loc string, lastMod time.Time) {

@@ -45,6 +45,11 @@ func TestAppSitemapListsPublicPagesWithoutFakeDates(t *testing.T) {
 			t.Errorf("sitemap missing %q", want)
 		}
 	}
+	for _, want := range []string{"<loc>https://waldi.blog/fa/explore</loc>", `<xhtml:link rel="alternate" hreflang="en" href="https://waldi.blog/how-it-works"/>`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("sitemap missing %q", want)
+		}
+	}
 	if strings.Contains(body, "<lastmod>") {
 		t.Errorf("sitemap has lastmod without any posts: %s", body)
 	}

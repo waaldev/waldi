@@ -17,7 +17,9 @@ const (
 // browser's Accept-Language when geolocation is unavailable (VPNs, Tor,
 // requests not routed through Cloudflare), falling back to i18n.Default.
 func resolveLocale(r *http.Request, user *store.User) (lang, dir string) {
-	if user != nil && i18n.Supported(user.Locale) {
+	if forced := forcedLocale(r); forced != "" {
+		lang = forced
+	} else if user != nil && i18n.Supported(user.Locale) {
 		lang = user.Locale
 	} else if cookie, err := r.Cookie(localeCookie); err == nil && i18n.Supported(cookie.Value) {
 		lang = cookie.Value

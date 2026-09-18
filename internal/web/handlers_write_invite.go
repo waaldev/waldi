@@ -20,7 +20,7 @@ func (s *Server) handleWriteInviteForm(w http.ResponseWriter, r *http.Request) {
 	pd := s.newPageData(r, user)
 	pd.Title = pd.T("write.invite.title")
 	pd.Inline = true
-	pd.SEO = publicPageSEO(r, s.baseDomain, pd.Lang, "/write/invite", "write.invite.title", "seo.write_invite.description")
+	pd.SEO = publicPageSEO(r, s.baseDomain, pd.Lang, r.URL.Path, "write.invite.title", "seo.write_invite.description")
 	pd.WriteInvite = &WriteInviteView{}
 	s.renderer.Render(w, "write_invite.html", pd)
 }

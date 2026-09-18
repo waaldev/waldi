@@ -52,6 +52,10 @@ func (s *Server) withCacheHeaders(w http.ResponseWriter, r *http.Request, next f
 		next(w, r)
 		return
 	}
+	if forcedLocale(r) != "" {
+		s.captureCacheableHTML(w, r, next, publicCacheControl, "", true)
+		return
+	}
 	s.captureCacheableHTML(w, r, next, cacheControlForLocale(r), "Cookie, CF-IPCountry", false)
 }
 

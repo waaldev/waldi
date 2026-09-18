@@ -87,6 +87,9 @@ type PageData struct {
 	BridgeSession    bool
 	DevSessionBridge bool
 	NavActive        string
+	LocalePrefix     string
+	LocaleFixed      bool
+	LangSwitchPath   string
 	Gone             bool
 	// Inline marks one-off public pages where CSS/JS is embedded directly into
 	// the HTML. Blog and app pages keep versioned external assets so navigation
@@ -482,12 +485,30 @@ func (p PageData) TN(key string, n int, args ...any) string {
 func (s *Server) newPageData(r *http.Request, user *store.User) PageData {
 	lang, dir := resolveLocale(r, user)
 	return PageData{
-		Lang:        lang,
-		Dir:         dir,
-		CurrentUser: s.userView(r, user),
-		BaseDomain:  s.baseDomain,
-		NavActive:   navActiveForPath(r.URL.Path),
+		Lang:         lang,
+		Dir:          dir,
+		CurrentUser:  s.userView(r, user),
+		BaseDomain:   s.baseDomain,
+		NavActive:    navActiveForPath(r.URL.Path),
+		LocalePrefix: localePrefix(forcedLocale(r)),
+		LocaleFixed:  forcedLocale(r) != "",
+		LangSwitchPath: func() string {
+			if forced := forcedLocale(r); forced != "" {
+				return localizedPath(otherLang(forced), unlocalizedPath(r.URL.Path))
+			}
+			return ""
+		}(),
 	}
+}
+
+func (p PageData) Local(path string) string {
+	if p.LocalePrefix == "" {
+		return path
+	}
+	if path == "/" {
+		return p.LocalePrefix
+	}
+	return p.LocalePrefix + path
 }
 
 // navActiveForPath derives which app-bar nav link (if any) is "current"

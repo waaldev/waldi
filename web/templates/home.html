@@ -6,7 +6,7 @@
 <header class="bar" aria-label="{{.T "nav.aria"}}">
   {{template "wordmark" .}}
   <nav>
-    <a class="public-nav-link" href="/how-it-works">{{.T "nav.how"}}</a>
+    <a class="public-nav-link" href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
     <a href="/login">{{.T "nav.login"}}</a>
     {{template "lang-toggle" .}}
     {{template "theme-toggle" .}}
@@ -100,7 +100,7 @@
       <h2>{{.T "landing.writing.heading"}}</h2>
       <p>{{.T "landing.writing.intro"}}</p>
       <p>{{.T "landing.writing.reach"}}</p>
-      <p class="note-links"><a href="/write/invite">{{.T "landing.writing.note"}}</a></p>
+      <p class="note-links"><a href="{{.Local "/write/invite"}}">{{.T "landing.writing.note"}}</a></p>
     </section>
   </main>
   {{template "platform-footer" .}}

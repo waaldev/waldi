@@ -40,6 +40,7 @@ type SEOView struct {
 	JSONLD           template.JS
 	RSSURL           string
 	RSSTitle         string
+	Alternates       []LangAlternate
 }
 
 func noindexSEO() *SEOView {
@@ -199,7 +200,7 @@ func blogSEO(r *http.Request, baseDomain string, owner store.User) *SEOView {
 }
 
 func landingSEO(r *http.Request, baseDomain, lang string) *SEOView {
-	canonical := strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + "/"
+	canonical := strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + localizedPath(forcedLocale(r), "/")
 	description := i18n.T(lang, "seo.landing.description")
 	title := i18n.T(lang, "seo.landing.title")
 	ogImage := defaultOGImageURL(r, baseDomain, lang)
@@ -217,6 +218,7 @@ func landingSEO(r *http.Request, baseDomain, lang string) *SEOView {
 		SiteName:      i18n.T(lang, "brand"),
 		TwitterCard:   "summary_large_image",
 		JSONLD:        landingJSONLD(title, description, canonical, lang, logoURL(r, baseDomain)),
+		Alternates:    langAlternates(r, baseDomain, "/"),
 	}
 }
 
@@ -257,6 +259,7 @@ func publicPageSEO(r *http.Request, baseDomain, lang, path, titleKey, descriptio
 		OGDescription: description, OGURL: canonical, OGLocale: ogLocale(lang),
 		OGImage:  defaultOGImageURL(r, baseDomain, lang),
 		SiteName: i18n.T(lang, "brand"), TwitterCard: "summary_large_image",
+		Alternates: langAlternates(r, baseDomain, path),
 	}
 }
 

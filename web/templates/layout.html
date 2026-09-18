@@ -12,7 +12,8 @@
     {{if .SEO.Author}}<meta name="author" content="{{.SEO.Author}}">{{end}}
     {{if .SEO.Robots}}<meta name="robots" content="{{.SEO.Robots}}">{{end}}
     {{if .SEO.CanonicalURL}}<link rel="canonical" href="{{.SEO.CanonicalURL}}">{{end}}
-    {{if .SEO.RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SEO.RSSTitle}}" href="{{.SEO.RSSURL}}">{{end}}
+    {{range .SEO.Alternates}}<link rel="alternate" hreflang="{{.Lang}}" href="{{.URL}}">
+    {{end}}{{if .SEO.RSSURL}}<link rel="alternate" type="application/rss+xml" title="{{.SEO.RSSTitle}}" href="{{.SEO.RSSURL}}">{{end}}
     {{if .SEO.OGTitle}}<meta property="og:title" content="{{.SEO.OGTitle}}">{{end}}
     {{if .SEO.OGDescription}}<meta property="og:description" content="{{.SEO.OGDescription}}">{{end}}
     {{if .SEO.OGURL}}<meta property="og:url" content="{{.SEO.OGURL}}">{{end}}
@@ -42,7 +43,7 @@
   <link rel="stylesheet" href="/static/css/main.css?v={{assetVersion}}">
   <script src="/static/js/theme.js?v={{assetVersion}}"></script>
   {{end}}
-  {{if not .CurrentUser}}<script src="/static/js/locale.js?v={{assetVersion}}" defer></script>{{end}}
+  {{if and (not .CurrentUser) (not .LocaleFixed)}}<script src="/static/js/locale.js?v={{assetVersion}}" defer></script>{{end}}
 </head>
 <body>
 <div class="page">
@@ -103,7 +104,7 @@
 <header class="bar" aria-label="{{.T "nav.aria"}}">
   {{template "wordmark" .}}
   <nav>
-    <a class="public-nav-link" href="/how-it-works">{{.T "nav.how"}}</a>
+    <a class="public-nav-link" href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
     {{if .CurrentUser}}<a href="/">{{.T "nav.home"}}</a>{{else}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
     {{template "lang-toggle" .}}
     {{template "theme-toggle" .}}
@@ -123,17 +124,17 @@
   {{else}}
     <a href="https://amin.waldi.blog/waldi-s-pact">{{.T "nav.pact"}}</a>
   {{end}}
-  <a href="/how-it-works">{{.T "nav.how"}}</a>
-  <a href="/explore">{{.T "nav.explore"}}</a>
+  <a href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
+  <a href="{{.Local "/explore"}}">{{.T "nav.explore"}}</a>
   <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a>
 </footer>
 {{end}}
 
-{{define "wordmark"}}<a class="wordmark" href="/">{{.T "brand"}} <span class="mark">※</span></a>{{end}}
+{{define "wordmark"}}<a class="wordmark" href="{{.Local "/"}}">{{.T "brand"}} <span class="mark">※</span></a>{{end}}
 
 {{define "theme-toggle"}}<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="{{.T "theme.toggle"}}">☾</button>{{end}}
 
-{{define "lang-toggle"}}<form class="inline-form lang-toggle" method="post" action="/lang/{{.T "lang.switch.code"}}"><button type="submit">{{.T "lang.switch.label"}}</button></form>{{end}}
+{{define "lang-toggle"}}{{if .LangSwitchPath}}<a class="lang-toggle" href="{{.LangSwitchPath}}" hreflang="{{.T "lang.switch.code"}}">{{.T "lang.switch.label"}}</a>{{else}}<form class="inline-form lang-toggle" method="post" action="/lang/{{.T "lang.switch.code"}}"><button type="submit">{{.T "lang.switch.label"}}</button></form>{{end}}{{end}}
 
 {{define "layout-end"}}
 </div>

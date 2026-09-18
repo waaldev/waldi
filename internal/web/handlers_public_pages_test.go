@@ -85,3 +85,89 @@ func TestExploreLanguageFilter(t *testing.T) {
 		t.Fatalf("status %d location %q", rec.Code, rec.Header().Get("Location"))
 	}
 }
+
+func TestLocalizedPublicPages(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+
+	tests := []struct {
+		path      string
+		acceptTag string
+		want      []string
+	}{
+		{
+			path:      "/fa/how-it-works",
+			acceptTag: "en",
+			want: []string{
+				`<html lang="fa" dir="rtl">`,
+				`<link rel="canonical" href="https://waldi.blog/fa/how-it-works">`,
+				`<link rel="alternate" hreflang="en" href="https://waldi.blog/how-it-works">`,
+				`<link rel="alternate" hreflang="fa" href="https://waldi.blog/fa/how-it-works">`,
+				`<link rel="alternate" hreflang="x-default" href="https://waldi.blog/how-it-works">`,
+				`href="/fa/explore"`,
+				`<a class="lang-toggle" href="/how-it-works" hreflang="en">`,
+			},
+		},
+		{
+			path:      "/",
+			acceptTag: "fa",
+			want: []string{
+				`<html lang="en" dir="ltr">`,
+				`<link rel="canonical" href="https://waldi.blog/">`,
+				`<link rel="alternate" hreflang="fa" href="https://waldi.blog/fa">`,
+				`<link rel="alternate" hreflang="x-default" href="https://waldi.blog/">`,
+				`href="/write/invite"`,
+				`<a class="lang-toggle" href="/fa" hreflang="fa">`,
+			},
+		},
+		{
+			path:      "/explore",
+			acceptTag: "fa",
+			want:      []string{`<html lang="en" dir="ltr">`, `href="/explore?lang=fa"`},
+		},
+		{
+			path:      "/fa/write/invite",
+			acceptTag: "en",
+			want:      []string{`<html lang="fa" dir="rtl">`, `<link rel="canonical" href="https://waldi.blog/fa/write/invite">`},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "https://waldi.blog"+tt.path, nil)
+			req.Header.Set("Accept-Language", tt.acceptTag)
+			req.Header.Set("CF-IPCountry", "IR")
+			rec := httptest.NewRecorder()
+			s.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d", rec.Code)
+			}
+			body := rec.Body.String()
+			for _, want := range tt.want {
+				if !strings.Contains(body, want) {
+					t.Errorf("body does not contain %q", want)
+				}
+			}
+			if strings.Contains(body, "locale.js") {
+				t.Error("localized page should not load locale.js")
+			}
+			if got := rec.Header().Get("Vary"); got != "" {
+				t.Errorf("Vary = %q, want none", got)
+			}
+		})
+	}
+}
+
+func TestEnglishIsDefaultEvenWithPersianCookie(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+	req := httptest.NewRequest(http.MethodGet, "https://waldi.blog/how-it-works", nil)
+	req.AddCookie(&http.Cookie{Name: localeCookie, Value: "fa"})
+	rec := httptest.NewRecorder()
+	s.ServeHTTP(rec, req)
+	if !strings.Contains(rec.Body.String(), `<html lang="en" dir="ltr">`) {
+		t.Fatal("unprefixed public page is not English")
+	}
+}
