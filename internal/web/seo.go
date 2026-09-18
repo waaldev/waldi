@@ -109,7 +109,7 @@ func postDocumentTitle(title, blogTitle string) string {
 	if blogTitle == "" {
 		return title
 	}
-	return blogTitle + " - " + title
+	return title + " - " + blogTitle
 }
 
 func blogDescription(lang, displayName, bio string) string {
