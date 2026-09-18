@@ -1,0 +1,39 @@
+{{define "how_it_works.html"}}
+{{template "layout-start" .}}
+{{template "platform-page-bar" .}}
+<main class="public-guide">
+  <header class="public-essay-head">
+    <h1>{{.T "how.heading"}}</h1>
+    <p>{{.T "how.lead"}}</p>
+  </header>
+
+  <div class="how-notes">
+    <section><h2>{{.T "how.read.heading"}}</h2><p>{{.T "how.read.body"}}</p></section>
+    <section><h2>{{.T "how.join.heading"}}</h2><p>{{.T "how.join.body"}}</p></section>
+    <section><h2>{{.T "how.stranger.heading"}}</h2><p>{{.T "how.stranger.body"}}</p><p>{{.T "how.stranger.body2"}}</p></section>
+    <section><h2>{{.T "how.reach.heading"}}</h2><p>{{.T "how.reach.body"}}</p><p>{{.T "how.reach.body2"}}</p><p>{{.T "how.reach.body3"}}</p></section>
+    <section><h2>{{.T "how.write.heading"}}</h2><p>{{.T "how.write.body"}}</p><p>{{.T "how.write.body2"}}</p></section>
+  </div>
+
+  <section class="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">{{.T "how.faq.heading"}}</h2>
+    <dl>
+      <div><dt>{{.T "how.faq.account.q"}}</dt><dd>{{.T "how.faq.account.a"}}</dd></div>
+      <div><dt>{{.T "how.faq.write.q"}}</dt><dd>{{.T "how.faq.write.a"}}</dd></div>
+      <div><dt>{{.T "how.faq.language.q"}}</dt><dd>{{.T "how.faq.language.a"}}</dd></div>
+      <div><dt>{{.T "how.faq.email.q"}}</dt><dd>{{.T "how.faq.email.a"}}</dd></div>
+      <div><dt>{{.T "how.faq.letters.q"}}</dt><dd>{{.T "how.faq.letters.a"}}</dd></div>
+      <div><dt>{{.T "how.faq.move.q"}}</dt><dd>{{.T "how.faq.move.a"}} <a href="https://github.com/waaldev/waldi" dir="ltr">{{.T "landing.finish.github"}}</a></dd></div>
+    </dl>
+  </section>
+
+  <footer class="note-ending">
+    <div class="note-links">
+      <a href="/signup">{{.T "landing.hero.join"}}</a>
+      <a href="/write/invite">{{.T "landing.writing.action"}}</a>
+    </div>
+  </footer>
+</main>
+{{template "platform-footer" .}}
+{{template "layout-end" .}}
+{{end}}

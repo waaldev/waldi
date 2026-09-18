@@ -99,8 +99,33 @@
 </header>
 {{end}}
 
+{{define "platform-page-bar"}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    <a class="public-nav-link" href="/how-it-works">{{.T "nav.how"}}</a>
+    {{if .CurrentUser}}<a href="/">{{.T "nav.home"}}</a>{{else}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
+    {{template "lang-toggle" .}}
+    {{template "theme-toggle" .}}
+  </nav>
+</header>
+{{end}}
+
 {{define "static-article-end"}}
 <p class="endmark" role="presentation"></p>
+{{end}}
+
+{{define "platform-footer"}}
+<footer class="platform-footer">
+  <a href="https://amin.waldi.blog/serendipity">{{.T "nav.why"}}</a>
+  {{if eq .Lang "fa"}}
+    <a href="https://aminz.net/%d8%b1%d8%a7%d9%87-%d9%88-%d8%b1%d8%b3%d9%85-%d9%88%d8%a7%d9%84%d8%af%db%8c">{{.T "nav.pact"}}</a>
+  {{else}}
+    <a href="https://amin.waldi.blog/waldi-s-pact">{{.T "nav.pact"}}</a>
+  {{end}}
+  <a href="/how-it-works">{{.T "nav.how"}}</a>
+  <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a>
+</footer>
 {{end}}
 
 {{define "wordmark"}}<a class="wordmark" href="/">{{.T "brand"}} <span class="mark">※</span></a>{{end}}

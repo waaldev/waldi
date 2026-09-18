@@ -1,13 +1,27 @@
 {{define "write_invite.html"}}
 {{template "layout-start" .}}
-{{template "app-bar" .}}
+{{template "platform-page-bar" .}}
 
-<main>
-  <section class="hero">
-    <span class="mark-big" role="presentation">※</span>
-    <h1>{{.T "write.invite.heading"}}</h1>
+<main class="public-guide write-invite-page">
+  <header class="public-essay-head">
+    <h1>{{.T "write.invite.public.heading"}}</h1>
     <p class="sub">{{.T "write.invite.sub"}}</p>
+  </header>
+
+  <section class="writing-note">
+    <p>{{.T "write.invite.benefits.body"}}</p>
+    <p>{{.T "write.invite.why"}}</p>
   </section>
+
+  {{if not .CurrentUser}}
+  <section class="write-invite-gate">
+    <p>{{.T "write.invite.guest"}}</p>
+    <div class="note-links">
+      <a href="/signup">{{.T "landing.hero.join"}}</a>
+      <a href="/login?next=/write/invite">{{.T "write.invite.guest.login"}}</a>
+    </div>
+  </section>
+  {{else}}
 
   {{if .WriteInvite.Error}}
     <p class="form-error">{{.WriteInvite.Error}}</p>
@@ -41,7 +55,9 @@
       <p class="hint" style="margin-block-start: var(--s3)">{{.T "write.invite.request.hint"}}</p>
     </form>
   </section>
+  {{end}}
 </main>
 
+{{template "platform-footer" .}}
 {{template "layout-end" .}}
 {{end}}

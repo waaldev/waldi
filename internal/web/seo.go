@@ -224,6 +224,18 @@ func landingJSONLD(name, description, url, lang string) template.JS {
 	return mustJSONLD(payload)
 }
 
+func publicPageSEO(r *http.Request, baseDomain, lang, path, titleKey, descriptionKey string) *SEOView {
+	canonical := strings.TrimSuffix(appBaseURL(r, baseDomain), "/") + path
+	title := i18n.T(lang, titleKey)
+	description := i18n.T(lang, descriptionKey)
+	return &SEOView{
+		Title: title, Description: description, CanonicalURL: canonical,
+		Robots: "index, follow", OGType: "website", OGTitle: title,
+		OGDescription: description, OGURL: canonical, OGLocale: ogLocale(lang),
+		SiteName: i18n.T(lang, "brand"), TwitterCard: "summary",
+	}
+}
+
 func postJSONLD(seo *SEOView, post store.Post, lang string) template.JS {
 	payload := map[string]any{
 		"@context":    "https://schema.org",
@@ -327,6 +339,7 @@ func robotsTxtForApp(r *http.Request, baseDomain string) string {
 	return fmt.Sprintf(`User-agent: *
 Allow: /
 Disallow: /write
+Allow: /write/invite
 Disallow: /inbox
 Disallow: /settings
 Disallow: /login

@@ -12,21 +12,15 @@ const writeRequestNoteMaxRunes = 2000
 
 func (s *Server) handleWriteInviteForm(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login?next="+url.QueryEscape("/write/invite"), http.StatusSeeOther)
-		return
-	}
-	if !s.requireVerified(w, r, user) {
-		return
-	}
-	if user.CanWrite {
+	if user != nil && user.CanWrite {
 		http.Redirect(w, r, "/write", http.StatusSeeOther)
 		return
 	}
 
 	pd := s.newPageData(r, user)
 	pd.Title = pd.T("write.invite.title")
-	pd.SEO = noindexSEO()
+	pd.Inline = true
+	pd.SEO = publicPageSEO(r, s.baseDomain, pd.Lang, "/write/invite", "write.invite.title", "seo.write_invite.description")
 	pd.WriteInvite = &WriteInviteView{}
 	s.renderer.Render(w, "write_invite.html", pd)
 }

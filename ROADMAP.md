@@ -12,11 +12,12 @@ Shipped, building, never done.
 - Letters abuse guard
 - RSS full-content feeds
 - Pages (About / Now) in blog nav
+- Stranger post on the main landing
+- Public How it works page and a link to the Serendipity post
 
 ## Next
 
 - Report link on letters
-- Stranger Post on the main landing
 - Blogfa / Persianblog / WordPress import
 
 ## Never (by principle)

@@ -6,6 +6,7 @@
 <header class="bar" aria-label="{{.T "nav.aria"}}">
   {{template "wordmark" .}}
   <nav>
+    <a class="public-nav-link" href="/how-it-works">{{.T "nav.how"}}</a>
     <a href="/login">{{.T "nav.login"}}</a>
     {{template "lang-toggle" .}}
     {{template "theme-toggle" .}}
@@ -70,32 +71,39 @@
     <small>{{.T "home.finish.sub"}}</small>
   </footer>
 {{else}}
-  <section class="hero">
-    <span class="mark-big" role="presentation">※</span>
-    <h1>{{.T "landing.hero.heading"}}</h1>
-    <p class="sub">{{.T "landing.hero.sub"}}</p>
-    <div class="hero-actions">
-      <a class="btn-follow" href="/read">{{.T "landing.hero.read"}}</a>
-      <a class="quiet-link" href="/signup">{{.T "landing.hero.start"}}</a>
-    </div>
-    <p class="hero-note">{{.T "landing.hero.invite"}}</p>
-  </section>
+  <main class="landing">
+    <header class="landing-intro">
+      <h1>{{.T "landing.hero.heading"}}</h1>
+      <p>{{.T "landing.hero.sub"}}</p>
+      <div class="landing-actions">
+        <a href="/read">{{.T "landing.hero.read"}}</a>
+        <a href="/signup">{{.T "landing.hero.join"}}</a>
+      </div>
+      <p class="landing-caption">{{.T "landing.reading.note"}}</p>
+    </header>
 
-  <p class="dinkus" role="presentation">※</p>
+    {{if .LandingSample}}
+    <section class="landing-sample" aria-labelledby="stranger-heading">
+      <h2 class="sample-label" id="stranger-heading">{{.T "landing.sample.kicker"}}</h2>
+      <p class="feed-writer"><a href="{{.LandingSample.BlogURL}}">{{.LandingSample.WriterLabel}}</a></p>
+      <a class="feed-item" href="{{.LandingSample.URL}}" lang="{{.LandingSample.Lang}}" dir="{{.LandingSample.Dir}}">
+        <h3 class="feed-title">{{.LandingSample.Title}}</h3>
+        {{if .LandingSample.Excerpt}}<p class="feed-excerpt">{{.LandingSample.Excerpt}}</p>{{end}}
+      </a>
+    </section>
+    {{end}}
 
-  <section class="landing-letter">
-    <h2>{{.T "landing.letter.heading"}}</h2>
-    <p>{{.T "landing.letter.p1"}}</p>
-    <p>{{.T "landing.letter.p2"}}</p>
-    <p>{{.T "landing.letter.p3"}}</p>
-  </section>
-
-  <p class="dinkus" role="presentation">※</p>
-
-  <footer class="finish">
-    <p>{{.T "landing.finish"}}</p>
-    <small>{{.T "landing.finish.sub"}} · <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a></small>
-  </footer>
+    <section class="landing-details">
+      <h2>{{.T "landing.reading.heading"}}</h2>
+      <p>{{.T "landing.reading.body"}}</p>
+      <p>{{.T "landing.account.body"}}</p>
+      <h2>{{.T "landing.writing.heading"}}</h2>
+      <p>{{.T "landing.writing.intro"}}</p>
+      <p>{{.T "landing.writing.reach"}}</p>
+      <p class="note-links"><a href="/write/invite">{{.T "landing.writing.note"}}</a></p>
+    </section>
+  </main>
+  {{template "platform-footer" .}}
 {{end}}
 {{template "layout-end" .}}
 {{end}}

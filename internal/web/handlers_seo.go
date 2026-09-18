@@ -138,7 +138,11 @@ func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`)
-	writeSitemapURL(&b, strings.TrimSuffix(appSiteURL(r, s.baseDomain), "/"), time.Now())
+	base := strings.TrimSuffix(appSiteURL(r, s.baseDomain), "/")
+	now := time.Now()
+	writeSitemapURL(&b, base, now)
+	writeSitemapURL(&b, base+"/how-it-works", now)
+	writeSitemapURL(&b, base+"/write/invite", now)
 	b.WriteString("</urlset>")
 
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
