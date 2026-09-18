@@ -73,6 +73,21 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	pd.Title = pd.T("home.title")
 	if user == nil {
 		pd.SEO = landingSEO(r, s.baseDomain, pd.Lang)
+		if s.store != nil {
+			p, err := s.store.DailyPublishedPost(r.Context(), pd.Lang, today())
+			if errors.Is(err, store.ErrNotFound) && pd.Lang != i18n.Default {
+				p, err = s.store.DailyPublishedPost(r.Context(), i18n.Default, today())
+			}
+			if err == nil {
+				view := postView(p)
+				view.URL = PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src=landing")
+				view.BlogURL = PublicBlogURL(r, s.baseDomain, p.Username, "/")
+				view.Excerpt = postExcerpt(p.HTML, 220)
+				pd.LandingSample = &view
+			} else if !errors.Is(err, store.ErrNotFound) {
+				s.logger.Error("loading landing sample", "err", err)
+			}
+		}
 	} else {
 		pd.SEO = noindexSEO()
 	}

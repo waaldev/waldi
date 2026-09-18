@@ -748,6 +748,34 @@ func (s *Store) RandomPublishedPost(ctx context.Context, lang string, excludeID 
 	return p, nil
 }
 
+// DailyPublishedPost returns a stable public sample for a language and day.
+// The date-seeded ordering changes the sample each day without changing it on
+// every landing-page request.
+func (s *Store) DailyPublishedPost(ctx context.Context, lang string, day time.Time) (Post, error) {
+	var p Post
+	err := s.pool.QueryRow(ctx, `
+		select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
+		       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang
+		from posts p
+		join users u on u.id = p.user_id
+		where p.status = 'published'
+		  and p.type = 'post'
+		  and p.word_count >= 50
+		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
+		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
+		  and u.blog_lang = $1
+		order by md5(p.id::text || $2), p.id
+		limit 1
+	`, lang, day.Format("2006-01-02")).Scan(postWithUserScanFields(&p)...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Post{}, ErrNotFound
+	}
+	if err != nil {
+		return Post{}, fmt.Errorf("finding daily published post: %w", err)
+	}
+	return p, nil
+}
+
 func (s *Store) AssignedWildcard(ctx context.Context, userID int64, day time.Time) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `

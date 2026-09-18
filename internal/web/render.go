@@ -75,6 +75,7 @@ type PageData struct {
 	WriteInvite      *WriteInviteView
 	Post             *PostView
 	Feed             *FeedView
+	LandingSample    *PostView
 	Inbox            *InboxView
 	Kept             *KeptView
 	SEO              *SEOView
