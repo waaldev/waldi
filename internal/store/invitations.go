@@ -86,17 +86,9 @@ func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, u
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	var inviteID int64
-	err = tx.QueryRow(ctx, `
-		select id from invitations
-		where code = $1 and used_at is null
-		for update
-	`, inviteCode).Scan(&inviteID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return User{}, ErrInviteInvalid
-	}
+	inviteID, inviterID, err := lockInvitation(ctx, tx, inviteCode)
 	if err != nil {
-		return User{}, fmt.Errorf("locking invitation: %w", err)
+		return User{}, err
 	}
 
 	var user User
@@ -109,13 +101,8 @@ func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, u
 		return User{}, fmt.Errorf("creating user: %w", err)
 	}
 
-	_, err = tx.Exec(ctx, `
-		update invitations
-		set used_at = now(), used_by_user_id = $2
-		where id = $1
-	`, inviteID, user.ID)
-	if err != nil {
-		return User{}, fmt.Errorf("redeeming invitation: %w", err)
+	if err := markInvitationUsed(ctx, tx, inviteID, inviterID, user.ID); err != nil {
+		return User{}, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -134,26 +121,16 @@ func (s *Store) RedeemInvitationForUser(ctx context.Context, code string, userID
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	var inviteID int64
-	err = tx.QueryRow(ctx, `
-		select id from invitations
-		where code = $1 and used_at is null
-		for update
-	`, code).Scan(&inviteID)
-	if errors.Is(err, pgx.ErrNoRows) {
+	inviteID, inviterID, err := lockInvitation(ctx, tx, code)
+	if err != nil {
+		return err
+	}
+	if inviterID != nil && *inviterID == userID {
 		return ErrInviteInvalid
 	}
-	if err != nil {
-		return fmt.Errorf("locking invitation: %w", err)
-	}
 
-	_, err = tx.Exec(ctx, `
-		update invitations
-		set used_at = now(), used_by_user_id = $2
-		where id = $1
-	`, inviteID, userID)
-	if err != nil {
-		return fmt.Errorf("redeeming invitation: %w", err)
+	if err := markInvitationUsed(ctx, tx, inviteID, inviterID, userID); err != nil {
+		return err
 	}
 
 	_, err = tx.Exec(ctx, `update users set can_write = true, blog_lang = locale where id = $1`, userID)
@@ -163,6 +140,51 @@ func (s *Store) RedeemInvitationForUser(ctx context.Context, code string, userID
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("committing transaction: %w", err)
+	}
+	return nil
+}
+
+func lockInvitation(ctx context.Context, tx pgx.Tx, code string) (int64, *int64, error) {
+	var inviteID int64
+	var inviterID *int64
+	err := tx.QueryRow(ctx, `
+		select id, invited_by_user_id from invitations
+		where code = $1 and used_at is null
+		for update
+	`, code).Scan(&inviteID, &inviterID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return 0, nil, ErrInviteInvalid
+	}
+	if err != nil {
+		return 0, nil, fmt.Errorf("locking invitation: %w", err)
+	}
+	return inviteID, inviterID, nil
+}
+
+func markInvitationUsed(ctx context.Context, tx pgx.Tx, inviteID int64, inviterID *int64, userID int64) error {
+	_, err := tx.Exec(ctx, `
+		update invitations
+		set used_at = now(), used_by_user_id = $2
+		where id = $1
+	`, inviteID, userID)
+	if err != nil {
+		return fmt.Errorf("redeeming invitation: %w", err)
+	}
+	if inviterID == nil {
+		return nil
+	}
+
+	_, err = tx.Exec(ctx, `update users set stranger_hold = true where id = $1`, userID)
+	if err != nil {
+		return fmt.Errorf("holding invited writer from strangers: %w", err)
+	}
+	_, err = tx.Exec(ctx, `
+		insert into follows (follower_id, followee_id)
+		values ($1, $2)
+		on conflict (follower_id, followee_id) do nothing
+	`, *inviterID, userID)
+	if err != nil {
+		return fmt.Errorf("following invited writer: %w", err)
 	}
 	return nil
 }

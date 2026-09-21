@@ -190,6 +190,7 @@ func (s *Store) EmailCaptureWildcard(ctx context.Context, email, readerLang stri
 		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and u.blog_lang = $2
+		  and not u.stranger_hold
 		  and not exists (
 		    select 1 from email_captures ec
 		    where ec.email = $1 and ec.source_username = u.username

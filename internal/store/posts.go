@@ -692,6 +692,7 @@ func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang 
 			  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 			  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 			  and u.blog_lang = $4
+			  and not u.stranger_hold
 			  and p.user_id <> $1
 			  and not exists (
 			    select 1 from follows f
@@ -735,6 +736,7 @@ func (s *Store) RandomPublishedPost(ctx context.Context, lang string, excludeID 
 		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and u.blog_lang = $1
+		  and not u.stranger_hold
 		  and ($2 = 0 or p.id <> $2)
 		order by random()
 		limit 1
@@ -764,6 +766,7 @@ func (s *Store) DailyPublishedPost(ctx context.Context, lang string, day time.Ti
 		  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
 		  and u.blog_lang = $1
+		  and not u.stranger_hold
 		order by md5(p.id::text || $2), p.id
 		limit 1
 	`, lang, day.Format("2006-01-02")).Scan(postWithUserScanFields(&p)...)
@@ -1130,6 +1133,7 @@ const exploreablePostFilter = `
 	and p.word_count >= 50
 	and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
 	and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
+	and not u.stranger_hold
 `
 
 func (s *Store) ExploreWriters(ctx context.Context, lang string, limit int) ([]ExploreWriter, error) {
