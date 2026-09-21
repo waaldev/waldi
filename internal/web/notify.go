@@ -43,6 +43,14 @@ func (s *Server) notifyPublish(r *http.Request, user store.User, post store.Post
 		title = "(untitled)"
 	}
 	text := fmt.Sprintf("Post published: %s\nby %s - %s", title, user.Username, PublicBlogURLForOwner(r, s.baseDomain, user, "/"+post.Slug))
+	if s.store != nil {
+		held, err := s.store.StrangerHold(r.Context(), user.ID)
+		if err != nil {
+			s.logger.Error("checking stranger hold", "err", err, "user_id", user.ID)
+		} else if held {
+			text += fmt.Sprintf("\nInvited writer, held from strangers. Release: /release %s", user.Username)
+		}
+	}
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), notifyTimeout)
 		defer cancel()

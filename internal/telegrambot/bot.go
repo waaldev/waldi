@@ -158,6 +158,10 @@ func (b *Bot) handleMessage(ctx context.Context, msg *Message) {
 		b.cmdInvite(ctx, msg.Chat.ID, strings.Join(args, " "))
 	case "/wildcardfloor":
 		b.cmdWildcardFloor(ctx, msg.Chat.ID, args)
+	case "/held":
+		b.cmdHeld(ctx, msg.Chat.ID)
+	case "/release":
+		b.cmdRelease(ctx, msg.Chat.ID, args)
 	default:
 		b.reply(ctx, msg.Chat.ID, "Unknown command. Send /help for available commands.")
 	}
@@ -461,6 +465,42 @@ func (b *Bot) cmdInvite(ctx context.Context, chatID int64, note string) {
 	b.reply(ctx, chatID, "Invitation created:\n"+url)
 }
 
+func (b *Bot) cmdHeld(ctx context.Context, chatID int64) {
+	users, err := b.store.StrangerHeldUsers(ctx)
+	if err != nil {
+		b.logger.Error("telegram list held writers", "err", err)
+		b.reply(ctx, chatID, "Failed to load held writers.")
+		return
+	}
+	if len(users) == 0 {
+		b.reply(ctx, chatID, "No writers are held from strangers.")
+		return
+	}
+	lines := []string{fmt.Sprintf("Held from strangers (%d):", len(users))}
+	for _, u := range users {
+		lines = append(lines, fmt.Sprintf("• @%s - %s", u.Username, b.blogURL(u)))
+	}
+	b.reply(ctx, chatID, strings.Join(lines, "\n"))
+}
+
+func (b *Bot) cmdRelease(ctx context.Context, chatID int64, args []string) {
+	if len(args) != 1 {
+		b.reply(ctx, chatID, "Usage: /release USERNAME_OR_EMAIL")
+		return
+	}
+	user, err := b.lookupUser(ctx, args[0])
+	if err != nil {
+		b.reply(ctx, chatID, "User not found.")
+		return
+	}
+	if err := b.store.ReleaseStrangerHold(ctx, user.ID); err != nil {
+		b.logger.Error("telegram release stranger hold", "err", err, "user_id", user.ID)
+		b.reply(ctx, chatID, "Could not release: "+err.Error())
+		return
+	}
+	b.reply(ctx, chatID, fmt.Sprintf("@%s can now reach strangers.", user.Username))
+}
+
 func (b *Bot) cmdWildcardFloor(ctx context.Context, chatID int64, args []string) {
 	if len(args) == 0 {
 		floor, err := b.store.WildcardImpressionFloor(ctx)
@@ -636,5 +676,7 @@ Waldi admin bot
 /delete USERNAME_OR_EMAIL - delete a user (confirmation required)
 /invite [note] - create a signup invitation link
 /wildcardfloor [N] - show or set the wildcard impression floor (fallback when the pool has no match)
+/held - invited writers still held from strangers
+/release USERNAME_OR_EMAIL - let an invited writer reach strangers
 `)
 }
