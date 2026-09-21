@@ -6,15 +6,27 @@
     {{if eq .Auth.Mode "login"}}
       <a href="/signup">{{.T "nav.signup"}}</a>
     {{else if ne .Auth.Mode "reset"}}
-      <a href="/login">{{.T "nav.login"}}</a>
+      <a href="/login{{if .Auth.Inviter}}?invite={{.Auth.InviteCode}}{{end}}">{{.T "nav.login"}}</a>
     {{end}}
     {{template "lang-toggle" .}}
     {{template "theme-toggle" .}}
   </nav>
 </header>
 
+{{if .Auth.Inviter}}
+<section class="invite-from">
+  <span class="mark-big" role="presentation">※</span>
+  <h1 class="who">{{.T "invite.landing.who" .Auth.Inviter}}</h1>
+  <p class="why">{{.T "invite.landing.why"}}</p>
+</section>
+
+<p class="invite-note">{{.T "invite.landing.note" .Auth.Inviter}}</p>
+{{end}}
+
 <main class="form-page">
+  {{if not .Auth.Inviter}}
   <h1 class="form-title">{{.Auth.Heading}}</h1>
+  {{end}}
   {{if .Auth.Error}}
     <p class="form-error">{{.Auth.Error}}</p>
   {{end}}
@@ -105,7 +117,9 @@
     </form>
 
     <p class="form-alt">
-      {{if eq .Auth.Mode "signup"}}
+      {{if .Auth.Inviter}}
+        {{.T "invite.landing.alt.prompt"}} <a href="/login?invite={{.Auth.InviteCode}}">{{.T "auth.login.alt.link"}}</a> {{.T "invite.landing.alt.suffix"}}
+      {{else if eq .Auth.Mode "signup"}}
         {{.T "auth.signup.alt.prompt"}} <a href="/login">{{.T "auth.login.alt.link"}}</a>
       {{else}}
         {{.T "auth.login.alt.prompt"}} <a href="/signup">{{.T "auth.signup.alt.link"}}</a><br>

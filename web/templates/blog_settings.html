@@ -110,6 +110,18 @@
     </div>
   </details>
 
+  {{if and .Invites .Invites.Rows}}
+  <details class="settings-fold" id="invites">
+    <summary>
+      <span class="fold-title">{{.T "invites.settings.heading"}}</span>
+      <span class="fold-sub">{{.T "invites.sub"}}</span>
+    </summary>
+    <div class="fold-body">
+      {{template "invite-list" .}}
+    </div>
+  </details>
+  {{end}}
+
   <details class="settings-fold" {{if or .BlogSettings.DomainError .BlogSettings.DomainNotice}}open{{end}}>
     <summary>
       <span class="fold-title">{{.T "blog.settings.domain.heading"}}</span>

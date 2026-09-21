@@ -33,7 +33,7 @@
   <section class="settings-section write-invite-form">
     <h2 class="settings-title">{{.T "write.invite.code.heading"}}</h2>
     <form class="capture-form" method="post" action="/write/invite/redeem">
-      <input name="code" type="text" dir="ltr" placeholder="{{.T "write.invite.code.placeholder"}}" aria-label="{{.T "write.invite.code.label"}}" required>
+      <input name="code" type="text" dir="ltr" value="{{.WriteInvite.Code}}" placeholder="{{.T "write.invite.code.placeholder"}}" aria-label="{{.T "write.invite.code.label"}}" required>
       <button type="submit">{{.T "write.invite.code.submit"}}</button>
     </form>
   </section>

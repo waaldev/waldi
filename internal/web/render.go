@@ -73,6 +73,7 @@ type PageData struct {
 	Auth             *AuthView
 	Write            *WriteView
 	WriteInvite      *WriteInviteView
+	Invites          *InvitesView
 	Post             *PostView
 	Feed             *FeedView
 	LandingSample    *PostView
@@ -121,6 +122,7 @@ type AuthView struct {
 	ResetToken  string
 	NextURL     string
 	InviteCode  string
+	Inviter     string
 }
 
 type BlogView struct {
@@ -218,6 +220,7 @@ type WriteView struct {
 type WriteInviteView struct {
 	Error   string
 	Message string
+	Code    string
 }
 
 type PostView struct {

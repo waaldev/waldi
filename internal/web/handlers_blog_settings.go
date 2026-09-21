@@ -79,6 +79,7 @@ func (s *Server) handleBlogSettingsForm(w http.ResponseWriter, r *http.Request) 
 	pd.BlogSettings.Saved = r.URL.Query().Get("saved") == "1"
 	pd.BlogSettings.Pages = s.pagesViewFor(r.Context(), user.ID)
 	pd.BlogSettings.MaxPages = store.MaxPagesPerUser
+	pd.Invites = s.invitesViewFor(r, *user, pd.Lang)
 	switch r.URL.Query().Get("domain") {
 	case "set":
 		pd.BlogSettings.DomainNotice = pd.T("blog.settings.domain.notice.set")

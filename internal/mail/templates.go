@@ -29,8 +29,12 @@ func htmlEmail(lang, title, bodyHTML, footer string) string {
 	if dir == "rtl" {
 		styles += emailStylesRTL
 	}
-	return fmt.Sprintf(`<!doctype html><html lang="%s" dir="%s"><head><meta charset="utf-8"><style>%s</style></head><body><div class="wrap"><div class="card"><div class="mark">※</div><h1>%s</h1>%s<div class="footer">%s</div></div></div></body></html>`,
-		html.EscapeString(lang), dir, styles, html.EscapeString(title), bodyHTML, footer)
+	heading := ""
+	if title != "" {
+		heading = "<h1>" + html.EscapeString(title) + "</h1>"
+	}
+	return fmt.Sprintf(`<!doctype html><html lang="%s" dir="%s"><head><meta charset="utf-8"><style>%s</style></head><body><div class="wrap"><div class="card"><div class="mark">※</div>%s%s<div class="footer">%s</div></div></div></body></html>`,
+		html.EscapeString(lang), dir, styles, heading, bodyHTML, footer)
 }
 
 // BrandName returns the From display name for the given locale (e.g. "Waldi"
@@ -171,5 +175,30 @@ func ReactivationEmail(lang, resumeURL string) (subject, plain, htmlBody string)
 			fmt.Sprintf(`<p>Hello.</p><p>You haven't been by Waldi in a while, so we've paused your daily digests.</p><p>If you'd still like to receive them:</p>%s<p>If you don't, we won't email you again.</p>`, buttonLink(resumeURL, "Yes, keep sending")),
 			"Waldi ※")
 	}
+	return subject, plain, htmlBody
+}
+
+func InviteePublishedEmail(lang, inviteeName, postTitle, postURL string) (subject, plain, htmlBody string) {
+	var lead, reason, readLabel, footer string
+	switch lang {
+	case "fa":
+		subject = inviteeName + " اولین نوشته‌اش را منتشر کرد"
+		lead = fmt.Sprintf("%s، که شما دعوتش کردید، اولین نوشته‌اش را در والدی منتشر کرد: «%s».", inviteeName, postTitle)
+		reason = fmt.Sprintf("به خاطر شماست که %s اینجا می‌نویسد.", inviteeName)
+		readLabel = "بخوانید:"
+		footer = "والدی ※"
+	default:
+		subject = inviteeName + " just published"
+		lead = fmt.Sprintf("%s, whom you invited, published their first post on Waldi: “%s.”", inviteeName, postTitle)
+		reason = fmt.Sprintf("You're the reason %s is writing here.", inviteeName)
+		readLabel = "Read it:"
+		footer = "Waldi ※"
+	}
+	linkText := strings.TrimPrefix(strings.TrimPrefix(postURL, "https://"), "http://")
+	plain = fmt.Sprintf("%s\n\n%s\n\n%s %s\n\n%s", lead, reason, readLabel, postURL, footer)
+	htmlBody = htmlEmail(lang, "",
+		fmt.Sprintf(`<p>%s</p><p>%s</p><p>%s <a href="%s" dir="ltr">%s</a></p>`,
+			html.EscapeString(lead), html.EscapeString(reason), html.EscapeString(readLabel), html.EscapeString(postURL), html.EscapeString(linkText)),
+		footer)
 	return subject, plain, htmlBody
 }

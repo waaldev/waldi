@@ -2105,6 +2105,98 @@ a.btn-secondary:hover {
   .fn-popover-hint { visibility: hidden; }
 }
 
+.invite-from {
+  text-align: center;
+  margin-block: var(--s6) var(--s5);
+}
+.invite-from .mark-big {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  color: var(--accent);
+  margin-block-end: var(--s4);
+}
+.invite-from .who {
+  font-family: var(--font-serif);
+  font-size: var(--text-title);
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0 0 var(--s3);
+}
+.invite-from .why {
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.invite-from .why:lang(fa) { font-style: normal; }
+
+.invite-note {
+  font-family: var(--font-serif);
+  font-size: var(--text-ui);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: var(--paper-raised);
+  border-radius: var(--radius);
+  padding: var(--s4);
+  margin-block-end: var(--s5);
+}
+
+.invite-list { list-style: none; margin: 0 0 var(--s4); padding: 0; }
+
+.invite-row {
+  padding-block: var(--s4);
+  border-block-end: 1px solid var(--hairline);
+}
+.invite-row:first-child { border-block-start: 1px solid var(--hairline); }
+
+.invite-link {
+  display: flex;
+  gap: var(--s2);
+  align-items: center;
+}
+.invite-link input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--s2) var(--s3);
+  direction: ltr;
+}
+.invite-link button {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: var(--s2) var(--s3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.invite-link button:hover { color: var(--accent-ink); border-color: var(--accent-ink); }
+
+.invite-status {
+  font-size: var(--text-meta);
+  color: var(--ink-faint);
+  margin-block: var(--s2) 0;
+}
+.invite-status .joined { color: var(--ink-soft); }
+.invite-status a { color: var(--accent); }
+
+.invite-used .ptitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-feed);
+  font-weight: 500;
+  margin: 0;
+}
+.invite-used .ptitle a { color: inherit; text-decoration: none; }
+
 /* ---------- print ---------- */
 
 @media print {

@@ -264,6 +264,7 @@ func (s *Server) handlePublishPost(w http.ResponseWriter, r *http.Request) {
 	}
 	s.purgePublicCache(user.Username)
 	s.notifyPublish(r, *user, p)
+	s.notifyInviterOfFirstPost(r, *user, p)
 	http.Redirect(w, r, "/write/"+strconv.FormatInt(p.ID, 10), http.StatusSeeOther)
 }
 

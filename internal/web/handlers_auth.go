@@ -14,7 +14,14 @@ import (
 )
 
 func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
-	pd := s.newPageData(r, currentUser(r))
+	user := currentUser(r)
+	inviteCode := strings.TrimSpace(r.URL.Query().Get("invite"))
+	if user != nil && inviteCode != "" {
+		http.Redirect(w, r, "/write/invite?code="+url.QueryEscape(inviteCode), http.StatusSeeOther)
+		return
+	}
+
+	pd := s.newPageData(r, user)
 	pd.SEO = noindexSEO()
 
 	pd.Title = pd.T("auth.signup.title")
@@ -22,9 +29,26 @@ func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 		Mode:        "signup",
 		Heading:     pd.T("auth.signup.heading"),
 		SubmitLabel: pd.T("auth.signup.submit"),
-		InviteCode:  strings.TrimSpace(r.URL.Query().Get("invite")),
+		InviteCode:  inviteCode,
 	}
+	s.applyInviter(r, &pd)
 	s.renderer.Render(w, "auth.html", pd)
+}
+
+func (s *Server) applyInviter(r *http.Request, pd *PageData) {
+	if s.store == nil || pd.Auth == nil || pd.Auth.InviteCode == "" || pd.Auth.Mode != "signup" {
+		return
+	}
+	inviter, err := s.store.InvitationInviter(r.Context(), pd.Auth.InviteCode)
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) && !errors.Is(err, store.ErrInviteInvalid) {
+			s.logger.Error("finding inviter", "err", err)
+		}
+		return
+	}
+	pd.Auth.Inviter = writerLabelFromUser(inviter)
+	pd.Title = pd.T("invite.landing.title", pd.Auth.Inviter)
+	pd.Auth.SubmitLabel = pd.T("invite.landing.submit")
 }
 
 func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +144,10 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleLoginForm(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
 	if user != nil {
+		if code := strings.TrimSpace(r.URL.Query().Get("invite")); code != "" {
+			http.Redirect(w, r, "/write/invite?code="+url.QueryEscape(code), http.StatusSeeOther)
+			return
+		}
 		redirect(w, r, safeNextURL(r.URL.Query().Get("next"), appBaseURL(r, s.baseDomain)))
 		return
 	}
@@ -131,6 +159,10 @@ func (s *Server) handleLoginForm(w http.ResponseWriter, r *http.Request) {
 		Heading:     pd.T("auth.login.heading"),
 		SubmitLabel: pd.T("auth.login.submit"),
 		NextURL:     r.URL.Query().Get("next"),
+		InviteCode:  strings.TrimSpace(r.URL.Query().Get("invite")),
+	}
+	if pd.Auth.InviteCode != "" {
+		pd.Auth.Message = pd.T("invite.login.note")
 	}
 	s.renderer.Render(w, "auth.html", pd)
 }
@@ -168,6 +200,17 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	dest := safeNextURL(r.FormValue("next"), "/")
 	if dest == "/" && !user.EmailVerified() {
 		dest = "/verify-email"
+	}
+	if code := strings.TrimSpace(r.FormValue("invite")); code != "" && !user.CanWrite {
+		err := s.store.RedeemInvitationForUser(r.Context(), code, user.ID)
+		switch {
+		case err == nil:
+			dest = "/write"
+		case errors.Is(err, store.ErrInviteInvalid):
+			dest = "/write/invite?code=" + url.QueryEscape(code)
+		default:
+			s.logger.Error("redeeming invite at login", "err", err)
+		}
 	}
 	redirect(w, r, dest)
 }
@@ -432,6 +475,7 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 		ResetToken:  strings.TrimSpace(r.FormValue("token")),
 		InviteCode:  strings.TrimSpace(r.FormValue("invite")),
 	}
+	s.applyInviter(r, &pd)
 	s.renderer.RenderStatus(w, http.StatusBadRequest, "auth.html", pd)
 }
 

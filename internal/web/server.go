@@ -138,6 +138,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /settings/pages/{id}/delete", s.handleDeletePage)
 	s.mux.HandleFunc("GET /write", s.handleWrite)
 	s.mux.HandleFunc("GET /write/invite", s.defaultLocalized(s.handleWriteInviteForm))
+	s.mux.HandleFunc("GET /invites", s.handleInvites)
 	s.mux.HandleFunc("POST /write/invite/redeem", s.handleRedeemWriteInvite)
 	s.mux.HandleFunc("POST /write/invite/request", s.handleWriteRequest)
 	s.mux.HandleFunc("POST /write/drafts", s.handleCreateDraft)

@@ -1,0 +1,55 @@
+{{define "invites.html"}}
+{{template "layout-start" .}}
+{{template "app-bar" .}}
+
+<main>
+  <section class="settings-section">
+    <h1 class="settings-title">{{.T "invites.heading"}}</h1>
+    <p class="settings-sub">{{.T "invites.sub"}}</p>
+    {{template "invite-list" .}}
+  </section>
+</main>
+{{template "layout-end" .}}
+{{end}}
+
+{{define "invite-list"}}
+<ul class="invite-list">
+  {{range .Invites.Rows}}
+    {{if .Used}}
+      <li class="invite-row invite-used">
+        <p class="ptitle"><a href="{{.BlogURL}}">{{.Name}}</a></p>
+        <p class="invite-status">
+          <span class="joined">{{.Joined}}{{if .Following}} {{$.T "invites.following"}}{{end}}</span>
+          {{if .FirstPostURL}} · {{$.T "invites.first_post"}} <a href="{{.FirstPostURL}}">{{.FirstPostTitle}}</a>{{end}}
+        </p>
+      </li>
+    {{else}}
+      <li class="invite-row">
+        <div class="invite-link">
+          <input type="text" readonly value="{{.Link}}" aria-label="{{$.T "invites.link.label"}}" onfocus="this.select()">
+          <button type="button" data-copied="{{$.T "invites.copied"}}">{{$.T "invites.copy"}}</button>
+        </div>
+        <p class="invite-status">{{$.T "invites.unused"}}</p>
+      </li>
+    {{end}}
+  {{end}}
+</ul>
+<script>
+  (function () {
+    document.querySelectorAll(".invite-link button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var input = button.parentNode.querySelector("input");
+        var done = function () { button.textContent = button.dataset.copied; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(input.value).then(done, function () {
+            input.select();
+          });
+        } else {
+          input.select();
+          if (document.execCommand("copy")) done();
+        }
+      });
+    });
+  })();
+</script>
+{{end}}
