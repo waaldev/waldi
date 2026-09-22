@@ -182,9 +182,9 @@ func InviteePublishedEmail(lang, inviteeName, postTitle, postURL string) (subjec
 	var lead, reason, readLabel, footer string
 	switch lang {
 	case "fa":
-		subject = inviteeName + " اولین نوشته‌اش را منتشر کرد"
-		lead = fmt.Sprintf("%s، که شما دعوتش کردید، اولین نوشته‌اش را در والدی منتشر کرد: «%s».", inviteeName, postTitle)
-		reason = fmt.Sprintf("به خاطر شماست که %s اینجا می‌نویسد.", inviteeName)
+		subject = inviteeName + " اولین نوشته\u200cاش را منتشر کرد"
+		lead = fmt.Sprintf("%s، که شما دعوتش کردید، اولین نوشته\u200cاش را در والدی منتشر کرد: «%s».", inviteeName, postTitle)
+		reason = fmt.Sprintf("به خاطر شماست که %s اینجا می\u200cنویسد.", inviteeName)
 		readLabel = "بخوانید:"
 		footer = "والدی ※"
 	default:
