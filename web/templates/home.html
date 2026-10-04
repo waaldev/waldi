@@ -72,36 +72,22 @@
   </footer>
 {{else}}
   <main class="landing">
-    <header class="landing-intro">
-      <h1>{{.T "landing.hero.heading"}}</h1>
-      <p>{{.T "landing.hero.sub"}}</p>
+    <h1>{{.T "landing.hero.heading"}}</h1>
+    <div class="landing-lines">
+      <p>{{.T "landing.line.stranger"}}</p>
+      <p>{{.T "landing.line.counts"}}</p>
+      <p>{{.T "landing.line.letters"}}</p>
+      <p>{{.T "landing.line.write"}}</p>
+    </div>
+    <footer class="landing-end">
+      <p class="landing-end-line">{{.T "landing.end"}}</p>
+      <p class="landing-end-sub">{{.T "landing.end.sub"}}</p>
       <div class="landing-actions">
-        <a href="/read">{{.T "landing.hero.read"}}</a>
+        <a class="btn-primary" href="{{if .LandingSample}}{{.LandingSample.URL}}{{else}}/read{{end}}">{{.T "landing.end.read"}}</a>
         <a href="/signup">{{.T "landing.hero.join"}}</a>
       </div>
-      <p class="landing-caption">{{.T "landing.reading.note"}}</p>
-    </header>
-
-    {{if .LandingSample}}
-    <section class="landing-sample" aria-labelledby="stranger-heading">
-      <h2 class="sample-label" id="stranger-heading">{{.T "landing.sample.kicker"}}</h2>
-      <p class="feed-writer"><a href="{{.LandingSample.BlogURL}}">{{.LandingSample.WriterLabel}}</a></p>
-      <a class="feed-item" href="{{.LandingSample.URL}}" lang="{{.LandingSample.Lang}}" dir="{{.LandingSample.Dir}}">
-        <h3 class="feed-title">{{.LandingSample.Title}}</h3>
-        {{if .LandingSample.Excerpt}}<p class="feed-excerpt">{{.LandingSample.Excerpt}}</p>{{end}}
-      </a>
-    </section>
-    {{end}}
-
-    <section class="landing-details">
-      <h2>{{.T "landing.reading.heading"}}</h2>
-      <p>{{.T "landing.reading.body"}}</p>
-      <p>{{.T "landing.account.body"}}</p>
-      <h2>{{.T "landing.writing.heading"}}</h2>
-      <p>{{.T "landing.writing.intro"}}</p>
-      <p>{{.T "landing.writing.reach"}}</p>
-      <p class="note-links"><a href="{{.Local "/write/invite"}}">{{.T "landing.writing.note"}}</a></p>
-    </section>
+      <p class="landing-caption">{{.T "landing.reading.note"}} <a href="{{.Local "/write/invite"}}">{{.T "landing.writing.note"}}</a></p>
+    </footer>
   </main>
   {{template "platform-footer" .}}
 {{end}}

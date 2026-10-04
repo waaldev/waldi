@@ -19,7 +19,7 @@ func TestPublicInformationPages(t *testing.T) {
 		path string
 		want string
 	}{
-		{path: "/how-it-works", want: "A few things about Waldi"},
+		{path: "/how-it-works", want: "How Waldi works"},
 		{path: "/write/invite", want: "Would you like to write here?"},
 		{path: "/explore", want: "Recent writing and the blogs on Waldi."},
 	}

@@ -85,8 +85,6 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			if err == nil {
 				view := postView(p)
 				view.URL = PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src=landing")
-				view.BlogURL = PublicBlogURL(r, s.baseDomain, p.Username, "/")
-				view.Excerpt = postExcerpt(p.HTML, 220)
 				pd.LandingSample = &view
 			} else if !errors.Is(err, store.ErrNotFound) {
 				s.logger.Error("loading landing sample", "err", err)
