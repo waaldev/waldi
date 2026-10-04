@@ -27,9 +27,15 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := currentUser(r)
+	if user == nil && r.URL.Path == "/" && wantsPersianLanding(r) {
+		w.Header().Set("Cache-Control", privateSessionCacheControl)
+		http.Redirect(w, r, localizedPath(prefixedLang, "/"), http.StatusFound)
+		return
+	}
 	pd := s.newPageData(r, user)
 	if user == nil {
 		pd.Inline = true
+		pd.LandingLocale = r.URL.Path == "/"
 	}
 	feed := &FeedView{Empty: true}
 	if user != nil && s.store != nil {
@@ -89,6 +95,16 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.renderer.Render(w, "home.html", pd)
+}
+
+func wantsPersianLanding(r *http.Request) bool {
+	if c, err := r.Cookie(localeCookie); err == nil && c.Value == prefixedLang {
+		return true
+	}
+	if localePinned(r) {
+		return false
+	}
+	return r.Header.Get("CF-IPCountry") == "IR"
 }
 
 func (s *Server) dailySample(r *http.Request, lang, src string) *PostView {

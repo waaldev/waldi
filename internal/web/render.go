@@ -91,6 +91,7 @@ type PageData struct {
 	LocalePrefix     string
 	LocaleFixed      bool
 	LangSwitchPath   string
+	LandingLocale    bool
 	Gone             bool
 	// Inline marks one-off public pages where CSS/JS is embedded directly into
 	// the HTML. Blog and app pages keep versioned external assets so navigation

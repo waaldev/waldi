@@ -12,6 +12,23 @@
 
   document.addEventListener("click", function (e) {
     var link = e.target.closest && e.target.closest("a.lang-toggle");
-    if (link) remember(link.getAttribute("hreflang"), "link=1");
+    if (!link) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+      remember(link.getAttribute("hreflang"), "link=1");
+      return;
+    }
+    e.preventDefault();
+    var went = false;
+    function go() {
+      if (went) return;
+      went = true;
+      location.href = link.href;
+    }
+    setTimeout(go, 1500);
+    try {
+      fetch("/lang/" + link.getAttribute("hreflang") + "?link=1", { method: "POST", credentials: "same-origin" }).then(go, go);
+    } catch (err) {
+      go();
+    }
   });
 })();

@@ -97,6 +97,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 	tests := []struct {
 		path      string
 		acceptTag string
+		country   string
 		want      []string
 	}{
 		{
@@ -116,6 +117,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 		{
 			path:      "/",
 			acceptTag: "fa",
+			country:   "DE",
 			want: []string{
 				`<html lang="en" dir="ltr">`,
 				`<link rel="canonical" href="https://waldi.blog/">`,
@@ -141,7 +143,11 @@ func TestLocalizedPublicPages(t *testing.T) {
 		t.Run(tt.path, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "https://waldi.blog"+tt.path, nil)
 			req.Header.Set("Accept-Language", tt.acceptTag)
-			req.Header.Set("CF-IPCountry", "IR")
+			country := tt.country
+			if country == "" {
+				country = "IR"
+			}
+			req.Header.Set("CF-IPCountry", country)
 			rec := httptest.NewRecorder()
 			s.ServeHTTP(rec, req)
 			if rec.Code != http.StatusOK {
@@ -153,7 +159,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 					t.Errorf("body does not contain %q", want)
 				}
 			}
-			if strings.Contains(body, "locale.js") {
+			if strings.Contains(body, "/static/js/locale.js") {
 				t.Error("localized page should not load locale.js")
 			}
 			if got := rec.Header().Get("Vary"); got != "" {
@@ -208,5 +214,64 @@ func TestSignedInUsersOnlySeeWorkingLanguageSwitch(t *testing.T) {
 	s.localized("fa", s.handleHowItWorks)(rec, req)
 	if !strings.Contains(rec.Body.String(), `<a class="lang-toggle" href="/how-it-works" hreflang="en">`) {
 		t.Error("signed-in user on /fa page is missing the language link")
+	}
+}
+
+func TestLandingSendsIranToPersian(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+
+	tests := []struct {
+		name     string
+		path     string
+		country  string
+		cookies  []*http.Cookie
+		redirect bool
+	}{
+		{name: "iran ip", path: "/", country: "IR", redirect: true},
+		{name: "other ip", path: "/", country: "DE"},
+		{name: "iran ip picked english", path: "/", country: "IR", cookies: []*http.Cookie{{Name: "waldi_lang", Value: "en"}, {Name: "waldi_lang_pinned", Value: "1"}}},
+		{name: "picked persian", path: "/", country: "DE", cookies: []*http.Cookie{{Name: "waldi_lang", Value: "fa"}, {Name: "waldi_lang_pinned", Value: "1"}}, redirect: true},
+		{name: "detected persian", path: "/", country: "DE", cookies: []*http.Cookie{{Name: "waldi_lang", Value: "fa"}}, redirect: true},
+		{name: "already persian", path: "/fa", country: "IR"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "https://waldi.blog"+tt.path, nil)
+			req.Header.Set("CF-IPCountry", tt.country)
+			for _, c := range tt.cookies {
+				req.AddCookie(c)
+			}
+			rec := httptest.NewRecorder()
+			s.ServeHTTP(rec, req)
+			if tt.redirect {
+				if rec.Code != http.StatusFound || rec.Header().Get("Location") != "/fa" {
+					t.Fatalf("status %d location %q, want redirect to /fa", rec.Code, rec.Header().Get("Location"))
+				}
+				if rec.Header().Get("Cache-Control") != privateSessionCacheControl {
+					t.Fatalf("Cache-Control = %q", rec.Header().Get("Cache-Control"))
+				}
+				return
+			}
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status %d, want 200", rec.Code)
+			}
+		})
+	}
+}
+
+func TestEnglishLandingChecksTimezone(t *testing.T) {
+	s := testServer(t)
+	s.mux = http.NewServeMux()
+	s.routes()
+
+	for path, want := range map[string]bool{"/": true, "/fa": false, "/how-it-works": false} {
+		req := httptest.NewRequest(http.MethodGet, "https://waldi.blog"+path, nil)
+		rec := httptest.NewRecorder()
+		s.ServeHTTP(rec, req)
+		if got := strings.Contains(rec.Body.String(), "/static/js/landing-locale.js"); got != want {
+			t.Errorf("%s includes landing-locale.js = %v, want %v", path, got, want)
+		}
 	}
 }

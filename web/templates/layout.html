@@ -45,6 +45,7 @@
   {{end}}
   {{if and (not .CurrentUser) (not .LocaleFixed)}}<script src="/static/js/locale.js?v={{assetVersion}}" defer></script>{{end}}
   {{if .LocaleFixed}}<script src="/static/js/lang-link.js?v={{assetVersion}}" defer></script>{{end}}
+  {{if .LandingLocale}}<script src="/static/js/landing-locale.js?v={{assetVersion}}"></script>{{end}}
 </head>
 <body>
 <div class="page">
