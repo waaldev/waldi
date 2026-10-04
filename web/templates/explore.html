@@ -13,42 +13,29 @@
     {{end}}
   </nav>
 
-  {{if or .Explore.Posts .Explore.Writers}}
   {{if .Explore.Posts}}
-  <section aria-labelledby="explore-posts-heading">
-    <h2 id="explore-posts-heading">{{.T "explore.posts.heading"}}</h2>
-    <ul class="feed">
-      {{range .Explore.Posts}}
-        <li lang="{{.Lang}}" dir="{{.Dir}}">
-          <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
-          <a class="feed-item" href="{{.URL}}">
-            <h3 class="feed-title">{{.Title}}</h3>
-            {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
-          </a>
-        </li>
-      {{end}}
-    </ul>
-  </section>
+  <ul class="feed explore-week">
+    {{range .Explore.Posts}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <a class="feed-item" href="{{.URL}}">
+          <p class="feed-writer">{{.WriterLabel}}{{if .FeedDate}} · {{.FeedDate}}{{end}}</p>
+          <h2 class="feed-title">{{.Title}}</h2>
+          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+        </a>
+      </li>
+    {{end}}
+  </ul>
   {{end}}
 
-  {{if .Explore.Writers}}
-  <section class="explore-writers" aria-labelledby="explore-writers-heading">
-    <h2 id="explore-writers-heading">{{.T "explore.writers.heading"}}</h2>
-    <ul class="feed">
-      {{range .Explore.Writers}}
-        <li>
-          <a class="feed-item" href="{{.URL}}" lang="{{.Lang}}" dir="{{.Dir}}">
-            <h3 class="feed-title">{{.Name}}</h3>
-            {{if .Bio}}<p class="feed-excerpt">{{.Bio}}</p>{{end}}
-          </a>
-        </li>
-      {{end}}
-    </ul>
-  </section>
-  {{end}}
-  {{else}}
-  <p>{{.T "explore.empty"}}</p>
-  {{end}}
+  <footer class="explore-end">
+    {{if .Explore.Posts}}
+      <p class="explore-end-line">{{.T "explore.end"}}</p>
+      <p class="explore-end-sub">{{.T "explore.end.sub"}}</p>
+    {{else}}
+      <p class="explore-end-line">{{.T "explore.empty"}}</p>
+    {{end}}
+    <p class="explore-end-link"><a href="{{.Local "/explore/blogs"}}">{{.T "explore.end.blogs"}}</a></p>
+  </footer>
 </main>
 {{template "platform-footer" .}}
 {{template "layout-end" .}}

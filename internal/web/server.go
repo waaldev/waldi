@@ -96,6 +96,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /why", s.handleWhy)
 	s.mux.HandleFunc("GET /how-it-works", s.defaultLocalized(s.handleHowItWorks))
 	s.mux.HandleFunc("GET /explore", s.defaultLocalized(s.handleExplore))
+	s.mux.HandleFunc("GET /explore/blogs", s.defaultLocalized(s.handleExploreBlogs))
 	s.routeLocalizedPages()
 	s.mux.HandleFunc("GET /signup", s.handleSignupForm)
 	s.mux.HandleFunc("POST /signup", s.handleSignup)

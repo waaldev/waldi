@@ -150,7 +150,7 @@ func (s *Server) handleAppSitemap(w http.ResponseWriter, r *http.Request) {
 	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`)
 	for _, path := range append([]string{"/"}, localizedPaths...) {
 		lastMod := time.Time{}
-		if path == "/explore" {
+		if path == "/explore" || path == "/explore/blogs" {
 			lastMod = latest
 		}
 		alternates := langAlternates(r, s.baseDomain, path)

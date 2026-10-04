@@ -77,19 +77,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	pd.Title = pd.T("home.title")
 	if user == nil {
 		pd.SEO = landingSEO(r, s.baseDomain, pd.Lang)
-		if s.store != nil {
-			p, err := s.store.DailyPublishedPost(r.Context(), pd.Lang, today())
-			if errors.Is(err, store.ErrNotFound) && pd.Lang != i18n.Default {
-				p, err = s.store.DailyPublishedPost(r.Context(), i18n.Default, today())
-			}
-			if err == nil {
-				view := postView(p)
-				view.URL = PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src=landing")
-				pd.LandingSample = &view
-			} else if !errors.Is(err, store.ErrNotFound) {
-				s.logger.Error("loading landing sample", "err", err)
-			}
-		}
+		pd.LandingSample = s.dailySample(r, pd.Lang, "landing")
 	} else {
 		pd.SEO = noindexSEO()
 	}
@@ -101,6 +89,26 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.renderer.Render(w, "home.html", pd)
+}
+
+func (s *Server) dailySample(r *http.Request, lang, src string) *PostView {
+	if s.store == nil {
+		return nil
+	}
+	p, err := s.store.DailyPublishedPost(r.Context(), lang, today())
+	if errors.Is(err, store.ErrNotFound) && lang != i18n.Default {
+		p, err = s.store.DailyPublishedPost(r.Context(), i18n.Default, today())
+	}
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			s.logger.Error("loading daily sample", "err", err)
+		}
+		return nil
+	}
+	view := postView(p)
+	view.URL = PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src="+src)
+	view.BlogURL = PublicBlogURL(r, s.baseDomain, p.Username, "/")
+	return &view
 }
 
 // handleReadRandom sends the visitor to a random published post in their

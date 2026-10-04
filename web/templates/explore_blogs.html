@@ -1,0 +1,46 @@
+{{define "explore_blogs.html"}}
+{{template "layout-start" .}}
+{{template "platform-page-bar" .}}
+<main class="public-guide explore">
+  <header class="public-essay-head">
+    <h1>{{.T "explore.blogs.heading"}}</h1>
+    <p>{{.T "explore.blogs.lead"}}</p>
+  </header>
+
+  {{if .Explore.Sample}}
+  <section class="explore-sample" aria-labelledby="explore-sample-heading">
+    <h2 class="sample-label" id="explore-sample-heading"><span class="mark">※</span> {{.T "explore.blogs.sample"}}</h2>
+    <p class="feed-writer"><a href="{{.Explore.Sample.BlogURL}}">{{.Explore.Sample.WriterLabel}}</a></p>
+    <a class="feed-item" href="{{.Explore.Sample.URL}}" lang="{{.Explore.Sample.Lang}}" dir="{{.Explore.Sample.Dir}}">
+      <h3 class="feed-title">{{.Explore.Sample.Title}}</h3>
+    </a>
+  </section>
+  {{end}}
+
+  {{if .Explore.Blogs}}
+  <ul class="blog-list">
+    {{range .Explore.Blogs}}
+      <li lang="{{.Lang}}" dir="{{.Dir}}">
+        <a href="{{.URL}}">
+          <h2 class="blog-list-name">{{.Name}}</h2>
+          {{if or .Writer .Bio}}<p class="blog-list-about">{{.Writer}}{{if and .Writer .Bio}} · {{end}}{{.Bio}}</p>{{end}}
+          {{if .LatestTitle}}<p class="blog-list-latest">{{$.T "explore.blogs.latest" .LatestTitle}}</p>{{end}}
+        </a>
+      </li>
+    {{end}}
+  </ul>
+  {{end}}
+
+  <footer class="explore-end">
+    {{if .Explore.Blogs}}
+      <p class="explore-end-line">{{.T "explore.blogs.end"}}</p>
+      <p class="explore-end-sub">{{.T "explore.blogs.end.sub"}}</p>
+    {{else}}
+      <p class="explore-end-line">{{.T "explore.blogs.empty"}}</p>
+    {{end}}
+    <p class="explore-end-link"><a href="{{.Local "/write/invite"}}">{{.T "how.writing.can.link"}}</a></p>
+  </footer>
+</main>
+{{template "platform-footer" .}}
+{{template "layout-end" .}}
+{{end}}

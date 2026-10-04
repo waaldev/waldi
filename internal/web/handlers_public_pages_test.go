@@ -21,7 +21,8 @@ func TestPublicInformationPages(t *testing.T) {
 	}{
 		{path: "/how-it-works", want: "How Waldi works"},
 		{path: "/write/invite", want: "Would you like to write here?"},
-		{path: "/explore", want: "Recent writing and the blogs on Waldi."},
+		{path: "/explore", want: "One recent post from everyone who wrote this week."},
+		{path: "/explore/blogs", want: "Here they all are, in the order they last wrote."},
 	}
 
 	for _, tt := range tests {

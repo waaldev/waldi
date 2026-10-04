@@ -1125,6 +1125,8 @@ func (s publishedAtScanner) Scan(value any) error {
 type ExploreWriter struct {
 	User            User
 	LastPublishedAt time.Time
+	LatestTitle     string
+	LatestSlug      string
 }
 
 const exploreablePostFilter = `
@@ -1138,14 +1140,18 @@ const exploreablePostFilter = `
 
 func (s *Store) ExploreWriters(ctx context.Context, lang string, limit int) ([]ExploreWriter, error) {
 	rows, err := s.pool.Query(ctx, `
-		select u.id, u.username, u.display_name, u.author_name, u.bio, u.blog_lang,
-		       u.custom_domain, u.custom_domain_verified_at, max(p.published_at)
-		from users u
-		join posts p on p.user_id = u.id
-		where `+exploreablePostFilter+`
-		  and ($2 = '' or u.blog_lang = $2)
-		group by u.id
-		order by max(p.published_at) desc, u.id desc
+		select id, username, display_name, author_name, bio, blog_lang,
+		       custom_domain, custom_domain_verified_at, published_at, title, slug
+		from (
+			select distinct on (u.id) u.id, u.username, u.display_name, u.author_name, u.bio, u.blog_lang,
+			       u.custom_domain, u.custom_domain_verified_at, p.published_at, p.title, p.slug, p.id as post_id
+			from users u
+			join posts p on p.user_id = u.id
+			where `+exploreablePostFilter+`
+			  and ($2 = '' or u.blog_lang = $2)
+			order by u.id, p.published_at desc, p.id desc
+		) latest
+		order by published_at desc, id desc
 		limit $1
 	`, limit, lang)
 	if err != nil {
@@ -1157,7 +1163,7 @@ func (s *Store) ExploreWriters(ctx context.Context, lang string, limit int) ([]E
 	for rows.Next() {
 		var w ExploreWriter
 		if err := rows.Scan(&w.User.ID, &w.User.Username, &w.User.DisplayName, &w.User.AuthorName, &w.User.Bio, &w.User.BlogLang,
-			&w.User.CustomDomain, &w.User.CustomDomainVerifiedAt, &w.LastPublishedAt); err != nil {
+			&w.User.CustomDomain, &w.User.CustomDomainVerifiedAt, &w.LastPublishedAt, &w.LatestTitle, &w.LatestSlug); err != nil {
 			return nil, fmt.Errorf("scanning explore writer: %w", err)
 		}
 		writers = append(writers, w)
@@ -1166,6 +1172,43 @@ func (s *Store) ExploreWriters(ctx context.Context, lang string, limit int) ([]E
 		return nil, fmt.Errorf("iterating explore writers: %w", err)
 	}
 	return writers, nil
+}
+
+// ExploreWeekPosts returns each writer's most recent explorable post published since the given time.
+func (s *Store) ExploreWeekPosts(ctx context.Context, lang string, since time.Time, limit int) ([]Post, error) {
+	rows, err := s.pool.Query(ctx, `
+		select id, user_id, username, author_name, display_name, title, slug, doc, html, status, type, page_position,
+		       word_count, published_at, created_at, updated_at, blog_lang
+		from (
+			select distinct on (p.user_id) p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
+			       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang
+			from posts p
+			join users u on u.id = p.user_id
+			where `+exploreablePostFilter+`
+			  and p.published_at >= $3
+			  and ($2 = '' or u.blog_lang = $2)
+			order by p.user_id, p.published_at desc, p.id desc
+		) latest
+		order by published_at desc, id desc
+		limit $1
+	`, limit, lang, since)
+	if err != nil {
+		return nil, fmt.Errorf("listing explore week posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		if err := rows.Scan(postWithUserScanFields(&p)...); err != nil {
+			return nil, fmt.Errorf("scanning explore week post: %w", err)
+		}
+		posts = append(posts, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating explore week posts: %w", err)
+	}
+	return posts, nil
 }
 
 func (s *Store) ExplorePosts(ctx context.Context, lang string, limit int) ([]Post, error) {
