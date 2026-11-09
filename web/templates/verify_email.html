@@ -18,6 +18,10 @@
     <p class="form-note">{{.T "auth.verify.body"}}</p>
   {{end}}
 
+  {{if .Auth.DraftSaved}}
+    <script>try { localStorage.removeItem("waldi:draft") } catch (e) {}</script>
+  {{end}}
+
   {{if .Auth.CanResend}}
     <form method="post" action="/verify-email/resend">
       <button class="btn-primary" type="submit">{{.T "auth.verify.resend"}}</button>

@@ -124,6 +124,8 @@ type AuthView struct {
 	InviteCode  string
 	Inviter     string
 	FormToken   string
+	HasDraft    bool
+	DraftSaved  bool
 }
 
 type BlogView struct {

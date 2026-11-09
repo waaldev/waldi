@@ -68,57 +68,54 @@
           <label for="website">{{.T "auth.field.website"}}</label>
           <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
+        {{if .Auth.HasDraft}}
+          <input type="hidden" name="draft" value="1">
+          <input type="hidden" name="draft_title" data-draft-title>
+          <input type="hidden" name="draft_doc" data-draft-doc>
+        {{end}}
+        {{if .Auth.HasDraft}}<p class="join-lead">{{.T "auth.join.lead.draft"}}</p>{{end}}
+        <p class="join-sentence">
+          <label for="blog_name">{{.T "auth.join.name.before"}}</label>
+          <input id="blog_name" name="blog_name" autocomplete="name" placeholder="{{.T "auth.join.name.example"}}" required maxlength="80" size="9">{{.T "auth.join.name.after"}}
+          <label for="username">{{.T "auth.join.user.before"}}</label>
+          <span class="join-host" dir="ltr"><input id="username" name="username" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32" size="7">.{{.BaseDomain}}</span>{{.T "auth.join.user.after"}}
+          <label for="email">{{.T "auth.join.email.before"}}</label>
+          <input id="email" name="email" type="email" dir="ltr" autocomplete="email" placeholder="{{.T "auth.join.email.example"}}" required size="14">{{.T "auth.join.email.after"}}
+          <label for="password">{{.T "auth.join.password.before"}}</label>
+          <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" placeholder="{{.T "auth.join.password.example"}}" required minlength="8" size="10">{{.T "auth.join.password.after"}}
+        </p>
+        <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
+        <p class="join-note">{{.T "auth.join.note"}}</p>
+        {{if .Auth.HasDraft}}
+          <p class="join-note">{{.T "auth.join.reader"}} <a href="/">{{.T "auth.join.back"}}</a></p>
+          <script>
+            (function () {
+              var form = document.currentScript.closest("form");
+              if (!form) return;
+              form.addEventListener("submit", function () {
+                try {
+                  var draft = JSON.parse(localStorage.getItem("waldi:draft") || "null");
+                  if (!draft || typeof draft.doc !== "string") return;
+                  form.querySelector("[data-draft-title]").value = draft.title || "";
+                  form.querySelector("[data-draft-doc]").value = draft.doc;
+                } catch (e) {}
+              });
+            })();
+          </script>
+        {{end}}
+      {{else}}
         <div class="field">
-          <label for="username">{{.T "auth.field.username"}}</label>
-          <input id="username" name="username" dir="ltr" autocomplete="username" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32">
-          <p class="field-help" id="username-help" data-base-domain="{{.BaseDomain}}">{{.T "auth.field.username.help" (.ExampleBlogHost (.T "auth.field.username.example"))}}</p>
+          <label for="email">{{.T "auth.field.email"}}</label>
+          <input id="email" name="email" type="email" dir="ltr" autocomplete="email" required>
         </div>
-        <script>
-          (function () {
-            var input = document.getElementById("username");
-            var help = document.getElementById("username-help");
-            if (!input || !help) return;
-            var baseDomain = help.dataset.baseDomain;
-            var currentHost = input.placeholder + "." + baseDomain;
-            input.addEventListener("input", function () {
-              var value = input.value.trim().toLowerCase() || input.placeholder;
-              var newHost = value + "." + baseDomain;
-              help.textContent = help.textContent.replace(currentHost, newHost);
-              currentHost = newHost;
-            });
-          })();
-        </script>
 
         <div class="field">
-          <label for="blog_name">{{.T "auth.field.blog_name"}}</label>
-          <input id="blog_name" name="blog_name" autocomplete="off" placeholder="{{.T "auth.field.blog_name.example"}}" required maxlength="80">
-          <p class="field-help">{{.T "auth.field.blog_name.help"}}</p>
+          <label for="password">{{.T "auth.field.password"}}</label>
+          <input id="password" name="password" type="password" dir="ltr" autocomplete="current-password" required minlength="8">
         </div>
 
-        <div class="field">
-          <label for="blog_description">{{.T "auth.field.blog_description"}}</label>
-          <textarea id="blog_description" name="blog_description" rows="3" maxlength="500"></textarea>
-          <p class="field-help">{{.T "auth.field.blog_description.help"}}</p>
-        </div>
+        <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
       {{end}}
-
-      <div class="field">
-        <label for="email">{{.T "auth.field.email"}}</label>
-        <input id="email" name="email" type="email" dir="ltr" autocomplete="email" required>
-        {{if eq .Auth.Mode "signup"}}
-          <p class="field-help">{{.T "auth.field.email.help"}}</p>
-        {{end}}
-      </div>
-
-      <div class="field">
-        <label for="password">{{.T "auth.field.password"}}</label>
-        <input id="password" name="password" type="password" dir="ltr" autocomplete="{{if eq .Auth.Mode "signup"}}new-password{{else}}current-password{{end}}" required minlength="8">
-        {{if eq .Auth.Mode "signup"}}
-          <p class="field-help">{{.T "auth.field.password.help"}}</p>
-        {{end}}
-      </div>
-
-      <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
     </form>
 
     <p class="form-alt">

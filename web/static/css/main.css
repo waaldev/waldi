@@ -1188,6 +1188,39 @@ a.quiet:hover { color: var(--ink); }
 /* ---------- forms (login / register) ---------- */
 
 .form-page { max-width: 22rem; margin-inline: auto; }
+.form-page:has(.join-sentence) { max-width: 34rem; }
+
+.join-lead {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-block: 0 var(--s5);
+}
+.join-sentence {
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: 2.2;
+  margin-block: 0 var(--s4);
+}
+.join-sentence input {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-block-end: 1px solid var(--ink-faint);
+  border-radius: 0;
+  padding: 0 2px;
+  max-width: 100%;
+}
+.join-sentence input::placeholder { color: var(--ink-faint); }
+.join-sentence input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.join-host { white-space: nowrap; }
+.join-note {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  margin-block: var(--s4) 0;
+}
 
 .letter-composer { margin-block-start: var(--s5); }
 .letter-composer[hidden] { display: none !important; }

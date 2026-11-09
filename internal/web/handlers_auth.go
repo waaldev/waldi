@@ -1,12 +1,14 @@
 package web
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+	"waldi/internal/i18n"
 	"waldi/internal/mail"
 	"waldi/internal/store"
 
@@ -31,6 +33,10 @@ func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 		SubmitLabel: pd.T("auth.signup.submit"),
 		InviteCode:  inviteCode,
 		FormToken:   signupFormToken(time.Now()),
+		HasDraft:    r.URL.Query().Get("draft") == "1",
+	}
+	if pd.Auth.HasDraft {
+		pd.Auth.SubmitLabel = pd.T("editor.publish")
 	}
 	s.applyInviter(r, &pd)
 	s.renderer.Render(w, "auth.html", pd)
@@ -149,7 +155,62 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	s.queueVerificationEmail(user, appBaseURL(r, s.baseDomain), verifyToken, false)
 	s.notifySignup(r, user)
+	if s.saveSignupDraft(r, user) {
+		http.Redirect(w, r, "/verify-email?draft=1", http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
+}
+
+func (s *Server) saveSignupDraft(r *http.Request, user store.User) bool {
+	raw := strings.TrimSpace(r.FormValue("draft_doc"))
+	if raw == "" {
+		return false
+	}
+	html, words, err := renderPostDoc(json.RawMessage(raw))
+	if err != nil || words == 0 {
+		return false
+	}
+	title := strings.TrimSpace(r.FormValue("draft_title"))
+	if title == "" {
+		title = i18n.T(user.Locale, "write.default_title")
+	}
+	slug, err := s.store.UniqueSlug(r.Context(), user.ID, slugFromTitle(title), 0)
+	if err != nil {
+		s.logger.Error("creating signup draft slug", "err", err)
+		return false
+	}
+	draft, err := s.store.CreateDraft(r.Context(), user.ID, title, slug, json.RawMessage(raw), html, words)
+	if err != nil {
+		s.logger.Error("creating signup draft", "err", err)
+		return false
+	}
+	if err := s.store.MarkPublishOnVerify(r.Context(), draft.ID, user.ID); err != nil {
+		s.logger.Error("marking signup draft", "err", err)
+		return false
+	}
+	return true
+}
+
+func (s *Server) publishOnVerify(r *http.Request, user store.User) int64 {
+	ids, err := s.store.TakePublishOnVerify(r.Context(), user.ID)
+	if err != nil {
+		s.logger.Error("loading posts to publish on verify", "err", err)
+		return 0
+	}
+	var last int64
+	for _, id := range ids {
+		p, err := s.store.PublishPost(r.Context(), id, user.ID)
+		if err != nil {
+			s.logger.Error("publishing on verify", "err", err, "post_id", id)
+			continue
+		}
+		s.purgePublicCache(user.Username)
+		s.notifyPublish(r, user, p)
+		s.notifyInviterOfFirstPost(r, user, p)
+		last = p.ID
+	}
+	return last
 }
 
 func (s *Server) handleLoginForm(w http.ResponseWriter, r *http.Request) {
@@ -241,6 +302,10 @@ func (s *Server) handleVerifyEmailPage(w http.ResponseWriter, r *http.Request) {
 			if err := s.startSession(w, r, verified.ID); err != nil {
 				s.logger.Error("starting session after verify", "err", err)
 			}
+			if id := s.publishOnVerify(r, verified); id != 0 {
+				http.Redirect(w, r, "/write/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
+				return
+			}
 			http.Redirect(w, r, "/verify-email?verified=1", http.StatusSeeOther)
 			return
 		}
@@ -274,6 +339,9 @@ func (s *Server) handleVerifyEmailPage(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.URL.Query().Get("verified") == "1":
 		pd.Auth.Message = pd.T("auth.verify.done")
+	case r.URL.Query().Get("draft") == "1":
+		pd.Auth.Message = pd.T("auth.verify.draft")
+		pd.Auth.DraftSaved = true
 	case r.URL.Query().Get("sent") == "1":
 		pd.Auth.Message = pd.T("auth.verify.resent")
 	case !s.canResendVerification(user):
@@ -480,6 +548,10 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 	}
 	if mode == "signup" {
 		pd.Auth.FormToken = signupFormToken(time.Now())
+		pd.Auth.HasDraft = r.FormValue("draft") == "1"
+		if pd.Auth.HasDraft {
+			pd.Auth.SubmitLabel = pd.T("editor.publish")
+		}
 	}
 	s.applyInviter(r, &pd)
 	s.renderer.RenderStatus(w, http.StatusBadRequest, "auth.html", pd)
