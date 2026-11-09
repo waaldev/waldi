@@ -90,6 +90,12 @@ html:lang(en) {
   font-feature-settings: normal;
 }
 
+:lang(fa) {
+  --text-body: 1.3125rem;
+  --text-ui:   1.0625rem;
+  --text-meta: 0.9375rem;
+}
+
 ::selection { background: color-mix(in srgb, var(--accent) 20%, transparent); }
 
 :focus-visible {
