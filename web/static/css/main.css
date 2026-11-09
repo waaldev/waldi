@@ -120,6 +120,13 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 
 /* ---------- top bar ---------- */
 
+.bar,
+.editor-bar {
+  --bar-width: min(72rem, calc(100vw - 2 * var(--s4)));
+  width: var(--bar-width);
+  margin-inline: calc((100% - var(--bar-width)) / 2);
+  box-sizing: border-box;
+}
 .bar {
   display: flex;
   flex-wrap: wrap;
