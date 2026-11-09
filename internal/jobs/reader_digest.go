@@ -60,7 +60,7 @@ func (j ReaderDigestJob) Run(ctx context.Context) error {
 	day := BeginningOfDay(sentAt)
 	baseURL := strings.TrimSuffix(j.BaseURL, "/")
 
-	users, err := j.Store.VerifiedSubscribedUsers(ctx, 1000)
+	users, err := j.Store.ReaderDigestRecipients(ctx, day, 1000)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,11 @@ func (j ReaderDigestJob) Run(ctx context.Context) error {
 			continue
 		}
 
-		followeePosts, err := j.Store.FeedPosts(ctx, user.ID, since, readerDigestFolloweePostLimit)
+		lastSent, err := j.Store.LastDigestSentAt(ctx, user.ID, "reader")
+		if err != nil {
+			return err
+		}
+		followeePosts, err := j.Store.FeedPosts(ctx, user.ID, readerDigestSince(lastSent, sentAt), readerDigestFolloweePostLimit)
 		if err != nil {
 			return err
 		}
@@ -213,6 +217,21 @@ func (j ReaderDigestJob) runForCapturedEmails(ctx context.Context, mailer mail.M
 		}
 	}
 	return nil
+}
+
+func readerDigestSince(lastSent, now time.Time) time.Time {
+	since := now.Add(-24 * time.Hour)
+	if lastSent.IsZero() || !lastSent.Before(since) {
+		return since
+	}
+	return maxTime(lastSent, now.Add(-7*24*time.Hour))
+}
+
+func maxTime(a, b time.Time) time.Time {
+	if a.After(b) {
+		return a
+	}
+	return b
 }
 
 // authorLabel returns the best available display name for a post's author.

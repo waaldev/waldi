@@ -68,3 +68,22 @@ func TestDigestEligible(t *testing.T) {
 		t.Fatal("empty email should not be eligible")
 	}
 }
+
+func TestReaderDigestSince(t *testing.T) {
+	now := time.Date(2026, 11, 10, 6, 10, 0, 0, time.UTC)
+	day := 24 * time.Hour
+	cases := []struct {
+		lastSent time.Time
+		want     time.Time
+	}{
+		{time.Time{}, now.Add(-day)},
+		{now.Add(-day), now.Add(-day)},
+		{now.Add(-3 * day), now.Add(-3 * day)},
+		{now.Add(-30 * day), now.Add(-7 * day)},
+	}
+	for _, c := range cases {
+		if got := readerDigestSince(c.lastSent, now); !got.Equal(c.want) {
+			t.Fatalf("readerDigestSince(%s) = %s, want %s", c.lastSent, got, c.want)
+		}
+	}
+}

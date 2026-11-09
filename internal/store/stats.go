@@ -237,6 +237,20 @@ func (s *Store) DigestSentToday(ctx context.Context, userID int64, kind string, 
 	return sent, nil
 }
 
+func (s *Store) LastDigestSentAt(ctx context.Context, userID int64, kind string) (time.Time, error) {
+	var sentAt *time.Time
+	err := s.pool.QueryRow(ctx, `
+		select max(sent_at) from digests where user_id = $1 and kind = $2
+	`, userID, kind).Scan(&sentAt)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("loading last digest: %w", err)
+	}
+	if sentAt == nil {
+		return time.Time{}, nil
+	}
+	return *sentAt, nil
+}
+
 func (s *Store) RecordDigestSent(ctx context.Context, userID int64, kind string, sentAt time.Time) error {
 	_, err := s.pool.Exec(ctx, `
 		insert into digests (user_id, kind, sent_at)
@@ -249,11 +263,30 @@ func (s *Store) RecordDigestSent(ctx context.Context, userID int64, kind string,
 	return nil
 }
 
-// VerifiedSubscribedUsers returns accounts eligible to receive the reader
-// digest: verified email, not opted out of digest emails. Every candidate
-// may or may not have anything to report on a given day - callers skip
-// sending when there's nothing to say.
-func (s *Store) VerifiedSubscribedUsers(ctx context.Context, limit int) ([]User, error) {
+func readerDigestDue(day string) string {
+	return `(
+		u.created_at > ` + day + ` - interval '14 days'
+		or u.last_active_at > ` + day + ` - interval '7 days'
+		or exists (
+			select 1 from wildcards ow
+			where ow.user_id = u.id and ow.opened_at > ` + day + ` - interval '14 days'
+		)
+		or not exists (
+			select 1 from digests d
+			where d.user_id = u.id and d.kind = 'reader' and d.sent_at > ` + day + ` - interval '6 days'
+		)
+	)`
+}
+
+func readerDigestRecipient(day string) string {
+	return `u.email_verified_at is not null
+		  and u.email <> ''
+		  and u.digest_unsubscribed_at is null
+		  and u.digest_paused_at is null
+		  and ` + readerDigestDue(day)
+}
+
+func (s *Store) ReaderDigestRecipients(ctx context.Context, day time.Time, limit int) ([]User, error) {
 	if limit <= 0 {
 		limit = 1000
 	}
@@ -266,13 +299,10 @@ func (s *Store) VerifiedSubscribedUsers(ctx context.Context, limit int) ([]User,
 		       u.digest_unsubscribe_token, u.digest_unsubscribed_at, u.can_write,
 		       u.last_active_at, u.digest_paused_at
 		from users u
-		where u.email_verified_at is not null
-		  and u.email <> ''
-		  and u.digest_unsubscribed_at is null
-		  and u.digest_paused_at is null
+		where `+readerDigestRecipient("$2::timestamptz")+`
 		order by u.id
 		limit $1
-	`, limit)
+	`, limit, day)
 	if err != nil {
 		return nil, fmt.Errorf("loading verified subscribed users: %w", err)
 	}

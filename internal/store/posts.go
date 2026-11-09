@@ -839,6 +839,7 @@ func (s *Store) UsersNeedingWildcard(ctx context.Context, day time.Time, limit i
 			select 1 from wildcards w
 			where w.user_id = u.id and w.date = $1
 		)
+		  and `+readerDigestRecipient("$1::timestamptz")+`
 		order by u.id
 		limit $2
 	`, day, limit)
