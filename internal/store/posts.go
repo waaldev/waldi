@@ -664,65 +664,6 @@ func (s *Store) FeedPosts(ctx context.Context, userID int64, since time.Time, li
 	return posts, nil
 }
 
-func (s *Store) WildcardCandidate(ctx context.Context, userID int64, readerLang string, day time.Time, impressionFloor int) (Post, error) {
-	var p Post
-	err := s.pool.QueryRow(ctx, `
-		with wildcard_opens as (
-			-- Preserve anonymous/email-capture opens recorded as wildcard impressions,
-			-- and add assigned readers whose deduplicated impression kept an older
-			-- feed/direct source.
-			select post_id, reader_key
-			from impressions
-			where source = 'wildcard'
-			union
-			select post_id, 'user:' || user_id
-			from wildcards
-			where opened_at is not null
-		),
-		candidates as (
-			select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
-			       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang,
-			       count(distinct wo.reader_key)::int as wildcard_impressions
-			from posts p
-			join users u on u.id = p.user_id
-			left join wildcard_opens wo on wo.post_id = p.id
-			where p.status = 'published'
-			  and p.type = 'post'
-			  and p.word_count >= 50
-			  and lower(p.title) !~ '(^|[^a-z])test([^a-z]|$)'
-			  and lower(p.slug) !~ '(^|[^a-z])test([^a-z]|$)'
-			  and u.blog_lang = $4
-			  and not u.stranger_hold
-			  and p.user_id <> $1
-			  and not exists (
-			    select 1 from follows f
-			    where f.follower_id = $1 and f.followee_id = p.user_id
-			  )
-			  and not exists (
-			    select 1 from wildcards w
-			    where w.user_id = $1 and w.post_id = p.id and w.date <= $2
-			  )
-			group by p.id, u.username, u.author_name, u.display_name, u.blog_lang
-		)
-		select id, user_id, username, author_name, display_name, title, slug, doc, html, status, type, page_position,
-		       word_count, published_at, created_at, updated_at, blog_lang
-		from candidates
-		order by
-		  case when wildcard_impressions < $3 then 0 else 1 end,
-		  case when wildcard_impressions < $3 then wildcard_impressions end asc,
-		  case when wildcard_impressions < $3 then published_at end asc,
-		  published_at desc
-		limit 1
-	`, userID, day, impressionFloor, readerLang).Scan(postWithUserScanFields(&p)...)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return Post{}, ErrNotFound
-	}
-	if err != nil {
-		return Post{}, fmt.Errorf("finding wildcard candidate: %w", err)
-	}
-	return p, nil
-}
-
 func (s *Store) RandomPublishedPost(ctx context.Context, lang string, excludeID int64) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `
@@ -973,33 +914,52 @@ func (s *Store) ListWildcardPool(ctx context.Context, limit int) ([]Post, error)
 	return posts, nil
 }
 
-// WildcardPoolCandidate picks the oldest-added pooled post this reader
-// hasn't already been shown, matching their reading language and excluding
-// their own posts and people they already follow. Returns ErrNotFound if
-// the pool has nothing suitable, so callers can fall back to the
-// impression-based algorithm.
-func (s *Store) WildcardPoolCandidate(ctx context.Context, userID int64, readerLang string, day time.Time) (Post, error) {
+// WildcardPoolCandidate picks the admin-curated pool post this reader hasn't
+// been shown that has reached the fewest verified strangers, newest first,
+// until every pooled post reaches the floor; then the oldest-added one.
+func (s *Store) WildcardPoolCandidate(ctx context.Context, userID int64, readerLang string, day time.Time, floor int) (Post, error) {
 	var p Post
 	err := s.pool.QueryRow(ctx, `
-		select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
-		       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang
-		from wildcard_pool wp
-		join posts p on p.id = wp.post_id
-		join users u on u.id = p.user_id
-		where p.status = 'published'
-		  and u.blog_lang = $2
-		  and p.user_id <> $1
-		  and not exists (
-		    select 1 from follows f
-		    where f.follower_id = $1 and f.followee_id = p.user_id
-		  )
-		  and not exists (
-		    select 1 from wildcards w
-		    where w.user_id = $1 and w.post_id = p.id and w.date <= $3
-		  )
-		order by wp.added_at asc
+		with deliveries as (
+			select w.post_id, 'user:' || w.user_id as reader_key
+			from wildcards w
+			join users r on r.id = w.user_id
+			where r.email_verified_at is not null
+			union
+			select post_id, reader_key
+			from impressions
+			where source = 'wildcard'
+		),
+		candidates as (
+			select p.id, p.user_id, u.username, u.author_name, u.display_name, p.title, p.slug, p.doc, p.html, p.status, p.type, p.page_position,
+			       p.word_count, p.published_at, p.created_at, p.updated_at, u.blog_lang,
+			       wp.added_at,
+			       (select count(distinct d.reader_key) from deliveries d where d.post_id = p.id)::int as delivered
+			from wildcard_pool wp
+			join posts p on p.id = wp.post_id
+			join users u on u.id = p.user_id
+			where p.status = 'published'
+			  and u.blog_lang = $2
+			  and p.user_id <> $1
+			  and not exists (
+			    select 1 from follows f
+			    where f.follower_id = $1 and f.followee_id = p.user_id
+			  )
+			  and not exists (
+			    select 1 from wildcards w
+			    where w.user_id = $1 and w.post_id = p.id and w.date <= $3
+			  )
+		)
+		select id, user_id, username, author_name, display_name, title, slug, doc, html, status, type, page_position,
+		       word_count, published_at, created_at, updated_at, blog_lang
+		from candidates
+		order by
+		  case when delivered < $4 then 0 else 1 end,
+		  case when delivered < $4 then delivered end asc,
+		  case when delivered < $4 then published_at end desc,
+		  added_at asc
 		limit 1
-	`, userID, readerLang, day).Scan(postWithUserScanFields(&p)...)
+	`, userID, readerLang, day, floor).Scan(postWithUserScanFields(&p)...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Post{}, ErrNotFound
 	}

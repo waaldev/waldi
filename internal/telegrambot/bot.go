@@ -506,10 +506,10 @@ func (b *Bot) cmdWildcardFloor(ctx context.Context, chatID int64, args []string)
 		floor, err := b.store.WildcardImpressionFloor(ctx)
 		if err != nil {
 			b.logger.Error("telegram wildcard floor get", "err", err)
-			b.reply(ctx, chatID, "Could not load wildcard impression floor.")
+			b.reply(ctx, chatID, "Could not load wildcard floor.")
 			return
 		}
-		b.reply(ctx, chatID, fmt.Sprintf("Wildcard impression floor: %d\n\nSend /wildcardfloor N to change it.", floor))
+		b.reply(ctx, chatID, fmt.Sprintf("Wildcard floor: %d verified strangers per post\n\nSend /wildcardfloor N to change it.", floor))
 		return
 	}
 	if len(args) != 1 {
@@ -524,10 +524,10 @@ func (b *Bot) cmdWildcardFloor(ctx context.Context, chatID int64, args []string)
 	}
 	if err := b.store.SetWildcardImpressionFloor(ctx, floor); err != nil {
 		b.logger.Error("telegram wildcard floor set", "err", err)
-		b.reply(ctx, chatID, "Could not update wildcard impression floor.")
+		b.reply(ctx, chatID, "Could not update wildcard floor.")
 		return
 	}
-	b.reply(ctx, chatID, fmt.Sprintf("Wildcard impression floor set to %d.", floor))
+	b.reply(ctx, chatID, fmt.Sprintf("Wildcard floor set to %d verified strangers per post.", floor))
 }
 
 func (b *Bot) lookupUser(ctx context.Context, ref string) (store.User, error) {

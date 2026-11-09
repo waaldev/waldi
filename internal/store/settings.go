@@ -5,10 +5,8 @@ import (
 	"fmt"
 )
 
-// WildcardImpressionFloor returns the minimum wildcard-impression count a
-// published post must reach before it's no longer prioritized as a stranger
-// recommendation; posts under the floor are preferred so the pool of
-// candidate posts gets even exposure.
+// WildcardImpressionFloor returns how many verified strangers a post must be
+// delivered to before it stops being prioritized as a stranger post.
 func (s *Store) WildcardImpressionFloor(ctx context.Context) (int, error) {
 	var floor int
 	err := s.pool.QueryRow(ctx, `select wildcard_impression_floor from app_settings where id = true`).Scan(&floor)

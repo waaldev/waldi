@@ -49,7 +49,7 @@ func (j WildcardJob) Run(ctx context.Context) error {
 
 	for _, user := range users {
 		readerLang := i18n.ReaderLang(user.Locale)
-		post, fromPool, err := j.pickCandidate(ctx, user.ID, readerLang, day, floor)
+		post, err := j.Store.WildcardPoolCandidate(ctx, user.ID, readerLang, day, floor)
 		if err != nil {
 			if errors.Is(err, store.ErrNotFound) {
 				continue
@@ -59,23 +59,9 @@ func (j WildcardJob) Run(ctx context.Context) error {
 		if err := j.Store.AssignWildcard(ctx, user.ID, post.ID, day); err != nil {
 			return err
 		}
-		logger.Info("wildcard assigned", "username", user.Username, "reader_lang", readerLang, "post_id", post.ID, "post_author", post.Username, "post_lang", post.BlogLang, "floor", floor, "from_pool", fromPool)
+		logger.Info("wildcard assigned", "username", user.Username, "reader_lang", readerLang, "post_id", post.ID, "post_author", post.Username, "post_lang", post.BlogLang, "floor", floor)
 	}
 	return nil
-}
-
-// pickCandidate prefers an admin-curated wildcard_pool post, falling back to
-// the impression-based algorithm when the pool has nothing suitable.
-func (j WildcardJob) pickCandidate(ctx context.Context, userID int64, readerLang string, day time.Time, floor int) (store.Post, bool, error) {
-	post, err := j.Store.WildcardPoolCandidate(ctx, userID, readerLang, day)
-	if err == nil {
-		return post, true, nil
-	}
-	if !errors.Is(err, store.ErrNotFound) {
-		return store.Post{}, false, err
-	}
-	post, err = j.Store.WildcardCandidate(ctx, userID, readerLang, day, floor)
-	return post, false, err
 }
 
 // WildcardSetJob hand-picks today's stranger post for one or all readers.
@@ -187,11 +173,7 @@ func EnsureUserWildcard(ctx context.Context, st *store.Store, userID int64, read
 	if skips >= MaxDailyWildcardSkips {
 		return nil
 	}
-	lang := i18n.ReaderLang(readerLang)
-	post, err := st.WildcardPoolCandidate(ctx, userID, lang, day)
-	if errors.Is(err, store.ErrNotFound) {
-		post, err = st.WildcardCandidate(ctx, userID, lang, day, floor)
-	}
+	post, err := st.WildcardPoolCandidate(ctx, userID, i18n.ReaderLang(readerLang), day, floor)
 	if errors.Is(err, store.ErrNotFound) {
 		return nil
 	}
