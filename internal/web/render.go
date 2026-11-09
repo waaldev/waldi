@@ -63,35 +63,36 @@ func loadInlineAssets(files fs.FS) (inlineAssets, error) {
 }
 
 type PageData struct {
-	Title            string
-	Lang             string
-	Dir              string
-	CurrentUser      *UserView
-	Blog             *BlogView
-	BlogSettings     *BlogSettingsView
-	ImportBlogir     *ImportBlogirView
-	Auth             *AuthView
-	Write            *WriteView
-	Invites          *InvitesView
-	Post             *PostView
-	Feed             *FeedView
-	LandingSample    *PostView
-	Explore          *ExploreView
-	Inbox            *InboxView
-	Kept             *KeptView
-	SEO              *SEOView
-	AppBaseURL       string
-	PageURL          string
-	LoginURL         string
-	BaseDomain       string
-	BridgeSession    bool
-	DevSessionBridge bool
-	NavActive        string
-	LocalePrefix     string
-	LocaleFixed      bool
-	LangSwitchPath   string
-	LandingLocale    bool
-	Gone             bool
+	Title             string
+	Lang              string
+	Dir               string
+	CurrentUser       *UserView
+	Blog              *BlogView
+	BlogSettings      *BlogSettingsView
+	ImportBlogir      *ImportBlogirView
+	Auth              *AuthView
+	Write             *WriteView
+	Invites           *InvitesView
+	Post              *PostView
+	Feed              *FeedView
+	LandingSample     *PostView
+	LandingSubscribed bool
+	Explore           *ExploreView
+	Inbox             *InboxView
+	Kept              *KeptView
+	SEO               *SEOView
+	AppBaseURL        string
+	PageURL           string
+	LoginURL          string
+	BaseDomain        string
+	BridgeSession     bool
+	DevSessionBridge  bool
+	NavActive         string
+	LocalePrefix      string
+	LocaleFixed       bool
+	LangSwitchPath    string
+	LandingLocale     bool
+	Gone              bool
 	// Inline marks one-off public pages where CSS/JS is embedded directly into
 	// the HTML. Blog and app pages keep versioned external assets so navigation
 	// reuses one shared browser-cache entry.
@@ -235,6 +236,8 @@ type PostView struct {
 	Slug             string
 	HTML             template.HTML
 	DocJSON          template.JS
+	Opening          template.HTML
+	OpeningMore      bool
 	Status           string
 	Lang             string
 	Dir              string

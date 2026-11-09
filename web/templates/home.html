@@ -72,22 +72,52 @@
   </footer>
 {{else}}
   <main class="landing">
-    <h1>{{.T "landing.hero.heading"}}</h1>
-    <div class="landing-lines">
-      <p>{{.T "landing.line.stranger"}}</p>
-      <p>{{.T "landing.line.counts"}}</p>
-      <p>{{.T "landing.line.letters"}}</p>
-      <p>{{.T "landing.line.write"}}</p>
-    </div>
+    <p class="landing-tagline">{{.T "landing.hero.heading"}}</p>
+    {{with .LandingSample}}
+      <section class="landing-stranger">
+        <p class="wildcard-label">{{$.T "home.wildcard.kicker"}}</p>
+        <p class="landing-stranger-note">{{$.T "landing.stranger.note"}}</p>
+        <article lang="{{.Lang}}" dir="{{.Dir}}">
+          <h1 class="article-title">{{.Title}}</h1>
+          {{if .Opening}}<div class="prose">{{.Opening}}</div>{{end}}
+        </article>
+        <p class="landing-stranger-more"><a href="{{.URL}}">{{if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a></p>
+      </section>
+    {{end}}
+
+    <section class="capture landing-capture">
+      {{if .LandingSubscribed}}
+        <p class="capture-lead">{{.T "post.subscribe.sent"}}</p>
+      {{else}}
+        <p class="capture-lead">{{.T "post.subscribe.heading"}} <span class="mark">※</span></p>
+        <form class="capture-form" method="post" action="/subscribe">
+          <input type="hidden" name="from" value="landing">
+          {{with .LandingSample}}
+            <input type="hidden" name="post_id" value="{{.ID}}">
+            <input type="hidden" name="username" value="{{.Username}}">
+          {{end}}
+          <input type="email" inputmode="email" dir="ltr" name="email" placeholder="{{.T "post.subscribe.placeholder"}}" aria-label="{{.T "post.subscribe.placeholder"}}" required>
+          <button type="submit">{{.T "post.subscribe.submit"}}</button>
+        </form>
+        <p class="capture-note">{{.T "post.subscribe.body"}}</p>
+      {{end}}
+    </section>
+
     <footer class="landing-end">
       <p class="landing-end-line">{{.T "landing.end"}}</p>
       <p class="landing-end-sub">{{.T "landing.end.sub"}}</p>
-      <div class="landing-actions">
-        <a class="btn-primary" href="{{if .LandingSample}}{{.LandingSample.URL}}{{else}}/read{{end}}">{{.T "landing.end.read"}}</a>
-        <a href="/signup">{{.T "landing.hero.join"}}</a>
-      </div>
-      <p class="landing-caption">{{.T "landing.reading.note"}} <a href="/write">{{.T "landing.writing.note"}}</a></p>
     </footer>
+
+    <section class="landing-where">
+      <h2>{{.T "landing.where.heading"}}</h2>
+      <div class="landing-lines">
+        <p>{{.T "landing.line.stranger"}}</p>
+        <p>{{.T "landing.line.counts"}}</p>
+        <p>{{.T "landing.line.letters"}}</p>
+        <p>{{.T "landing.line.write"}}</p>
+      </div>
+      <p><a href="/write">{{.T "landing.where.write"}}</a></p>
+    </section>
   </main>
   {{template "platform-footer" .}}
 {{end}}

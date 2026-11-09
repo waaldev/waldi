@@ -57,7 +57,7 @@ func TestLandingExplainsReaderAndWriterPaths(t *testing.T) {
 	s.ServeHTTP(rec, req)
 
 	body := rec.Body.String()
-	for _, want := range []string{"Join Waldi", "A quiet place to write, and to be read.", "Anyone can start writing.", "/how-it-works", "/signup", "https://amin.waldi.blog/serendipity"} {
+	for _, want := range []string{"A quiet place to write, and to be read.", "If you are wondering where you are", "Write something", `href="/write"`, "/how-it-works", "https://amin.waldi.blog/serendipity"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("landing body does not contain %q", want)
 		}
@@ -122,7 +122,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 				`<link rel="canonical" href="https://waldi.blog/">`,
 				`<link rel="alternate" hreflang="fa" href="https://waldi.blog/fa">`,
 				`<link rel="alternate" hreflang="x-default" href="https://waldi.blog/">`,
-				`href="/signup"`,
+				`href="/write"`,
 				`<a class="lang-toggle" href="/fa" hreflang="fa">`,
 			},
 		},

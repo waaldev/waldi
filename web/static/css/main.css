@@ -617,23 +617,73 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .platform-footer a { color: var(--ink-soft); }
 
 .landing { margin-block-start: var(--s7); }
-.landing h1 {
-  font-size: clamp(var(--text-title), 6vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.2;
-  margin: 0 0 var(--s5);
+.landing-tagline {
+  color: var(--ink-soft);
+  margin: 0 0 var(--s7);
 }
-.landing h1:lang(fa) {
+.landing-stranger .wildcard-label {
+  font-family: var(--font-sans);
+  margin: 0 0 var(--s1);
+}
+.landing-stranger-note {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 var(--s4);
+}
+.landing-stranger-note:lang(fa) { font-style: normal; }
+.landing-stranger .article-title { margin-block-end: var(--s5); }
+.landing-stranger .prose > :last-child { margin-block-end: 0; }
+.landing-stranger-more {
+  margin: var(--s3) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+}
+.landing .landing-stranger-more a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+.landing .landing-stranger-more a:hover { color: var(--accent-ink); }
+.landing .landing-capture {
+  background: none;
+  padding: 0;
+  text-align: start;
+  margin-block-start: var(--s7);
+}
+.landing .landing-capture .capture-lead {
+  font-size: 1.5rem;
+  line-height: 1.35;
+}
+.landing .landing-capture .capture-form {
+  max-width: none;
+  justify-content: flex-start;
+}
+.landing-where {
+  margin-block-start: var(--s7);
+  padding-block-start: var(--s5);
+  border-block-start: 1px solid var(--hairline);
+}
+.landing-where h2 {
+  font-size: var(--text-body);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 var(--s4);
+}
+.landing-where h2:lang(fa) { font-style: normal; font-size: inherit; }
+.landing-where .landing-lines p {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0 0 var(--s2);
+}
+.landing-where > p { margin: var(--s4) 0 0; }
+.landing .article-title:lang(fa) {
   font-weight: 700;
   line-height: 1.5;
   -webkit-text-stroke: 0.4px currentColor;
 }
-.landing-lines p {
-  font-size: 1.375rem;
-  line-height: 1.5;
-  margin: 0 0 var(--s4);
-}
-.landing-lines p:lang(fa) { font-size: 1.5rem; line-height: 1.8; }
 .landing-end {
   text-align: center;
   margin-block-start: var(--s7);
@@ -660,13 +710,6 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .landing-end .landing-actions { justify-content: center; }
 .landing-actions a { min-height: 44px; display: inline-flex; align-items: center; }
 .landing-actions a.btn-primary { margin: 0; }
-.landing-caption {
-  font-family: var(--font-sans);
-  font-size: var(--text-meta);
-  color: var(--ink-soft);
-  margin: var(--s3) 0 0;
-}
-.landing-caption a { color: var(--ink-soft); }
 .landing + .platform-footer {
   justify-content: center;
   margin-block-start: var(--s7);

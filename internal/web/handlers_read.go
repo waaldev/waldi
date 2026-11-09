@@ -84,6 +84,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		pd.SEO = landingSEO(r, s.baseDomain, pd.Lang)
 		pd.LandingSample = s.dailySample(r, pd.Lang, "landing")
+		pd.LandingSubscribed = r.URL.Query().Get("subscribed") == "1"
 	} else {
 		pd.SEO = noindexSEO()
 	}
@@ -111,9 +112,9 @@ func (s *Server) dailySample(r *http.Request, lang, src string) *PostView {
 	if s.store == nil {
 		return nil
 	}
-	p, err := s.store.DailyPublishedPost(r.Context(), lang, today())
+	p, err := s.store.DailyPoolPost(r.Context(), lang, today())
 	if errors.Is(err, store.ErrNotFound) && lang != i18n.Default {
-		p, err = s.store.DailyPublishedPost(r.Context(), i18n.Default, today())
+		p, err = s.store.DailyPoolPost(r.Context(), i18n.Default, today())
 	}
 	if err != nil {
 		if !errors.Is(err, store.ErrNotFound) {
@@ -122,6 +123,7 @@ func (s *Server) dailySample(r *http.Request, lang, src string) *PostView {
 		return nil
 	}
 	view := postView(p)
+	view.Opening, view.OpeningMore = postOpening(p.Doc, 3)
 	view.URL = PublicBlogURL(r, s.baseDomain, p.Username, "/"+p.Slug+"?src="+src)
 	view.BlogURL = PublicBlogURL(r, s.baseDomain, p.Username, "/")
 	return &view

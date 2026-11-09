@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"html/template"
 	"regexp"
 	"strings"
 	"unicode"
@@ -102,4 +103,39 @@ func wordCount(doc postdoc.Document) int {
 	}
 	walk(doc.Content)
 	return count
+}
+
+var openingBlockTypes = map[string]bool{
+	"paragraph":   true,
+	"heading":     true,
+	"blockquote":  true,
+	"aside":       true,
+	"bulletList":  true,
+	"orderedList": true,
+}
+
+func postOpening(raw json.RawMessage, paragraphs int) (template.HTML, bool) {
+	doc, err := postdoc.Parse(raw)
+	if err != nil {
+		return "", false
+	}
+	var opening []postdoc.Node
+	count := 0
+	for _, node := range doc.Content {
+		if !openingBlockTypes[node.Type] || count >= paragraphs {
+			break
+		}
+		opening = append(opening, node)
+		if node.Type == "paragraph" {
+			count++
+		}
+	}
+	if len(opening) == 0 {
+		return "", true
+	}
+	html, err := postdoc.RenderHTML(postdoc.Document{Type: doc.Type, Content: opening})
+	if err != nil {
+		return "", false
+	}
+	return template.HTML(html), len(opening) < len(doc.Content)
 }

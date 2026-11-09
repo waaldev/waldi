@@ -21,6 +21,9 @@ func (s *Server) handleSubscribe(w http.ResponseWriter, r *http.Request) {
 	postIDStr := strings.TrimSpace(r.FormValue("post_id"))
 
 	redirectTo := s.subscribeRedirectTarget(r, postIDStr)
+	if r.FormValue("from") == "landing" {
+		redirectTo = "/"
+	}
 
 	if email == "" || !strings.Contains(email, "@") || s.store == nil {
 		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
