@@ -2,7 +2,7 @@
 {{template "layout-start" .}}
 {{template "app-bar" .}}
 
-<section class="blog-head">
+<section class="blog-head blog-head-own">
   <h1 class="blog-name">{{.Blog.DisplayName}}</h1>
   {{if .Blog.Bio}}
     <p class="blog-bio">{{.Blog.Bio}}</p>
@@ -30,7 +30,6 @@
       {{range .Posts}}
         <li lang="{{.Lang}}" dir="{{.Dir}}">
           <a class="feed-item" href="{{.URL}}">
-            <p class="feed-writer">{{.FeedDate}}</p>
             <h2 class="feed-title">{{.Title}}</h2>
             {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
           </a>
@@ -42,10 +41,8 @@
     <p class="feed-more"><a class="quiet-link" href="{{.Blog.OlderURL}}">{{.T "pagination.older"}}</a></p>
   {{end}}
 {{else}}
-  <div class="empty-state">
-    <h2>{{.T "profile.empty.heading"}}</h2>
-    <p>{{.T "profile.empty.body"}}</p>
-  </div>
+  <p class="today-empty-line">{{.T "profile.empty.heading"}}</p>
+  <p class="today-empty-sub">{{.T "profile.empty.body"}}</p>
 {{end}}
 
 <footer class="finish">

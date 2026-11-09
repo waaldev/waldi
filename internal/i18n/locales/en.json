@@ -139,7 +139,7 @@
   "profile.subhead": "This writer's public posts are published on this subdomain.",
   "profile.heading": "%s",
   "profile.title": "%s's blog",
-  "profile.empty.heading": "Welcome to Waldi",
+  "profile.empty.heading": "No posts yet.",
   "profile.empty.body": "Once a post is published, it will show up here, quiet and readable.",
   "profile.finish": "※",
   "profile.finish.line": "%s writes on %s.",
@@ -257,7 +257,7 @@
   "you.post.date_cancel": "Cancel",
   "you.post.date_note": "Only the displayed date changes; feed placement and readers who already saw it aren't affected.",
   "you.post.stats.empty": "No one has read this yet.",
-  "you.post.stats.caption": "Only you can see this.",
+  "you.post.stats.caption": "Only you can see this. Numbers update each morning.",
   "you.post.date_error": "That date couldn't be used - check the format (YYYY/MM/DD) and that it isn't in the future.",
 
   "letter.page.title": "Letter from %s",

@@ -1956,6 +1956,8 @@ a.btn-secondary:hover {
 .blog-head .btn-follow { width: auto; }
 
 .blog-head .inline-form { margin: 0; }
+.blog-head-own { text-align: start; }
+.blog-head-own .blog-nav a { margin-inline: 0 var(--s4); }
 
 /* owner-only quiet row under the bio - kept on one line; if it's wider
    than the viewport it scrolls horizontally instead of wrapping and
@@ -1972,6 +1974,8 @@ a.btn-secondary:hover {
 .owner-row a:hover { color: var(--ink); }
 .owner-row .sep { margin-inline: var(--s2); }
 .owner-row .inline-form { display: inline; margin: 0; }
+.owner-row .quiet-danger { color: var(--ink-soft); font-size: inherit; }
+.owner-row .quiet-danger:hover { color: var(--ink); }
 
 .blog-nav {
   margin-block-start: var(--s4);

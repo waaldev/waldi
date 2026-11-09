@@ -135,7 +135,7 @@
   "profile.subhead": "نوشته‌های عمومی این نویسنده همین‌جا منتشر می‌شوند.",
   "profile.heading": "%s",
   "profile.title": "وبلاگ %s",
-  "profile.empty.heading": "هنوز نوشته‌ای منتشر نشده",
+  "profile.empty.heading": "هنوز نوشته‌ای منتشر نشده.",
   "profile.empty.body": "اولین نوشته که برسد، همین‌جا آرام و خوانا می‌نشیند.",
   "profile.finish": "※",
   "profile.finish.line": "%s در %s می‌نویسد.",
@@ -251,7 +251,7 @@
   "you.post.date_cancel": "بی‌خیال",
   "you.post.date_note": "فقط تاریخِ روی نوشته عوض می‌شود؛ جای آن در فهرست و خواننده‌هایی که قبلاً دیده‌اندش تغییری نمی‌کند.",
   "you.post.stats.empty": "هنوز کسی این را نخوانده است.",
-  "you.post.stats.caption": "این را فقط شما می‌بینید.",
+  "you.post.stats.caption": "فقط شما این را می‌بینید. عددها هر صبح تازه می‌شوند.",
   "you.post.date_error": "این تاریخ پذیرفته نشد - قالب را (۱۴۰۵/۰۴/۰۹) و اینکه در آینده نباشد بررسی کنید.",
 
   "letter.page.title": "نامه از %s",

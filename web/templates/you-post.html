@@ -5,10 +5,8 @@
 <article lang="{{.Post.Lang}}" dir="{{.Post.Dir}}">
   <header class="article-head">
     <h1 class="article-title">{{.Post.Title}}</h1>
-    <p class="article-meta">{{if .Post.PublishedAtISO}}<time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{else}}{{.Post.PublishedAt}}{{end}}</p>
-
     <div class="owner-row">
-      <a href="{{.Post.URL}}" target="_blank" rel="noopener">{{.T "post.owner.badge"}}</a>
+      <a href="{{.Post.URL}}" target="_blank" rel="noopener" title="{{.T "post.owner.badge"}}">{{if .Post.PublishedAtISO}}<time datetime="{{.Post.PublishedAtISO}}">{{.Post.PublishedAt}}</time>{{else}}{{.Post.PublishedAt}}{{end}}</a>
       <span class="sep">·</span>&nbsp;<a href="/write/{{.Post.ID}}">{{.T "post.owner.edit"}}</a>
       <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" data-owner-toggle="date-edit">{{.T "you.post.edit_date"}}</button>
       <span class="sep">·</span>&nbsp;<button class="quiet-danger" type="button" data-owner-toggle="delete-confirm">{{.T "post.owner.delete"}}</button>
