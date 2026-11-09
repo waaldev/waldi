@@ -58,7 +58,7 @@ Reading measure: **max-width 34rem** (~65 characters at 19px) for all prose, cen
 ### Spacing & shape
 
 - Spacing scale: 4 / 8 / 12 / 20 / 32 / 52 / 84px (a loose golden-ish ramp - generous jumps are what read as "calm").
-- **Radius: 6px** on the few boxes that exist (inputs, buttons). Not 0 (severe), not 16 (app-like).
+- **Radius: 6px** on the few boxes that exist (inputs). Not 0 (severe), not 16 (app-like).
 - **No shadows anywhere.** Elevation doesn't exist in a book. Layering is done with `--paper-raised` and space.
 - **Hairlines only when space can't do the job:** 1px `--ink-faint` at 40% opacity. Feed items are separated by whitespace alone.
 
@@ -91,11 +91,11 @@ It costs nothing, renders everywhere, and after a week of use, ※ *means* "a sm
 - Nothing above the title except a small back-arrow "Waldi ※" wordmark and the writer's name. **No sticky header** - when you scroll into the text, the interface leaves the room.
 - Title in display Newsreader, then the writer + date line in `--text-meta`, then 52px of air, then prose.
 - Images: full column width, 6px radius, optional caption in `--text-meta` italic centered. Dividers (the writer's `+` divider) render as a centered `※` - the mark again, doing real work.
-- At the end: the closing ※, then 84px of air, then the action row - **Follow · Write a letter · Share** - set as text buttons in the sans, Follow alone carrying the accent (solid accent bg, paper text, 6px radius; it's the single most important button in the product and the only solid button on the screen). After following, the button becomes quiet text: "Following ✓".
+- At the end: the closing ※, then 84px of air, then the action row - **Follow · Write a letter · Share** - set as text buttons in the sans, Follow alone carrying the accent (accent text with a 1px underline; it's the single most important button in the product). After following, the button becomes quiet text: "Following ✓".
 - Absolutely no numbers on this screen. Ever.
 
 ### The editor
-- The chrome disappears: paper background edge-to-edge, a tiny top bar with only "Drafts" left, "Publish" right (ghost button until the doc has a title and >0 words, then solid accent).
+- The chrome disappears: paper background edge-to-edge, a tiny top bar with only "Drafts" left, "Publish" right (quiet text until the doc has a title and >0 words, then accent).
 - Title is a serif input styled identically to a rendered title, placeholder "Title" in `--ink-faint`. Body placeholder: "Write."
 - The floating toolbar (on text selection): a small `--ink` pill, paper-colored icons/labels, 6px radius - the one dark element in light mode, intentionally, like a pen. Bold · Italic · Link · H2 · Quote.
 - Autosave indicator: the word "Saved" in `--ink-faint` at top center, fading in and out. Never a spinner.
@@ -131,7 +131,7 @@ Everything else is instant. Hovers change color with a 120ms transition, nothing
 - **Link style in prose:** `--accent` text with a subtle underline (`text-decoration-thickness: 1px; text-underline-offset: 3px`). Links in UI chrome: no underline until hover.
 - **Links on public pages** (landing, how it works, write invite): `--ink` text with the same 1px underline in `--ink-faint`, darkening to `currentColor` on hover. These pages carry several links at once, so ink keeps the accent within its one-or-two-per-screen budget.
 - **Selection color:** `--accent` at ~20% opacity - even selecting text feels on-palette.
-- **Buttons:** one solid style (accent bg) reserved for the primary act of a screen (Follow, Publish, Send letter). Everything else is text or ghost. Two button styles total in the product.
+- **Buttons:** no filled buttons. The primary act of a screen (Follow, Publish, Send letter) is accent text with a 1px underline offset 4px, at least 44px tall. Everything else is quiet text.
 - **Forms (login/signup):** labels above inputs in `--text-meta`, inputs on `--paper-raised` with 1px faint border, generous 12px padding. The signup page should be as considered as the reading page - it's the first impression.
 - **The favicon and touch icon:** the ※ mark in ink on paper. Details like this are half of "lovely."
 - **Print stylesheet** for posts: hide all chrome, black on white, serif. A blogging platform whose posts print beautifully is a quiet statement of values. It's ~15 lines of CSS.
