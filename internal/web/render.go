@@ -126,6 +126,10 @@ type AuthView struct {
 	FormToken   string
 	HasDraft    bool
 	DraftSaved  bool
+	BlogName    string
+	Username    string
+	Email       string
+	ErrorField  string
 }
 
 type BlogView struct {

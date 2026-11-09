@@ -134,7 +134,11 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			s.renderAuthError(w, r, "signup", "auth.error.duplicate")
+			if pgErr.ConstraintName == "users_email_key" {
+				s.renderAuthError(w, r, "signup", "auth.error.email_taken")
+				return
+			}
+			s.renderAuthError(w, r, "signup", "auth.error.username_taken")
 			return
 		}
 		s.logger.Error("creating user", "err", err)
@@ -547,6 +551,10 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 		InviteCode:  strings.TrimSpace(r.FormValue("invite")),
 	}
 	if mode == "signup" {
+		pd.Auth.BlogName = strings.TrimSpace(r.FormValue("blog_name"))
+		pd.Auth.Username = normalizeUsername(r.FormValue("username"))
+		pd.Auth.Email = strings.TrimSpace(r.FormValue("email"))
+		pd.Auth.ErrorField = signupErrorFields[messageKey]
 		pd.Auth.FormToken = signupFormToken(time.Now())
 		pd.Auth.HasDraft = r.FormValue("draft") == "1"
 		if pd.Auth.HasDraft {
@@ -575,4 +583,13 @@ func (s *Server) handleSessionBridge(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(`<!doctype html><script>parent.postMessage({username:`))
 	_, _ = w.Write([]byte(strconv.Quote(username)))
 	_, _ = w.Write([]byte(`}, ` + strconv.Quote(origin) + `)</script>`))
+}
+
+var signupErrorFields = map[string]string{
+	"auth.error.blog_name":      "blog_name",
+	"auth.error.username":       "username",
+	"auth.error.username_taken": "username",
+	"auth.error.email":          "email",
+	"auth.error.email_taken":    "email",
+	"auth.error.password_len":   "password",
 }

@@ -27,7 +27,7 @@
   {{if not .Auth.Inviter}}
   <h1 class="form-title">{{.Auth.Heading}}</h1>
   {{end}}
-  {{if .Auth.Error}}
+  {{if and .Auth.Error (ne .Auth.Mode "signup")}}
     <p class="form-error">{{.Auth.Error}}</p>
   {{end}}
   {{if .Auth.Message}}
@@ -76,33 +76,71 @@
         {{if .Auth.HasDraft}}<p class="join-lead">{{.T "auth.join.lead.draft"}}</p>{{end}}
         <p class="join-sentence">
           <label for="blog_name">{{.T "auth.join.name.before"}}</label>
-          <input id="blog_name" name="blog_name" autocomplete="name" placeholder="{{.T "auth.join.name.example"}}" required maxlength="80" size="9">{{.T "auth.join.name.after"}}
+          <input id="blog_name" name="blog_name" value="{{.Auth.BlogName}}" autocomplete="name" placeholder="{{.T "auth.join.name.example"}}" required maxlength="80" size="9"{{if eq .Auth.ErrorField "blog_name"}} aria-invalid="true" aria-describedby="join-error" autofocus{{else if not .Auth.ErrorField}} autofocus{{end}}>{{.T "auth.join.name.after"}}
           <label for="username">{{.T "auth.join.user.before"}}</label>
-          <span class="join-host" dir="ltr"><input id="username" name="username" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32" size="7">.{{.BaseDomain}}</span>{{.T "auth.join.user.after"}}
+          <span class="join-host" dir="ltr"><input id="username" name="username" value="{{.Auth.Username}}" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32" pattern="[a-z0-9\-]{3,32}" size="7"{{if eq .Auth.ErrorField "username"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>.{{.BaseDomain}}</span>{{.T "auth.join.user.after"}}
           <label for="email">{{.T "auth.join.email.before"}}</label>
-          <input id="email" name="email" type="email" dir="ltr" autocomplete="email" placeholder="{{.T "auth.join.email.example"}}" required size="14">{{.T "auth.join.email.after"}}
+          <input id="email" name="email" value="{{.Auth.Email}}" type="email" dir="ltr" autocomplete="email" placeholder="{{.T "auth.join.email.example"}}" required size="14"{{if eq .Auth.ErrorField "email"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>{{.T "auth.join.email.after"}}
           <label for="password">{{.T "auth.join.password.before"}}</label>
-          <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" placeholder="{{.T "auth.join.password.example"}}" required minlength="8" size="10">{{.T "auth.join.password.after"}}
+          <input id="password" name="password" type="password" dir="ltr" autocomplete="new-password" placeholder="{{.T "auth.join.password.example"}}" required minlength="8" size="10"{{if eq .Auth.ErrorField "password"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>{{.T "auth.join.password.after"}}
         </p>
-        <button class="btn-primary" type="submit">{{.Auth.SubmitLabel}}</button>
+        <button class="join-reveal" type="button" aria-controls="password" aria-pressed="false" data-reveal data-show="{{.T "auth.join.password.show"}}" data-hide="{{.T "auth.join.password.hide"}}">{{.T "auth.join.password.show"}}</button>
+        {{if .Auth.Error}}
+          <p class="form-error" id="join-error" role="alert">{{.Auth.Error}}{{if eq .Auth.ErrorField "email"}} <a href="/login">{{.T "auth.login.alt.link"}}</a>{{end}}</p>
+        {{end}}
+        <button class="btn-primary" type="submit" data-join-submit>{{.Auth.SubmitLabel}}</button>
         <p class="join-note">{{.T "auth.join.note"}}</p>
         {{if .Auth.HasDraft}}
           <p class="join-note">{{.T "auth.join.reader"}} <a href="/">{{.T "auth.join.back"}}</a></p>
-          <script>
-            (function () {
-              var form = document.currentScript.closest("form");
-              if (!form) return;
-              form.addEventListener("submit", function () {
+        {{end}}
+        <script>
+          (function () {
+            var form = document.currentScript.closest("form");
+            if (!form) return;
+            var name = form.querySelector("#blog_name");
+            var user = form.querySelector("#username");
+            var pass = form.querySelector("#password");
+            var reveal = form.querySelector("[data-reveal]");
+            var submit = form.querySelector("[data-join-submit]");
+            var userTouched = user.value !== "";
+
+            function slug(value) {
+              return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32);
+            }
+
+            name.addEventListener("input", function () {
+              if (userTouched) return;
+              var suggestion = slug(name.value);
+              user.value = suggestion.length >= 3 ? suggestion : "";
+            });
+            user.addEventListener("input", function () {
+              userTouched = user.value !== "";
+              var clean = user.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+              if (clean !== user.value) user.value = clean;
+            });
+            reveal.addEventListener("click", function () {
+              var showing = pass.type === "text";
+              pass.type = showing ? "password" : "text";
+              reveal.textContent = showing ? reveal.dataset.show : reveal.dataset.hide;
+              reveal.setAttribute("aria-pressed", showing ? "false" : "true");
+            });
+            form.addEventListener("submit", function () {
+              pass.type = "password";
+              var title = form.querySelector("[data-draft-title]");
+              var doc = form.querySelector("[data-draft-doc]");
+              if (title && doc) {
                 try {
                   var draft = JSON.parse(localStorage.getItem("waldi:draft") || "null");
-                  if (!draft || typeof draft.doc !== "string") return;
-                  form.querySelector("[data-draft-title]").value = draft.title || "";
-                  form.querySelector("[data-draft-doc]").value = draft.doc;
+                  if (draft && typeof draft.doc === "string") {
+                    title.value = draft.title || "";
+                    doc.value = draft.doc;
+                  }
                 } catch (e) {}
-              });
-            })();
-          </script>
-        {{end}}
+              }
+              window.setTimeout(function () { submit.disabled = true; submit.setAttribute("aria-busy", "true"); }, 0);
+            });
+          })();
+        </script>
       {{else}}
         <div class="field">
           <label for="email">{{.T "auth.field.email"}}</label>
