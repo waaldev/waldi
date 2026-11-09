@@ -162,7 +162,7 @@
       {{else if eq .Auth.Mode "signup"}}
         {{.T "auth.signup.alt.prompt"}} <a href="/login">{{.T "auth.login.alt.link"}}</a>
       {{else}}
-        {{.T "auth.login.alt.prompt"}} <a href="/signup">{{.T "auth.signup.alt.link"}}</a><br>
+        {{.T "auth.login.alt.prompt"}} <a href="/write">{{.T "auth.login.alt.write"}}</a>.<br>
         <a href="/forgot-password">{{.T "auth.forgot.link"}}</a>
       {{end}}
     </p>

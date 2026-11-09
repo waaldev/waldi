@@ -17,10 +17,10 @@
       </div>
       <article lang="{{.Lang}}" dir="{{.Dir}}">
         <h1 class="article-title">{{.Title}}</h1>
-        {{if .Opening}}<div class="prose">{{.Opening}}</div>{{end}}
+        {{if .Opening}}<div class="prose">{{.Opening}}</div>{{else}}<p class="stranger-images">{{$.T "explore.images"}}</p>{{end}}
       </article>
       <div class="today-stranger-actions">
-        <a class="today-stranger-more" href="{{.URL}}" target="_blank" rel="noopener">{{if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a>
+        <a class="today-stranger-more" href="{{.URL}}" target="_blank" rel="noopener">{{if not .Opening}}{{$.T "landing.stranger.see"}}{{else if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a>
         {{if .Kept}}
           <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
             <button class="keep kept" type="submit">{{$.T "post.kept"}}</button>
@@ -89,9 +89,9 @@
         <p class="landing-stranger-note">{{$.T "landing.stranger.note"}}</p>
         <article lang="{{.Lang}}" dir="{{.Dir}}">
           <h1 class="article-title">{{.Title}}</h1>
-          {{if .Opening}}<div class="prose">{{.Opening}}</div>{{end}}
+          {{if .Opening}}<div class="prose">{{.Opening}}</div>{{else}}<p class="stranger-images">{{$.T "explore.images"}}</p>{{end}}
         </article>
-        <p class="landing-stranger-more"><a href="{{.URL}}">{{if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a></p>
+        <p class="landing-stranger-more"><a href="{{.URL}}">{{if not .Opening}}{{$.T "landing.stranger.see"}}{{else if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a></p>
       </section>
     {{end}}
 

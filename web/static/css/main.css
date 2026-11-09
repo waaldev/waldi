@@ -656,6 +656,13 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   margin: 0 0 var(--s4);
 }
 .landing-stranger-note:lang(fa) { font-style: normal; }
+.stranger-images {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.stranger-images:lang(fa) { font-style: normal; }
 .landing-stranger .article-title { margin-block-end: var(--s5); }
 .landing-stranger .prose > :last-child { margin-block-end: 0; }
 .landing-stranger-more {
