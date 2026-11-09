@@ -82,6 +82,8 @@
   "explore.filter.all": "همه",
   "explore.filter.aria": "زبان",
   "explore.empty": "این هفته هنوز کسی ننوشته است.",
+  "explore.empty.filtered": "این هفته کسی به این زبان ننوشته است.",
+  "explore.empty.everyone": "همه را ببینید",
   "explore.end": "این هفته همین‌ها نوشتند. ※",
   "explore.end.sub": "نوشته‌های قدیمی‌تر در وبلاگ هر نویسنده هست.",
   "explore.end.blogs": "همه‌ی وبلاگ‌های والدی را ببینید",

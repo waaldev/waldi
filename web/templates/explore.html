@@ -31,6 +31,9 @@
     {{if .Explore.Posts}}
       <p class="explore-end-line">{{.T "explore.end"}}</p>
       <p class="explore-end-sub">{{.T "explore.end.sub"}}</p>
+    {{else if .Explore.Filtered}}
+      <p class="explore-end-line">{{.T "explore.empty.filtered"}}</p>
+      <p class="explore-end-link"><a href="{{.Local "/explore"}}">{{.T "explore.empty.everyone"}}</a></p>
     {{else}}
       <p class="explore-end-line">{{.T "explore.empty"}}</p>
     {{end}}

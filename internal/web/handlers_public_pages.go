@@ -42,10 +42,11 @@ func (s *Server) serveBlogPostAt(w http.ResponseWriter, r *http.Request, slug st
 }
 
 type ExploreView struct {
-	Filters []ExploreFilterView
-	Posts   []PostView
-	Blogs   []ExploreBlogView
-	Sample  *PostView
+	Filtered bool
+	Filters  []ExploreFilterView
+	Posts    []PostView
+	Blogs    []ExploreBlogView
+	Sample   *PostView
 }
 
 type ExploreFilterView struct {
@@ -85,6 +86,7 @@ func (s *Server) handleExplore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	explore.Filters = exploreFilters(pd, r.URL.Path, filter)
+	explore.Filtered = filter != ""
 	pd.Explore = explore
 	s.withCacheHeaders(w, r, func(w http.ResponseWriter, r *http.Request) {
 		s.renderer.Render(w, "explore.html", pd)

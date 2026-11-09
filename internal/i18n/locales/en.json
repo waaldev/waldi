@@ -84,6 +84,8 @@
   "explore.filter.all": "All",
   "explore.filter.aria": "Language",
   "explore.empty": "No one has written this week yet.",
+  "explore.empty.filtered": "No one has written in this language this week.",
+  "explore.empty.everyone": "See everyone",
   "explore.end": "That’s everyone who wrote this week. ※",
   "explore.end.sub": "Older writing lives on each writer’s blog.",
   "explore.end.blogs": "See all blogs on Waldi",
