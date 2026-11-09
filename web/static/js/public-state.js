@@ -28,6 +28,10 @@
     })
   }
 
+  var source = new URLSearchParams(window.location.search).get('src')
+  var backToday = document.querySelector('[data-back-today]')
+  if (backToday && (source === 'wildcard' || source === 'landing')) backToday.hidden = false
+
   fetch(url, { credentials: 'same-origin' })
     .then(function (response) { return response.ok ? response.json() : null })
     .then(function (state) {

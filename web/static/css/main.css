@@ -996,6 +996,14 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .stranger-note:not([hidden]) + .post-actions { margin-block-start: var(--s5); }
 
 .post-actions .inline-form { margin: 0; }
+.back-today {
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  margin: var(--s5) 0 0;
+}
+.back-today a { color: var(--ink-soft); }
+.back-today a:hover { color: var(--ink); }
 
 .btn-follow {
   font-family: var(--font-sans);
