@@ -111,9 +111,8 @@ func (s *Store) CreateUserAndRedeemInvitation(ctx context.Context, inviteCode, u
 	return user, nil
 }
 
-// RedeemInvitationForUser grants write access to an already-existing account
-// by redeeming an invite code for it - the "I already have a reader account,
-// redeeming a code later" path used by the write-invite page.
+// RedeemInvitationForUser links an invite code to an already-existing account
+// when someone signs in from an invitation link.
 func (s *Store) RedeemInvitationForUser(ctx context.Context, code string, userID int64) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {

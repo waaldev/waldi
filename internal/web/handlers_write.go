@@ -23,10 +23,6 @@ func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
 	if !s.requireVerified(w, r, user) {
 		return
 	}
-	if !user.CanWrite {
-		http.Redirect(w, r, "/write/invite", http.StatusSeeOther)
-		return
-	}
 	if s.store == nil {
 		s.renderWriteError(w, r, "write.error.db")
 		return

@@ -14,6 +14,7 @@ Shipped, building, never done.
 - Pages (About / Now) in blog nav
 - Stranger post on the main landing
 - Public How it works page and a link to the Serendipity post
+- Open writing
 
 ## Next
 

@@ -22,18 +22,6 @@ func (s *Server) notifySignup(r *http.Request, user store.User) {
 	}()
 }
 
-func (s *Server) notifyWriteRequest(user store.User, blogLink, note string) {
-	if s.notifier == nil {
-		return
-	}
-	text := fmt.Sprintf("Write request: %s (%s)\n%s\n%s", user.Username, user.Email, blogLink, note)
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), notifyTimeout)
-		defer cancel()
-		s.notifier.Notify(ctx, text)
-	}()
-}
-
 func (s *Server) notifyPublish(r *http.Request, user store.User, post store.Post) {
 	if s.notifier == nil {
 		return

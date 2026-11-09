@@ -370,7 +370,6 @@ func robotsTxtForApp(r *http.Request, baseDomain string) string {
 	return fmt.Sprintf(`User-agent: *
 Allow: /
 Disallow: /write
-Allow: /write/invite
 Disallow: /inbox
 Disallow: /settings
 Disallow: /login

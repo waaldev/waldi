@@ -15,11 +15,11 @@ import (
 
 func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
-	inviteCode := strings.TrimSpace(r.URL.Query().Get("invite"))
-	if user != nil && inviteCode != "" {
-		http.Redirect(w, r, "/write/invite?code="+url.QueryEscape(inviteCode), http.StatusSeeOther)
+	if user != nil {
+		http.Redirect(w, r, "/write", http.StatusSeeOther)
 		return
 	}
+	inviteCode := strings.TrimSpace(r.URL.Query().Get("invite"))
 
 	pd := s.newPageData(r, user)
 	pd.SEO = noindexSEO()
@@ -144,10 +144,6 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleLoginForm(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
 	if user != nil {
-		if code := strings.TrimSpace(r.URL.Query().Get("invite")); code != "" {
-			http.Redirect(w, r, "/write/invite?code="+url.QueryEscape(code), http.StatusSeeOther)
-			return
-		}
 		redirect(w, r, safeNextURL(r.URL.Query().Get("next"), appBaseURL(r, s.baseDomain)))
 		return
 	}
@@ -201,16 +197,12 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if dest == "/" && !user.EmailVerified() {
 		dest = "/verify-email"
 	}
-	if code := strings.TrimSpace(r.FormValue("invite")); code != "" && !user.CanWrite {
+	if code := strings.TrimSpace(r.FormValue("invite")); code != "" {
 		err := s.store.RedeemInvitationForUser(r.Context(), code, user.ID)
-		switch {
-		case err == nil:
-			dest = "/write"
-		case errors.Is(err, store.ErrInviteInvalid):
-			dest = "/write/invite?code=" + url.QueryEscape(code)
-		default:
+		if err != nil && !errors.Is(err, store.ErrInviteInvalid) {
 			s.logger.Error("redeeming invite at login", "err", err)
 		}
+		dest = "/write"
 	}
 	redirect(w, r, dest)
 }

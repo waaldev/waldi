@@ -72,7 +72,6 @@ type PageData struct {
 	ImportBlogir     *ImportBlogirView
 	Auth             *AuthView
 	Write            *WriteView
-	WriteInvite      *WriteInviteView
 	Invites          *InvitesView
 	Post             *PostView
 	Feed             *FeedView
@@ -216,12 +215,6 @@ type WriteView struct {
 	Post              *PostView
 	Error             string
 	Saved             bool
-}
-
-type WriteInviteView struct {
-	Error   string
-	Message string
-	Code    string
 }
 
 type PostView struct {

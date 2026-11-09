@@ -15,7 +15,7 @@ const (
 
 var localizedLangs = []string{defaultPublicLang, prefixedLang}
 
-var localizedPaths = []string{"/how-it-works", "/explore", "/explore/blogs", "/write/invite"}
+var localizedPaths = []string{"/how-it-works", "/explore", "/explore/blogs"}
 
 type LangAlternate struct {
 	Lang string
@@ -76,7 +76,7 @@ func (s *Server) routeLocalizedPages() {
 	s.mux.HandleFunc("GET "+prefix+"/how-it-works", s.localized(prefixedLang, s.handleHowItWorks))
 	s.mux.HandleFunc("GET "+prefix+"/explore", s.localized(prefixedLang, s.handleExplore))
 	s.mux.HandleFunc("GET "+prefix+"/explore/blogs", s.localized(prefixedLang, s.handleExploreBlogs))
-	s.mux.HandleFunc("GET "+prefix+"/write/invite", s.localized(prefixedLang, s.handleWriteInviteForm))
+	s.mux.HandleFunc("GET "+prefix+"/write/invite", s.handleOldWriteInvite)
 }
 
 func (s *Server) localized(lang string, next http.HandlerFunc) http.HandlerFunc {

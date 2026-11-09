@@ -40,7 +40,7 @@ func TestAppSitemapListsPublicPagesWithoutFakeDates(t *testing.T) {
 	s.handleAppSitemap(rec, req)
 
 	body := rec.Body.String()
-	for _, want := range []string{"<loc>https://waldi.blog/</loc>", "<loc>https://waldi.blog/how-it-works</loc>", "<loc>https://waldi.blog/explore</loc>", "<loc>https://waldi.blog/write/invite</loc>"} {
+	for _, want := range []string{"<loc>https://waldi.blog/</loc>", "<loc>https://waldi.blog/how-it-works</loc>", "<loc>https://waldi.blog/explore</loc>"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("sitemap missing %q", want)
 		}

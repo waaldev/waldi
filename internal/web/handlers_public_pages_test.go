@@ -20,7 +20,6 @@ func TestPublicInformationPages(t *testing.T) {
 		want string
 	}{
 		{path: "/how-it-works", want: "How Waldi works"},
-		{path: "/write/invite", want: "Would you like to write here?"},
 		{path: "/explore", want: "One recent post from everyone who wrote this week."},
 		{path: "/explore/blogs", want: "Here they all are, in the order they last wrote."},
 	}
@@ -58,7 +57,7 @@ func TestLandingExplainsReaderAndWriterPaths(t *testing.T) {
 	s.ServeHTTP(rec, req)
 
 	body := rec.Body.String()
-	for _, want := range []string{"Join Waldi", "A quiet place to write, and to be read.", "Writing is invite-only for now.", "/how-it-works", "/write/invite", "https://amin.waldi.blog/serendipity"} {
+	for _, want := range []string{"Join Waldi", "A quiet place to write, and to be read.", "Anyone can start writing.", "/how-it-works", "/signup", "https://amin.waldi.blog/serendipity"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("landing body does not contain %q", want)
 		}
@@ -123,7 +122,7 @@ func TestLocalizedPublicPages(t *testing.T) {
 				`<link rel="canonical" href="https://waldi.blog/">`,
 				`<link rel="alternate" hreflang="fa" href="https://waldi.blog/fa">`,
 				`<link rel="alternate" hreflang="x-default" href="https://waldi.blog/">`,
-				`href="/write/invite"`,
+				`href="/signup"`,
 				`<a class="lang-toggle" href="/fa" hreflang="fa">`,
 			},
 		},
@@ -131,11 +130,6 @@ func TestLocalizedPublicPages(t *testing.T) {
 			path:      "/explore",
 			acceptTag: "fa",
 			want:      []string{`<html lang="en" dir="ltr">`, `href="/explore?lang=fa"`},
-		},
-		{
-			path:      "/fa/write/invite",
-			acceptTag: "en",
-			want:      []string{`<html lang="fa" dir="rtl">`, `<link rel="canonical" href="https://waldi.blog/fa/write/invite">`},
 		},
 	}
 

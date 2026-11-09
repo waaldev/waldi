@@ -2,7 +2,7 @@
 
 A quiet place to write, and to be read.
 
-Live at **[waldi.blog](https://waldi.blog)**. Reading is open to everyone. Writing requires an invitation for now. because I can curate a minimum quality of wildcard posts.
+Live at **[waldi.blog](https://waldi.blog)**. Reading and writing are open to everyone.
 
 ![A Waldi post in light and dark mode](docs/screenshot.jpg)
 
