@@ -118,11 +118,6 @@
 {{define "platform-footer"}}
 <footer class="platform-footer">
   <a href="https://amin.waldi.blog/serendipity">{{.T "nav.why"}}</a>
-  {{if eq .Lang "fa"}}
-    <a href="https://aminz.net/%d8%b1%d8%a7%d9%87-%d9%88-%d8%b1%d8%b3%d9%85-%d9%88%d8%a7%d9%84%d8%af%db%8c">{{.T "nav.pact"}}</a>
-  {{else}}
-    <a href="https://amin.waldi.blog/waldi-s-pact">{{.T "nav.pact"}}</a>
-  {{end}}
   <a href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
   <a href="{{.Local "/explore"}}">{{.T "nav.explore"}}</a>
   <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a>
