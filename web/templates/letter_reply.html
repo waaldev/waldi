@@ -8,10 +8,11 @@
 <p class="composer-to">{{.T "letter.reply.to" .Inbox.Letter.OtherWriterLabel .Inbox.Letter.PostTitle}}</p>
 
 <form method="post" action="/inbox/{{.Inbox.Letter.ID}}/reply">
-  <textarea class="composer-body" name="body" lang="{{.Lang}}" dir="{{.Dir}}" placeholder="{{.T "letter.reply.placeholder" .Inbox.Letter.OtherWriterLabel}}" required minlength="2" maxlength="5000"></textarea>
+  <label class="visually-hidden" for="reply-body">{{.T "letter.kicker"}}</label>
+  <textarea class="composer-body" id="reply-body" name="body" dir="auto" placeholder="{{.T "letter.reply.placeholder" .Inbox.Letter.OtherWriterLabel}}" required minlength="2" maxlength="5000"></textarea>
   <div class="composer-send">
     <button class="btn-follow" type="submit">{{.T "letter.reply.send"}}</button>
-    <p class="field-help">{{.T "letter.reply.hint"}}</p>
+    <p class="field-help">{{.T "letter.body.help"}}</p>
   </div>
 </form>
 {{template "layout-end" .}}

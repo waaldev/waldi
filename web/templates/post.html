@@ -56,15 +56,15 @@
   {{if .Post.LetterSent}}
     <p class="capture-lead">{{.T "letter.sent"}}</p>
   {{else}}
-    <h2 class="form-title">{{.T "letter.kicker"}}</h2>
     <form method="post" action="/letters">
       <input type="hidden" name="post_id" value="{{.Post.ID}}">
-      <div class="field">
-        <label for="letter-body">{{.T "letter.dear.before"}}<a href="{{.Post.BlogURL}}">{{.Post.WriterLabel}}</a>{{.T "letter.dear.after"}}</label>
-        <textarea id="letter-body" name="body" rows="8" required minlength="2" maxlength="5000"></textarea>
+      <p class="composer-to">{{.T "letter.reply.to" .Post.WriterLabel .Post.Title}}</p>
+      <label class="visually-hidden" for="letter-body">{{.T "letter.kicker"}}</label>
+      <textarea class="composer-body" id="letter-body" name="body" dir="auto" placeholder="{{.T "letter.reply.placeholder" .Post.WriterLabel}}" required minlength="2" maxlength="5000"></textarea>
+      <div class="composer-send">
+        <button class="btn-follow" type="submit">{{.T "letter.reply.send"}}</button>
         <p class="field-help">{{.T "letter.body.help"}}</p>
       </div>
-      <button class="btn-primary" type="submit">{{.T "letter.submit"}}</button>
     </form>
   {{end}}
 </section>

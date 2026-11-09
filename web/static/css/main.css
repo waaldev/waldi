@@ -1159,6 +1159,14 @@ a.quiet:hover { color: var(--ink); }
   min-height: 44px;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .composer-to {
   font-size: var(--text-meta);
   color: var(--ink-soft);
@@ -1181,9 +1189,13 @@ a.quiet:hover { color: var(--ink); }
 .composer-body:lang(fa) { font-size: 1.3125rem; line-height: 1.9; }
 
 .composer-send {
-  margin-block-start: var(--s6);
-  text-align: center;
+  margin-block-start: var(--s5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s5);
 }
+.composer-send .field-help { margin: 0; }
 
 /* ---------- email capture (anonymous visitors, end of post) ---------- */
 
