@@ -615,6 +615,11 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   font-size: var(--text-meta);
 }
 .platform-footer a { color: var(--ink-soft); }
+.platform-footer .theme-toggle {
+  font-size: inherit;
+  color: var(--ink-soft);
+  min-height: 44px;
+}
 
 .landing { margin-block-start: var(--s7); }
 .landing-tagline {
@@ -780,10 +785,6 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   line-height: 1.9;
 }
 .how-actions { margin-block-start: var(--s7); }
-
-@media (max-width: 600px) {
-  .bar .public-nav-link { display: none; }
-}
 
 /* ---------- article ---------- */
 

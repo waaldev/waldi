@@ -106,10 +106,7 @@
 <header class="bar" aria-label="{{.T "nav.aria"}}">
   {{template "wordmark" .}}
   <nav>
-    <a class="public-nav-link" href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
-    {{if .CurrentUser}}<a href="/">{{.T "nav.home"}}</a>{{else}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
     {{template "lang-toggle" .}}
-    {{template "theme-toggle" .}}
   </nav>
 </header>
 {{end}}
@@ -129,6 +126,8 @@
   <a href="{{.Local "/how-it-works"}}">{{.T "nav.how"}}</a>
   <a href="{{.Local "/explore"}}">{{.T "nav.explore"}}</a>
   <a href="https://github.com/waaldev/waldi" dir="ltr" rel="noopener">{{.T "landing.finish.github"}}</a>
+  {{if .CurrentUser}}<a href="/">{{.T "nav.home"}}</a>{{else}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
+  {{template "theme-toggle" .}}
 </footer>
 {{end}}
 
