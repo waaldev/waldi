@@ -54,16 +54,6 @@ func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
 	}
 
 	published, hasMore := trimPage(rawPublished, publishedPageSize)
-	postIDs := make([]int64, len(published))
-	for i := range published {
-		postIDs[i] = published[i].ID
-	}
-	engagement, err := s.store.PostEngagementForPosts(r.Context(), user.ID, postIDs)
-	if err != nil {
-		s.logger.Error("loading post engagement", "err", err)
-		s.renderWriteError(w, r, "write.error.list")
-		return
-	}
 
 	lang, _ := resolveLocale(r, user)
 	now := time.Now()
@@ -72,7 +62,7 @@ func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
 	pd.SEO = noindexSEO()
 	pd.Write = &WriteView{
 		Drafts:            writeDraftViews(drafts, lang, now),
-		Published:         writePublishedViews(published, engagement, lang),
+		Published:         writePublishedViews(published, lang, now),
 		PublishedOlderURL: publishedOlderURL("/write", published, hasMore),
 	}
 	s.renderer.Render(w, "write.html", pd)

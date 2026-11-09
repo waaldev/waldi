@@ -9,49 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type PostEngagement struct {
-	Readers int
-	Letters int
-}
-
-func (s *Store) PostEngagementForPosts(ctx context.Context, userID int64, postIDs []int64) (map[int64]PostEngagement, error) {
-	if len(postIDs) == 0 {
-		return map[int64]PostEngagement{}, nil
-	}
-
-	rows, err := s.pool.Query(ctx, `
-		select p.id,
-		       (select count(distinct i.reader_key)::int
-		          from impressions i
-		         where i.post_id = p.id
-		           and i.reader_key <> ('user:' || p.user_id::text)) as readers,
-		       (select count(*)::int
-		          from letters l
-		         where l.post_id = p.id) as letters
-		from posts p
-		where p.user_id = $1 and p.status = 'published' and p.type = 'post'
-		  and p.id = any($2::bigint[])
-	`, userID, postIDs)
-	if err != nil {
-		return nil, fmt.Errorf("loading post engagement: %w", err)
-	}
-	defer rows.Close()
-
-	out := make(map[int64]PostEngagement)
-	for rows.Next() {
-		var postID int64
-		var e PostEngagement
-		if err := rows.Scan(&postID, &e.Readers, &e.Letters); err != nil {
-			return nil, fmt.Errorf("scanning post engagement: %w", err)
-		}
-		out[postID] = e
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("iterating post engagement: %w", err)
-	}
-	return out, nil
-}
-
 type PostStats struct {
 	PostID      int64
 	PostTitle   string
