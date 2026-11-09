@@ -314,13 +314,13 @@ func (s *Server) handleCreateLetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	completed, err := s.store.CompletedReadingsCount(r.Context(), user.ID)
+	allowed, err := s.canSendLetter(r.Context(), user.ID, post.ID)
 	if err != nil {
-		s.logger.Error("checking completed readings", "err", err)
+		s.logger.Error("checking letter gate", "err", err)
 		http.Error(w, "letter failed", http.StatusInternalServerError)
 		return
 	}
-	if completed < minCompletedReadingsForLetters {
+	if !allowed {
 		http.Error(w, "read a few more posts before writing letters", http.StatusForbidden)
 		return
 	}
@@ -384,4 +384,13 @@ func statsViews(lang string, stats []store.PostStats) []StatsView {
 		})
 	}
 	return views
+}
+
+func (s *Server) canSendLetter(ctx context.Context, userID, postID int64) (bool, error) {
+	opened, err := s.store.OpenedWildcardPost(ctx, userID, postID)
+	if err != nil || opened {
+		return opened, err
+	}
+	completed, err := s.store.CompletedReadingsCount(ctx, userID)
+	return completed >= minCompletedReadingsForLetters, err
 }

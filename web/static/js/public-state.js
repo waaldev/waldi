@@ -6,7 +6,7 @@
   if (!username) return
 
   var url = '/api/public-state?username=' + encodeURIComponent(username)
-  if (root.hasAttribute('data-state-post')) url += '&post=1'
+  if (root.hasAttribute('data-state-post')) url += '&post=' + encodeURIComponent(root.getAttribute('data-post-id') || '')
 
   function hide(selector) {
     document.querySelectorAll(selector).forEach(function (element) {
@@ -43,6 +43,7 @@
       show(state.following ? 'unfollow' : 'follow')
       if (root.hasAttribute('data-state-post')) {
         show(state.can_send_letter ? 'letter' : 'letter-gated')
+        if (state.can_send_letter && new URLSearchParams(window.location.search).get('src') === 'wildcard') show('stranger')
         if (state.can_send_letter && new URLSearchParams(window.location.search).get('letter') === 'sent') {
           var composer = document.getElementById('letter')
           if (composer) composer.hidden = false

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"waldi/internal/store"
 )
@@ -58,11 +59,10 @@ func (s *Server) handlePublicState(w http.ResponseWriter, r *http.Request) {
 		s.logger.Error("loading public follow state", "viewer_id", viewer.ID, "owner_id", owner.ID, "err", err)
 	}
 	if r.URL.Query().Has("post") {
-		completed, err := s.store.CompletedReadingsCount(r.Context(), viewer.ID)
+		postID, _ := strconv.ParseInt(r.URL.Query().Get("post"), 10, 64)
+		state.CanSendLetter, err = s.canSendLetter(r.Context(), viewer.ID, postID)
 		if err != nil {
 			s.logger.Error("loading public letter state", "viewer_id", viewer.ID, "err", err)
-		} else {
-			state.CanSendLetter = completed >= minCompletedReadingsForLetters
 		}
 	}
 

@@ -915,6 +915,15 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   justify-content: center;
 }
 
+.stranger-note {
+  max-width: 28rem;
+  margin: var(--s7) auto 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  color: var(--ink-soft);
+}
+.stranger-note:not([hidden]) + .post-actions { margin-block-start: var(--s5); }
+
 .post-actions .inline-form { margin: 0; }
 
 .btn-follow {

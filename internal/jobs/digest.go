@@ -112,6 +112,9 @@ func DigestSentence(lang string, stat store.PostStats) string {
 	if stat.Completed > 0 {
 		clauses = append(clauses, i18n.TN(lang, "digest.clause.completed", stat.Completed))
 	}
+	if stat.Strangers > 0 {
+		clauses = append(clauses, i18n.TN(lang, "digest.clause.strangers", stat.Strangers))
+	}
 	if stat.Follows > 0 {
 		clauses = append(clauses, i18n.TN(lang, "digest.clause.follows", stat.Follows))
 	}

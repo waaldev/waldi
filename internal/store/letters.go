@@ -60,6 +60,20 @@ func (s *Store) CompletedReadingsCount(ctx context.Context, userID int64) (int, 
 	return count, nil
 }
 
+func (s *Store) OpenedWildcardPost(ctx context.Context, userID, postID int64) (bool, error) {
+	var opened bool
+	err := s.pool.QueryRow(ctx, `
+		select exists(
+			select 1 from wildcards
+			where user_id = $1 and post_id = $2 and opened_at is not null
+		)
+	`, userID, postID).Scan(&opened)
+	if err != nil {
+		return false, fmt.Errorf("checking opened wildcard: %w", err)
+	}
+	return opened, nil
+}
+
 // LettersSentSince counts letters a user has sent since a given time - used
 // to enforce a daily letter rate limit.
 func (s *Store) LettersSentSince(ctx context.Context, userID int64, since time.Time) (int, error) {

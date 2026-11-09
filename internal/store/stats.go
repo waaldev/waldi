@@ -57,6 +57,7 @@ type PostStats struct {
 	PostTitle   string
 	Readers     int
 	Completed   int
+	Strangers   int
 	Follows     int
 	Letters     int
 	PublishedAt *time.Time
@@ -75,12 +76,19 @@ func (s *Store) PostStatsForUser(ctx context.Context, userID int64, since time.T
 		           and r.completed
 		           and greatest(i.created_at, coalesce(r.updated_at, i.created_at)) >= $2
 		       )::int as completed,
+		       count(distinct i.reader_key) filter (
+		         where i.reader_key <> ('user:' || p.user_id::text)
+		           and r.completed
+		           and (i.source = 'wildcard' or sw.user_id is not null)
+		           and greatest(i.created_at, coalesce(r.updated_at, i.created_at)) >= $2
+		       )::int as strangers,
 		       count(distinct f.follower_id)::int as follows,
 		       count(distinct l.id)::int as letters,
 		       p.published_at
 		from posts p
 		left join impressions i on i.post_id = p.id
 		left join readings r on r.impression_id = i.id
+		left join wildcards sw on sw.post_id = p.id and sw.opened_at is not null and i.reader_key = 'user:' || sw.user_id
 		left join follows f on f.source_post_id = p.id and f.created_at >= $2
 		left join letters l on l.post_id = p.id and l.created_at >= $2
 		where p.user_id = $1 and p.status = 'published'
@@ -107,6 +115,7 @@ func (s *Store) PostStatsForUser(ctx context.Context, userID int64, since time.T
 			&stat.PostTitle,
 			&stat.Readers,
 			&stat.Completed,
+			&stat.Strangers,
 			&stat.Follows,
 			&stat.Letters,
 			publishedAtStatDest(&stat),
@@ -133,12 +142,18 @@ func (s *Store) PostStatsByID(ctx context.Context, userID, postID int64) (PostSt
 		         where i.reader_key <> ('user:' || p.user_id::text)
 		           and r.completed
 		       )::int as completed,
+		       count(distinct i.reader_key) filter (
+		         where i.reader_key <> ('user:' || p.user_id::text)
+		           and r.completed
+		           and (i.source = 'wildcard' or sw.user_id is not null)
+		       )::int as strangers,
 		       count(distinct f.follower_id)::int as follows,
 		       count(distinct l.id)::int as letters,
 		       p.published_at
 		from posts p
 		left join impressions i on i.post_id = p.id
 		left join readings r on r.impression_id = i.id
+		left join wildcards sw on sw.post_id = p.id and sw.opened_at is not null and i.reader_key = 'user:' || sw.user_id
 		left join follows f on f.source_post_id = p.id
 		left join letters l on l.post_id = p.id
 		where p.id = $1 and p.user_id = $2
@@ -148,6 +163,7 @@ func (s *Store) PostStatsByID(ctx context.Context, userID, postID int64) (PostSt
 		&stat.PostTitle,
 		&stat.Readers,
 		&stat.Completed,
+		&stat.Strangers,
 		&stat.Follows,
 		&stat.Letters,
 		publishedAtStatDest(&stat),

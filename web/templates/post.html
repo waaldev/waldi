@@ -14,6 +14,8 @@
 
   <p class="endmark" role="presentation"></p>
 
+  <p class="stranger-note" data-state="stranger" hidden>{{.T "post.stranger.note"}}</p>
+
   <footer class="post-actions">
     <a class="btn-follow" href="{{.LoginURL}}" data-state="anonymous-follow" hidden>{{.T "post.follow" .Blog.WriterLabel}}</a>
     <form class="inline-form" method="post" action="/follow/{{.Post.Username}}" data-state="follow" hidden>
