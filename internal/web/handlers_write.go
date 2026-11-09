@@ -262,7 +262,44 @@ func (s *Server) handlePublishPost(w http.ResponseWriter, r *http.Request) {
 	s.purgePublicCache(user.Username)
 	s.notifyPublish(r, *user, p)
 	s.notifyInviterOfFirstPost(r, *user, p)
-	http.Redirect(w, r, "/write/"+strconv.FormatInt(p.ID, 10), http.StatusSeeOther)
+	http.Redirect(w, r, "/write/"+strconv.FormatInt(p.ID, 10)+"/published", http.StatusSeeOther)
+}
+
+func (s *Server) handlePublished(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if s.store == nil {
+		s.renderWriteError(w, r, "write.error.db")
+		return
+	}
+	id, ok := parseID(w, r.PathValue("id"))
+	if !ok {
+		return
+	}
+	p, err := s.store.PostByIDForUser(r.Context(), id, user.ID)
+	if errors.Is(err, store.ErrNotFound) {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.logger.Error("loading published post", "err", err)
+		s.renderWriteError(w, r, "write.error.load_failed")
+		return
+	}
+	if p.Status != "published" {
+		http.Redirect(w, r, "/write/"+strconv.FormatInt(p.ID, 10), http.StatusSeeOther)
+		return
+	}
+	view := postView(p)
+	view.URL = PublicBlogURLForOwner(r, s.baseDomain, *user, "/"+p.Slug)
+	pd := s.newPageData(r, user)
+	pd.Title = pd.T("published.heading")
+	pd.SEO = noindexSEO()
+	pd.Write = &WriteView{Post: &view}
+	s.renderer.Render(w, "published.html", pd)
 }
 
 func (s *Server) handleUnpublishPost(w http.ResponseWriter, r *http.Request) {

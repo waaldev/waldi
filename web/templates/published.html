@@ -1,0 +1,10 @@
+{{define "published.html"}}
+{{template "layout-start" .}}
+<main class="published-moment">
+  <span class="mark-big" role="presentation">※</span>
+  <h1>{{.T "published.heading"}}</h1>
+  <p class="published-sub">{{.T "published.sub"}}</p>
+  <p><a href="{{.Write.Post.URL}}">{{.T "published.see"}}</a></p>
+</main>
+{{template "layout-end" .}}
+{{end}}

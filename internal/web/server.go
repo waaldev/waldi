@@ -142,6 +142,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /invites", s.handleInvites)
 	s.mux.HandleFunc("POST /write/drafts", s.handleCreateDraft)
 	s.mux.HandleFunc("GET /write/{id}", s.handleEditDraft)
+	s.mux.HandleFunc("GET /write/{id}/published", s.handlePublished)
 	s.mux.HandleFunc("POST /api/drafts/{id}", s.handleAutosaveDraft)
 	s.mux.HandleFunc("POST /api/uploads/images", s.handleImageUpload)
 	s.mux.HandleFunc("POST /api/events/impressions", s.handleImpressionEvent)

@@ -1266,6 +1266,35 @@ a.quiet:hover { color: var(--ink); }
 /* ---------- forms (login / register) ---------- */
 
 .form-page { max-width: 22rem; margin-inline: auto; }
+
+.published-moment {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-serif);
+  animation: rise 400ms ease-out both;
+}
+.published-moment h1 {
+  font-size: var(--text-title);
+  font-weight: 500;
+  margin: var(--s4) 0 0;
+}
+.published-moment .published-sub {
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: var(--s4) 0 var(--s6);
+}
+.published-moment .published-sub:lang(fa) { font-style: normal; }
+.published-moment .mark-big {
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .published-moment { animation: none; }
+}
 .form-page:has(.join-sentence) { max-width: 34rem; }
 
 .join-lead {

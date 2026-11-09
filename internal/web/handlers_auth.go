@@ -307,7 +307,7 @@ func (s *Server) handleVerifyEmailPage(w http.ResponseWriter, r *http.Request) {
 				s.logger.Error("starting session after verify", "err", err)
 			}
 			if id := s.publishOnVerify(r, verified); id != 0 {
-				http.Redirect(w, r, "/write/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
+				http.Redirect(w, r, "/write/"+strconv.FormatInt(id, 10)+"/published", http.StatusSeeOther)
 				return
 			}
 			http.Redirect(w, r, "/verify-email?verified=1", http.StatusSeeOther)
