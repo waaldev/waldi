@@ -493,6 +493,13 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   align-items: center;
   min-height: 44px;
 }
+.field-trap {
+  position: absolute;
+  inset-inline-start: -10000px;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+}
 .explore section { margin-block-end: var(--s6); }
 .explore .feed-item,
 .explore .feed-item:hover,

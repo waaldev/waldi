@@ -30,6 +30,7 @@ func (s *Server) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 		Heading:     pd.T("auth.signup.heading"),
 		SubmitLabel: pd.T("auth.signup.submit"),
 		InviteCode:  inviteCode,
+		FormToken:   signupFormToken(time.Now()),
 	}
 	s.applyInviter(r, &pd)
 	s.renderer.Render(w, "auth.html", pd)
@@ -58,6 +59,16 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := r.ParseForm(); err != nil {
 		s.renderAuthError(w, r, "signup", "auth.error.form")
+		return
+	}
+	if signupTrapFilled(r) {
+		s.logger.Info("signup blocked", "reason", "trap")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if !signupFormTimely(r.FormValue("form_token"), time.Now()) {
+		s.logger.Info("signup blocked", "reason", "timing")
+		s.renderAuthError(w, r, "signup", "auth.error.signup_retry")
 		return
 	}
 
@@ -466,6 +477,9 @@ func (s *Server) renderAuthError(w http.ResponseWriter, r *http.Request, mode, m
 		Error:       pd.T(messageKey),
 		ResetToken:  strings.TrimSpace(r.FormValue("token")),
 		InviteCode:  strings.TrimSpace(r.FormValue("invite")),
+	}
+	if mode == "signup" {
+		pd.Auth.FormToken = signupFormToken(time.Now())
 	}
 	s.applyInviter(r, &pd)
 	s.renderer.RenderStatus(w, http.StatusBadRequest, "auth.html", pd)

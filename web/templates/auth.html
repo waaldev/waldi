@@ -63,6 +63,11 @@
         <input type="hidden" name="invite" value="{{.Auth.InviteCode}}">
       {{end}}
       {{if eq .Auth.Mode "signup"}}
+        <input type="hidden" name="form_token" value="{{.Auth.FormToken}}">
+        <div class="field-trap" aria-hidden="true">
+          <label for="website">{{.T "auth.field.website"}}</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
         <div class="field">
           <label for="username">{{.T "auth.field.username"}}</label>
           <input id="username" name="username" dir="ltr" autocomplete="username" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32">

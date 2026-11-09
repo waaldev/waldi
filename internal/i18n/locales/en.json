@@ -301,6 +301,8 @@
   "auth.error.email": "Enter a valid email address.",
   "auth.error.password_len": "Password must be at least 8 characters.",
   "auth.error.signup_failed": "Sign up failed.",
+  "auth.field.website": "Website",
+  "auth.error.signup_retry": "That was quicker than we expected. Please check the form and send it again.",
   "auth.error.invite_invalid": "This invitation link is invalid or has already been used.",
   "auth.error.duplicate": "That username or email is already registered.",
   "auth.error.autologin": "Automatic sign-in failed.",

@@ -123,6 +123,7 @@ type AuthView struct {
 	NextURL     string
 	InviteCode  string
 	Inviter     string
+	FormToken   string
 }
 
 type BlogView struct {

@@ -294,6 +294,8 @@
   "auth.error.email": "یک ایمیل معتبر بنویسید.",
   "auth.error.password_len": "رمز عبور باید دست‌کم ۸ نویسه باشد.",
   "auth.error.signup_failed": "ثبت‌نام کامل نشد.",
+  "auth.field.website": "وب‌سایت",
+  "auth.error.signup_retry": "این کار سریع‌تر از انتظار انجام شد. لطفاً فرم را بررسی کنید و دوباره بفرستید.",
   "auth.error.invite_invalid": "این لینک دعوت‌نامه معتبر نیست یا قبلا استفاده شده.",
   "auth.error.duplicate": "این نام کاربری یا ایمیل قبلا ثبت شده است.",
   "auth.error.autologin": "حساب ساخته شد، اما ورود خودکار انجام نشد.",
