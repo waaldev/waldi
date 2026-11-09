@@ -216,6 +216,7 @@ type WriteView struct {
 	Post              *PostView
 	Error             string
 	Saved             bool
+	Local             bool
 }
 
 type PostView struct {

@@ -30418,9 +30418,12 @@ ${prefix}
     const draftForm = root.querySelector("[data-draft-form]");
     const wordCount = root.querySelector("[data-editor-words]");
     const footnotePopover = root.querySelector("[data-fn-popover]");
-    if (form && titleInput && docJSON && docInput && canvas && mount && status && bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput && footnotePopover && (publishForm || draftForm) && form.dataset.saveUrl) {
-      const saveURL = form.dataset.saveUrl;
-      const rawDoc = docJSON.textContent?.trim() ?? docInput.value.trim();
+    if (form && titleInput && docJSON && docInput && canvas && mount && status && bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput && footnotePopover && (publishForm || draftForm) && (form.dataset.saveUrl || form.dataset.localKey)) {
+      const saveURL = form.dataset.saveUrl || "";
+      const localKey = form.dataset.localKey || "";
+      const localDraft = localKey ? readLocalDraft(localKey) : null;
+      if (localDraft) titleInput.value = localDraft.title;
+      const rawDoc = localDraft?.doc || (docJSON.textContent?.trim() ?? docInput.value.trim());
       let initialContent;
       let docLoadFailed = false;
       let expectedWords = 0;
@@ -30722,6 +30725,10 @@ ${prefix}
       };
       const save = async () => {
         syncDoc();
+        if (localKey) {
+          setState(writeLocalDraft(localKey, titleInput.value, docInput.value) ? "saved" : "error");
+          return;
+        }
         inFlight?.abort();
         inFlight = new AbortController();
         setState("saving");
@@ -30807,6 +30814,10 @@ ${prefix}
       window.addEventListener("pagehide", () => {
         if (docLoadFailed) return;
         syncDoc();
+        if (localKey) {
+          writeLocalDraft(localKey, titleInput.value, docInput.value);
+          return;
+        }
         const body = new URLSearchParams();
         body.set("title", titleInput.value);
         body.set("doc", docInput.value);
@@ -30822,6 +30833,25 @@ ${prefix}
         updateBubbleActiveState();
         setState("saved");
       }
+    }
+  }
+  function readLocalDraft(key) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return null;
+      const draft = JSON.parse(raw);
+      if (typeof draft.doc !== "string") return null;
+      return { title: typeof draft.title === "string" ? draft.title : "", doc: draft.doc };
+    } catch {
+      return null;
+    }
+  }
+  function writeLocalDraft(key, title, doc3) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify({ title, doc: doc3 }));
+      return true;
+    } catch {
+      return false;
     }
   }
   function countDocWords(value) {

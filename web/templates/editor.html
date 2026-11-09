@@ -2,7 +2,7 @@
 {{template "layout-start" .}}
 <header class="editor-bar">
   <div class="left">
-    <a href="/write">← {{.T "editor.drafts"}}</a>
+    {{if .Write.Local}}{{template "wordmark" .}}{{else}}<a href="/write">← {{.T "editor.drafts"}}</a>{{end}}
   </div>
   <div class="right">
     <p class="save-status" data-editor-status></p>
@@ -20,7 +20,7 @@
   data-dir="{{.Write.Post.Dir}}"
   data-page-lang="{{.Lang}}"
   data-ui-saving="{{.T "editor.status.saving"}}"
-  data-ui-saved="{{.T "editor.status.saved"}}"
+  data-ui-saved="{{if .Write.Local}}{{.T "editor.status.local"}}{{else}}{{.T "editor.status.saved"}}{{end}}"
   data-ui-error="{{.T "editor.status.error"}}"
   data-ui-link-prompt="{{.T "editor.link.prompt"}}"
   data-ui-footnote-title="{{.T "editor.footnote.title"}}"
@@ -30,7 +30,7 @@
   data-ui-words-one="{{.T "editor.words.one"}}"
   data-ui-words-other="{{.T "editor.words.other"}}"
   data-ui-body-placeholder="{{.T "editor.body.placeholder"}}">
-  <form data-editor-form data-save-url="/api/drafts/{{.Write.Post.ID}}">
+  <form data-editor-form {{if .Write.Local}}data-local-key="waldi:draft"{{else}}data-save-url="/api/drafts/{{.Write.Post.ID}}"{{end}}>
     <input class="editor-title" name="title" value="{{.Write.Post.Title}}" placeholder="{{.T "editor.title.placeholder"}}" data-editor-title>
 
     <div class="editor-canvas" data-editor-canvas>
@@ -61,7 +61,7 @@
       <div class="plus-control" data-plus-control>
         <button type="button" class="plus-button" aria-label="{{.T "editor.toolbar.aria"}}" data-plus-button>+</button>
         <div class="plus-menu" data-plus-menu>
-          <button type="button" data-command="image">{{.T "editor.toolbar.image"}}</button>
+          {{if not .Write.Local}}<button type="button" data-command="image">{{.T "editor.toolbar.image"}}</button>{{end}}
           <button type="button" data-command="embed">{{.T "editor.toolbar.embed"}}</button>
           <button type="button" data-command="divider">{{.T "editor.toolbar.divider"}}</button>
         </div>
@@ -95,12 +95,16 @@
     <p class="word-count" data-editor-words></p>
   </form>
 
-  {{if eq .Write.Post.Status "published"}}
+  {{if .Write.Local}}
+    <form id="publish-form" method="get" action="/signup" data-publish-form><input type="hidden" name="draft" value="1"></form>
+    <p class="editor-local-note">{{.T "editor.local.note"}}</p>
+  {{else if eq .Write.Post.Status "published"}}
     <form id="draft-form" method="post" action="/write/{{.Write.Post.ID}}/draft" data-draft-form></form>
   {{else}}
     <form id="publish-form" method="post" action="/write/{{.Write.Post.ID}}/publish" data-publish-form></form>
   {{end}}
 
+  {{if not .Write.Local}}
   <footer class="editor-delete">
     <details class="confirm-delete">
       <summary class="quiet-danger">{{if eq .Write.Post.Status "published"}}{{.T "editor.delete_post"}}{{else}}{{.T "editor.delete_draft"}}{{end}}</summary>
@@ -110,6 +114,7 @@
       </form>
     </details>
   </footer>
+  {{end}}
 </section>
 <script src="/static/js/editor.js?v={{assetVersion}}" defer></script>
 {{template "layout-end" .}}

@@ -1787,6 +1787,14 @@ a.btn-secondary:hover {
   text-align: center;
 }
 
+.editor-local-note {
+  margin-block-start: var(--s7);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
 .editor-canvas { position: relative; }
 
 .editor-mount { min-height: 50vh; }

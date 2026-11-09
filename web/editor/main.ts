@@ -119,10 +119,13 @@ if (root) {
     bubbleMenu && imageMenu && embedMenu && plusControl && plusButton && plusMenu && imageInput &&
     footnotePopover &&
     (publishForm || draftForm) &&
-    form.dataset.saveUrl
+    (form.dataset.saveUrl || form.dataset.localKey)
   ) {
-    const saveURL = form.dataset.saveUrl
-    const rawDoc = docJSON.textContent?.trim() ?? docInput.value.trim()
+    const saveURL = form.dataset.saveUrl || ''
+    const localKey = form.dataset.localKey || ''
+    const localDraft = localKey ? readLocalDraft(localKey) : null
+    if (localDraft) titleInput.value = localDraft.title
+    const rawDoc = localDraft?.doc || (docJSON.textContent?.trim() ?? docInput.value.trim())
 
     let initialContent: unknown
     let docLoadFailed = false
@@ -466,6 +469,10 @@ if (root) {
 
     const save = async () => {
       syncDoc()
+      if (localKey) {
+        setState(writeLocalDraft(localKey, titleInput.value, docInput.value) ? 'saved' : 'error')
+        return
+      }
       inFlight?.abort()
       inFlight = new AbortController()
       setState('saving')
@@ -565,6 +572,10 @@ if (root) {
     window.addEventListener('pagehide', () => {
       if (docLoadFailed) return
       syncDoc()
+      if (localKey) {
+        writeLocalDraft(localKey, titleInput.value, docInput.value)
+        return
+      }
       const body = new URLSearchParams()
       body.set('title', titleInput.value)
       body.set('doc', docInput.value)
@@ -581,6 +592,27 @@ if (root) {
       updateBubbleActiveState()
       setState('saved')
     }
+  }
+}
+
+function readLocalDraft(key: string): { title: string; doc: string } | null {
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return null
+    const draft = JSON.parse(raw) as { title?: unknown; doc?: unknown }
+    if (typeof draft.doc !== 'string') return null
+    return { title: typeof draft.title === 'string' ? draft.title : '', doc: draft.doc }
+  } catch {
+    return null
+  }
+}
+
+function writeLocalDraft(key: string, title: string, doc: string): boolean {
+  try {
+    window.localStorage.setItem(key, JSON.stringify({ title, doc }))
+    return true
+  } catch {
+    return false
   }
 }
 

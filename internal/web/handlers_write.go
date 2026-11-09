@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,7 +18,7 @@ import (
 func (s *Server) handleWrite(w http.ResponseWriter, r *http.Request) {
 	user := currentUser(r)
 	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		s.renderLocalEditor(w, r)
 		return
 	}
 	if !s.requireVerified(w, r, user) {
@@ -379,4 +380,20 @@ func parseID(w http.ResponseWriter, raw string) (int64, bool) {
 func isUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
+func (s *Server) renderLocalEditor(w http.ResponseWriter, r *http.Request) {
+	pd := s.newPageData(r, nil)
+	pd.Title = pd.T("editor.local.title")
+	pd.SEO = noindexSEO()
+	pd.Write = &WriteView{
+		Local: true,
+		Post: &PostView{
+			Status:  "draft",
+			Lang:    pd.Lang,
+			Dir:     i18n.Dir(pd.Lang),
+			DocJSON: template.JS(defaultDocJSON()),
+		},
+	}
+	s.renderer.Render(w, "editor.html", pd)
 }
