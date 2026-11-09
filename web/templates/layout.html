@@ -106,6 +106,7 @@
 <header class="bar" aria-label="{{.T "nav.aria"}}">
   {{template "wordmark" .}}
   <nav>
+    {{if not .CurrentUser}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
     {{template "lang-toggle" .}}
   </nav>
 </header>

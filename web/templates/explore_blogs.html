@@ -4,6 +4,7 @@
   {{template "wordmark" .}}
   <nav>
     <a href="{{.Local "/explore"}}">{{.T "explore.blogs.back"}}</a>
+    {{if not .CurrentUser}}<a href="/login">{{.T "nav.login"}}</a>{{end}}
     {{template "lang-toggle" .}}
   </nav>
 </header>
