@@ -1054,7 +1054,7 @@ a.quiet:hover { color: var(--ink); }
   font-family: var(--font-serif);
   font-style: italic;
   color: var(--ink-soft);
-  margin: 0 0 var(--s7);
+  margin: 0 0 var(--s6);
 }
 .letters-sub:lang(fa) { font-style: normal; }
 .letters-list { list-style: none; margin: 0; padding: 0; }
@@ -1085,11 +1085,13 @@ a.quiet:hover { color: var(--ink); }
 .letter-unread .letter-row-body { color: var(--ink); }
 .letter-row:hover .letter-row-body { color: var(--accent-ink); }
 .letters-stats {
-  margin-block-start: var(--s7);
+  margin-block-start: var(--s6);
   font-family: var(--font-serif);
+  color: var(--ink-soft);
 }
 .letters-stats p { margin: 0 0 var(--s2); }
-.letters-stats strong { font-weight: 500; }
+.letters-stats strong { font-weight: 500; color: var(--ink); }
+.letters-stats strong:lang(fa) { font-weight: 400; -webkit-text-stroke: 0.35px currentColor; }
 .letters-caption {
   font-family: var(--font-sans);
   font-size: var(--text-meta);
