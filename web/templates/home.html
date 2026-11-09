@@ -7,56 +7,74 @@
 {{end}}
 
 {{if .CurrentUser}}
-  {{if .Feed.Wildcard}}
-    <section class="wildcard">
-      <p class="wildcard-label">{{.T "home.wildcard.kicker"}}</p>
-      <p class="feed-writer"><a href="{{.Feed.Wildcard.BlogURL}}">{{.Feed.Wildcard.WriterLabel}}</a></p>
-      <a class="feed-item" href="{{.Feed.Wildcard.URL}}" target="_blank" rel="noopener" lang="{{.Feed.Wildcard.Lang}}" dir="{{.Feed.Wildcard.Dir}}">
-        <h2 class="feed-title">{{.Feed.Wildcard.Title}}</h2>
-        {{if .Feed.Wildcard.Excerpt}}<p class="feed-excerpt">{{.Feed.Wildcard.Excerpt}}</p>{{end}}
-      </a>
-      <form class="inline-form" method="post" action="/wildcard/skip">
-        <button class="skip" type="submit">{{.T "home.wildcard.skip"}}</button>
-      </form>
-      <p class="skip-note">{{.TN "home.wildcard.skip.note" .Feed.WildcardSkipsLeft}}</p>
+  {{with .Feed.Wildcard}}
+    <section class="today-stranger">
+      <div class="today-stranger-head">
+        <p class="wildcard-label">{{$.T "home.wildcard.kicker"}}</p>
+        <form class="inline-form" method="post" action="/wildcard/skip">
+          <button class="skip" type="submit">{{$.T "home.wildcard.skip"}}</button>
+        </form>
+      </div>
+      <article lang="{{.Lang}}" dir="{{.Dir}}">
+        <h1 class="article-title">{{.Title}}</h1>
+        {{if .Opening}}<div class="prose">{{.Opening}}</div>{{end}}
+      </article>
+      <div class="today-stranger-actions">
+        <a class="today-stranger-more" href="{{.URL}}" target="_blank" rel="noopener">{{if .OpeningMore}}{{$.T "landing.stranger.more"}}{{else}}{{$.T "landing.stranger.visit"}}{{end}}</a>
+        {{if .Kept}}
+          <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
+            <button class="keep kept" type="submit">{{$.T "post.kept"}}</button>
+          </form>
+        {{else}}
+          <form class="keep-form" method="post" action="/keep/{{.ID}}">
+            <button class="keep" type="submit">{{$.T "post.keep"}}</button>
+          </form>
+        {{end}}
+      </div>
     </section>
-  {{else if .Feed.WildcardSpent}}
-    <section class="wildcard">
+  {{else}}
+    <section class="today-stranger today-stranger-empty">
       <p class="wildcard-label">{{.T "home.wildcard.kicker"}}</p>
-      <p class="wildcard-spent">{{.T "home.wildcard.spent"}}</p>
+      <p class="today-empty-line">{{if .Feed.WildcardSpent}}{{.T "home.wildcard.spent"}}{{else}}{{.T "home.wildcard.none"}}{{end}}</p>
+      <p class="today-empty-sub">{{.T "home.wildcard.tomorrow"}}</p>
     </section>
   {{end}}
 
-  {{if .Feed.Days}}
-    {{range .Feed.Days}}
-      <p class="daylabel">{{.Label}}</p>
+  <section class="following">
+    {{if .Feed.Days}}
+      <p class="following-label">{{.T "home.following"}}</p>
       <ul class="feed">
-        {{range .Posts}}
-          <li lang="{{.Lang}}" dir="{{.Dir}}">
-            <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
-            <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
-              <h2 class="feed-title">{{.Title}}</h2>
-              {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
-            </a>
-            {{if .Kept}}
-              <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
-                <button class="keep kept" type="submit">{{$.T "post.kept"}}</button>
-              </form>
-            {{else}}
-              <form class="keep-form" method="post" action="/keep/{{.ID}}">
-                <button class="keep" type="submit">{{$.T "post.keep"}}</button>
-              </form>
-            {{end}}
-          </li>
+        {{range .Feed.Days}}
+          {{range .Posts}}
+            <li lang="{{.Lang}}" dir="{{.Dir}}">
+              <p class="feed-writer"><a href="{{.BlogURL}}">{{.WriterLabel}}</a></p>
+              <a class="feed-item" href="{{.URL}}" target="_blank" rel="noopener">
+                <h2 class="feed-title">{{.Title}}</h2>
+                {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+              </a>
+              {{if .Kept}}
+                <form class="keep-form" method="post" action="/unkeep/{{.ID}}">
+                  <button class="keep kept" type="submit">{{$.T "post.kept"}}</button>
+                </form>
+              {{else}}
+                <form class="keep-form" method="post" action="/keep/{{.ID}}">
+                  <button class="keep" type="submit">{{$.T "post.keep"}}</button>
+                </form>
+              {{end}}
+            </li>
+          {{end}}
         {{end}}
       </ul>
+    {{else}}
+      {{if .Feed.FollowsAnyone}}
+        <p class="today-empty-line">{{.T "home.empty.quiet.heading"}}</p>
+        <p class="today-empty-sub">{{.T "home.empty.quiet.body"}}</p>
+      {{else}}
+        <p class="today-empty-line">{{.T "home.empty.following.heading"}}</p>
+        <p class="today-empty-sub">{{.T "home.empty.following.body"}}</p>
+      {{end}}
     {{end}}
-  {{else}}
-    <div class="empty-state">
-      <h2>{{.T "home.empty.following.heading"}}</h2>
-      <p>{{.T "home.empty.following.body"}}</p>
-    </div>
-  {{end}}
+  </section>
 
   <footer class="finish">
     <p>{{.T "home.finish"}}</p>

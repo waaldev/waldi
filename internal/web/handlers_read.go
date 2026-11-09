@@ -49,6 +49,12 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		views := s.postViewsWithURLs(r, posts)
 		s.markKept(r, user.ID, views)
 		feed.Empty = len(views) == 0
+		if feed.Empty {
+			feed.FollowsAnyone, err = s.store.FollowsAnyone(r.Context(), user.ID)
+			if err != nil {
+				s.logger.Error("checking follows", "err", err)
+			}
+		}
 		feed.Days = buildFeedDays(views, pd.Lang)
 
 		day := today()
@@ -66,8 +72,10 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			view := postView(wildcard)
 			view.URL = PublicBlogURL(r, s.baseDomain, wildcard.Username, "/"+wildcard.Slug+"?src=wildcard")
 			view.BlogURL = PublicBlogURL(r, s.baseDomain, wildcard.Username, "/")
-			view.Excerpt = postExcerpt(wildcard.HTML, 200)
-			feed.Wildcard = &view
+			view.Opening, view.OpeningMore = postOpening(wildcard.Doc, 3)
+			kept := []PostView{view}
+			s.markKept(r, user.ID, kept)
+			feed.Wildcard = &kept[0]
 		} else if !errors.Is(err, store.ErrNotFound) {
 			s.logger.Error("loading wildcard", "err", err)
 		}
@@ -76,7 +84,6 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.logger.Error("counting wildcard skips", "err", err)
 		}
-		feed.WildcardSkipsLeft = max(jobs.MaxDailyWildcardSkips-skips, 0)
 		feed.WildcardSpent = feed.Wildcard == nil && skips > 0
 	}
 

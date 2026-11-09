@@ -274,11 +274,11 @@ type PostView struct {
 }
 
 type FeedView struct {
-	Days              []FeedDay
-	Wildcard          *PostView
-	WildcardSkipsLeft int
-	WildcardSpent     bool
-	Empty             bool
+	Days          []FeedDay
+	Wildcard      *PostView
+	WildcardSpent bool
+	Empty         bool
+	FollowsAnyone bool
 }
 
 type FeedDay struct {

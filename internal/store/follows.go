@@ -41,3 +41,12 @@ func (s *Store) IsFollowing(ctx context.Context, followerID, followeeID int64) (
 	}
 	return following, nil
 }
+
+func (s *Store) FollowsAnyone(ctx context.Context, userID int64) (bool, error) {
+	var follows bool
+	err := s.pool.QueryRow(ctx, `select exists(select 1 from follows where follower_id = $1)`, userID).Scan(&follows)
+	if err != nil {
+		return false, fmt.Errorf("checking follows: %w", err)
+	}
+	return follows, nil
+}

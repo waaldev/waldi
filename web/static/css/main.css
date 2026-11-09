@@ -306,43 +306,77 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 
 /* ---------- wildcard ---------- */
 
-.wildcard {
-  background: var(--paper-raised);
-  border-radius: var(--radius);
-  padding: var(--s4);
-  margin-block-end: var(--s6);
-}
-
 .wildcard-label {
   font-size: var(--text-meta);
   color: var(--accent);
   margin-block-end: var(--s3);
 }
 
-.wildcard .skip {
-  display: inline-block;
-  margin-block-start: var(--s3);
+.today-stranger { margin-block-start: var(--s6); }
+.today-stranger-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s4);
+}
+.today-stranger-head .wildcard-label { margin: 0; }
+.today-stranger .skip {
+  font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: var(--ink-faint);
+  color: var(--ink-soft);
   background: none;
   border: 0;
   padding: 0;
+  min-height: 44px;
   cursor: pointer;
-  font-family: inherit;
 }
-.wildcard .skip:hover { color: var(--ink-soft); }
-
-.wildcard .skip-note {
-  font-size: var(--text-meta);
-  color: var(--ink-faint);
-  margin-block: var(--s2) 0;
+.today-stranger .skip:hover { color: var(--ink); }
+.today-stranger .article-title { margin-block: var(--s2) var(--s5); }
+.today-stranger .prose > :last-child { margin-block-end: 0; }
+.today-stranger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s5);
+  margin-block-start: var(--s3);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
 }
-
-.wildcard-spent {
-  font-family: var(--font-serif);
+.today-stranger-more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.today-stranger-more:hover { color: var(--accent-ink); }
+.today-stranger-actions .keep {
   font-size: var(--text-ui);
   color: var(--ink-soft);
+  padding: 0;
   margin: 0;
+  min-height: 44px;
+}
+.today-empty-line {
+  font-family: var(--font-serif);
+  font-size: var(--text-feed);
+  margin: var(--s2) 0 0;
+}
+.today-empty-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.today-empty-sub:lang(fa) { font-style: normal; }
+.following { margin-block-start: var(--s7); }
+.following-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  margin: 0 0 var(--s4);
 }
 
 .another {
@@ -2309,7 +2343,7 @@ a.btn-secondary:hover {
   .btn-primary,
   .btn-secondary,
   .btn-publish,
-  .wildcard .skip {
+  .today-stranger .skip {
     min-height: 2.75rem;
     display: inline-flex;
     align-items: center;
