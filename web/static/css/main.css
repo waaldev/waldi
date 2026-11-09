@@ -2218,6 +2218,8 @@ a.btn-secondary:hover {
   min-width: 6.5rem;
 }
 .plus-control.menu-open .plus-menu { display: flex; }
+.plus-control[data-side="left"] .plus-menu { left: 0; right: auto; }
+.plus-control[data-side="right"] .plus-menu { right: 0; left: auto; }
 
 .plus-menu button {
   font: inherit;

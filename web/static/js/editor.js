@@ -30649,12 +30649,18 @@ ${prefix}
         const coords = editor.view.coordsAtPos($from.pos);
         const canvasRect = canvas.getBoundingClientRect();
         const top = coords.top - canvasRect.top;
-        let left = dir === "rtl" ? coords.right - canvasRect.left + 10 : coords.left - canvasRect.left - 36;
-        const minLeft = -canvasRect.left + 4;
-        const maxLeft = window.innerWidth - canvasRect.left - 30;
-        left = Math.max(minLeft, Math.min(left, maxLeft));
+        const size3 = plusButton.offsetWidth || 20;
+        const roomRight = window.innerWidth - coords.right >= size3 + 14;
+        const roomLeft = coords.left >= size3 + 14;
+        let left;
+        if (dir === "rtl") {
+          left = roomRight ? coords.right - canvasRect.left + 10 : 0;
+        } else {
+          left = roomLeft ? coords.left - canvasRect.left - size3 - 16 : canvasRect.width - size3;
+        }
         plusControl.style.top = `${top}px`;
         plusControl.style.left = `${left}px`;
+        plusControl.dataset.side = canvasRect.left + left > window.innerWidth / 2 ? "right" : "left";
         plusControl.classList.add("is-visible");
       };
       plusControl.addEventListener("mousedown", () => {

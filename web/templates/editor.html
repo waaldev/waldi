@@ -30,7 +30,7 @@
   data-ui-words-other="{{.T "editor.words.other"}}"
   data-ui-body-placeholder="{{.T "editor.body.placeholder"}}">
   <form data-editor-form {{if .Write.Local}}data-local-key="waldi:draft"{{else}}data-save-url="/api/drafts/{{.Write.Post.ID}}"{{end}}>
-    <input class="editor-title" name="title" value="{{.Write.Post.Title}}" placeholder="{{.T "editor.title.placeholder"}}" data-editor-title>
+    <input class="editor-title" name="title" value="{{if ne .Write.Post.Title (.T "write.default_title")}}{{.Write.Post.Title}}{{end}}" placeholder="{{.T "editor.title.placeholder"}}" data-editor-title>
 
     <div class="editor-canvas" data-editor-canvas>
       <div class="editor-mount prose" data-editor-mount></div>
