@@ -76,6 +76,10 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			kept := []PostView{view}
 			s.markKept(r, user.ID, kept)
 			feed.Wildcard = &kept[0]
+			feed.WildcardRead, err = s.store.OpenedWildcardToday(r.Context(), user.ID, day)
+			if err != nil {
+				s.logger.Error("checking opened wildcard", "err", err)
+			}
 		} else if !errors.Is(err, store.ErrNotFound) {
 			s.logger.Error("loading wildcard", "err", err)
 		}

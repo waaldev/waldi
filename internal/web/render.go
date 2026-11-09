@@ -277,6 +277,7 @@ type FeedView struct {
 	Days          []FeedDay
 	Wildcard      *PostView
 	WildcardSpent bool
+	WildcardRead  bool
 	Empty         bool
 	FollowsAnyone bool
 }

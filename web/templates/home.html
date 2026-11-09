@@ -7,7 +7,14 @@
 {{end}}
 
 {{if .CurrentUser}}
-  {{with .Feed.Wildcard}}
+  {{if and .Feed.Wildcard .Feed.WildcardRead}}
+    <section class="today-later">
+      <span class="mark-big" role="presentation">※</span>
+      <h1>{{.T "home.later.heading"}}</h1>
+      <p class="today-later-sub">{{.T "home.later.sub"}}</p>
+      <p class="today-later-links"><a href="{{.Feed.Wildcard.URL}}" target="_blank" rel="noopener">{{.T "home.later.again"}}</a><a href="/kept">{{.T "home.later.shelf"}}</a></p>
+    </section>
+  {{else if .Feed.Wildcard}}{{with .Feed.Wildcard}}
     <section class="today-stranger">
       <div class="today-stranger-head">
         <p class="wildcard-label">{{$.T "home.wildcard.kicker"}}</p>
@@ -32,7 +39,7 @@
         {{end}}
       </div>
     </section>
-  {{else}}
+  {{end}}{{else}}
     <section class="today-stranger today-stranger-empty">
       <p class="wildcard-label">{{.T "home.wildcard.kicker"}}</p>
       <p class="today-empty-line">{{if .Feed.WildcardSpent}}{{.T "home.wildcard.spent"}}{{else}}{{.T "home.wildcard.none"}}{{end}}</p>

@@ -796,6 +796,19 @@ func (s *Store) HasActiveWildcard(ctx context.Context, userID int64, day time.Ti
 	return active, nil
 }
 
+func (s *Store) OpenedWildcardToday(ctx context.Context, userID int64, day time.Time) (bool, error) {
+	var opened bool
+	if err := s.pool.QueryRow(ctx, `
+		select exists(
+			select 1 from wildcards
+			where user_id = $1 and date = $2 and not skipped and opened_at is not null
+		)
+	`, userID, day).Scan(&opened); err != nil {
+		return false, fmt.Errorf("checking opened wildcard: %w", err)
+	}
+	return opened, nil
+}
+
 func (s *Store) WildcardSkipCount(ctx context.Context, userID int64, day time.Time) (int, error) {
 	var count int
 	if err := s.pool.QueryRow(ctx, `
