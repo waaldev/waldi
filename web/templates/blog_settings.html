@@ -114,7 +114,7 @@
   <details class="settings-fold" id="invites">
     <summary>
       <span class="fold-title">{{.T "invites.settings.heading"}}</span>
-      <span class="fold-sub">{{.T "invites.sub"}}</span>
+      <span class="fold-sub">{{.T "invites.settings.lead"}}</span>
     </summary>
     <div class="fold-body">
       {{template "invite-list" .}}
@@ -196,6 +196,17 @@
     </div>
   </details>
 
+  <details class="settings-fold">
+    <summary>
+      <span class="fold-title">{{.T "blog.settings.writing.heading"}}</span>
+      <span class="fold-sub">{{.T "blog.settings.writing.lead"}}</span>
+    </summary>
+    <div class="fold-body">
+      <p><a href="/settings/export">{{.T "blog.settings.account.export"}}</a> {{.T "blog.settings.account.export.body"}}</p>
+      <p><a href="/settings/import-blogir">{{.T "import_blogir.heading"}}</a></p>
+    </div>
+  </details>
+
   <details class="settings-fold" {{if or .BlogSettings.PasswordError .BlogSettings.PasswordSaved .BlogSettings.DeleteError}}open{{end}}>
     <summary>
       <span class="fold-title">{{.T "blog.settings.account.heading"}}</span>
@@ -239,7 +250,6 @@
     </details>
 
     <div class="danger-zone">
-      <p><a href="/settings/export">{{.T "blog.settings.account.export"}}</a> {{.T "blog.settings.account.export.body"}}</p>
 
       <details class="delete-account" {{if .BlogSettings.DeleteError}}open{{end}}>
         <summary>{{.T "blog.settings.delete.link"}}</summary>
@@ -258,6 +268,10 @@
     </div>
     </div>
   </details>
+
+  <form class="settings-logout" method="post" action="/logout">
+    <button class="quiet" type="submit">{{.T "nav.logout"}}</button>
+  </form>
 </main>
 
 {{if or .BlogSettings.Error .BlogSettings.Saved .BlogSettings.PasswordError .BlogSettings.PasswordSaved .BlogSettings.DeleteError}}

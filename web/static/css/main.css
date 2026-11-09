@@ -1775,6 +1775,18 @@ a.btn-secondary:hover {
 .domain-row form { margin: 0; }
 
 .danger-zone p { font-size: var(--text-meta); color: var(--ink-soft); }
+.settings-logout { margin-block-start: var(--s6); }
+.settings-logout .quiet {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+.settings-logout .quiet:hover { color: var(--ink); }
 
 .change-password summary,
 .delete-account summary {

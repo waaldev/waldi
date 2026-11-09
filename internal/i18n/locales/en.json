@@ -147,7 +147,7 @@
   "profile.finish.sub.after": ".",
   "profile.finish.rss": "RSS",
 
-  "blog.settings.title": "Blog settings",
+  "blog.settings.title": "Settings",
   "blog.settings.heading": "Your public blog",
   "blog.settings.lead": "How your blog appears to readers.",
   "blog.settings.link": "Edit blog",
@@ -172,7 +172,7 @@
   "blog.settings.error.save": "Could not save your blog settings.",
 
   "blog.settings.domain.heading": "Custom domain",
-  "blog.settings.domain.lead": "Use a domain you own instead of your Waldi subdomain.",
+  "blog.settings.domain.lead": "Use a domain you own instead of your Waldi address.",
   "blog.settings.domain.label": "Domain",
   "blog.settings.domain.placeholder": "blog.example.com",
   "blog.settings.domain.help": "Register a domain with a provider first, then enter it here and add the DNS records Waldi shows. A subdomain like blog.example.com is usually easiest.",
@@ -205,7 +205,7 @@
   "blog.settings.domain.notice.removed": "Custom domain removed.",
 
   "blog.settings.pages.heading": "Pages",
-  "blog.settings.pages.lead": "Fixed rooms in your blog - alongside your posts, above the feed.",
+  "blog.settings.pages.lead": "Fixed rooms in your blog, alongside your posts.",
   "blog.settings.pages.move.up": "Move up",
   "blog.settings.pages.move.down": "Move down",
   "blog.settings.pages.edit_slug": "Edit address",
@@ -225,7 +225,9 @@
   "blog.settings.pages.error.slug_taken": "That address is already in use.",
 
   "blog.settings.account.heading": "Account",
-  "blog.settings.account.lead": "Email, password, and your posts.",
+  "blog.settings.account.lead": "Email, password, and language.",
+  "blog.settings.writing.heading": "Your writing",
+  "blog.settings.writing.lead": "Your writing is yours. Take it whenever, or bring it from elsewhere.",
   "blog.settings.account.email": "Email",
   "blog.settings.account.ui_lang": "Language",
   "blog.settings.account.ui_lang.alt": "/ فارسی",
@@ -233,7 +235,7 @@
   "blog.settings.ui_lang.fa": "فارسی",
   "blog.settings.ui_lang.en": "English",
   "blog.settings.account.export": "Download all your posts",
-  "blog.settings.account.export.body": "- everything, in one file. Your writing is yours; take it with you whenever you'd like.",
+  "blog.settings.account.export.body": "Everything, in one file.",
   "export.drafts": "Drafts",
 
   "blog.settings.password.link": "Change password",
@@ -532,6 +534,7 @@
   "invites.title": "Invitations - Waldi",
   "invites.heading": "Your invitations",
   "invites.settings.heading": "Invitations",
+  "invites.settings.lead": "Bring someone you would like to read.",
   "invites.sub": "Here you can invite someone to Waldi whose writing you'd like to read.",
   "invites.unused": "Not used yet",
   "invites.copy": "Copy link",
