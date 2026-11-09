@@ -423,7 +423,7 @@
   "published.sub": "It is on its way to strangers now. You do not need to watch it go.",
   "published.see": "See your post",
   "editor.to_draft": "Draft",
-  "editor.drafts": "Drafts",
+  "editor.back": "Back to your desk",
   "editor.words.one": "%d word",
   "editor.words.other": "%d words",
   "editor.delete_draft": "Delete draft",

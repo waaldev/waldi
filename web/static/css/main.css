@@ -1805,7 +1805,20 @@ a.btn-secondary:hover {
 .delete-account form { margin-block-start: var(--s3); }
 .delete-account .form-error { margin-block-start: var(--s3); }
 
-.confirm-delete summary { font-size: var(--text-meta); cursor: pointer; }
+.confirm-delete summary { font-size: var(--text-meta); cursor: pointer; list-style: none; }
+.confirm-delete summary::-webkit-details-marker { display: none; }
+.editor-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s3) var(--s5);
+  margin-block-start: var(--s7);
+  font-family: var(--font-sans);
+}
+.editor-foot .word-count { margin: 0; text-align: start; color: var(--ink-soft); }
+.editor-foot .confirm-delete summary { color: var(--ink-soft); }
+.editor-foot .confirm-delete { text-align: end; }
 .confirm-delete .hint { margin-block: var(--s2); }
 .confirm-delete form { margin: 0; }
 
@@ -2031,10 +2044,12 @@ a.btn-secondary:hover {
 .editor-bar a:hover { color: var(--ink); }
 
 .save-status {
-  font-size: var(--text-meta);
-  color: var(--ink-faint);
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
   margin: 0;
 }
+.save-status:lang(fa) { font-style: normal; }
 .save-status[data-state="error"] { color: var(--ink); }
 
 .btn-publish {
@@ -2073,10 +2088,6 @@ a.btn-secondary:hover {
 .editor-title,
 .editor-surface { caret-color: var(--accent); }
 
-.editor-delete {
-  margin-block-start: var(--s7);
-  text-align: center;
-}
 
 .editor-local-note {
   margin-block-start: var(--s7);

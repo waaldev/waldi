@@ -416,7 +416,7 @@
   "published.sub": "حالا در راه غریبه‌هاست. لازم نیست رفتنش را تماشا کنید.",
   "published.see": "نوشته‌تان را ببینید",
   "editor.to_draft": "پیش‌نویس",
-  "editor.drafts": "پیش‌نویس‌ها",
+  "editor.back": "بازگشت به میز کار",
   "editor.words.one": "%d واژه",
   "editor.words.other": "%d واژه",
   "editor.delete_draft": "حذف پیش‌نویس",

@@ -2,7 +2,7 @@
 {{template "layout-start" .}}
 <header class="editor-bar">
   <div class="left">
-    {{if .Write.Local}}{{template "wordmark" .}}{{else}}<a href="/write">← {{.T "editor.drafts"}}</a>{{end}}
+    {{if .Write.Local}}{{template "wordmark" .}}{{else}}<a href="/write">{{.T "editor.back"}}</a>{{end}}
   </div>
   <div class="right">
     <p class="save-status" data-editor-status></p>
@@ -11,7 +11,6 @@
     {{else}}
       <button class="btn-publish" type="submit" form="publish-form">{{.T "editor.publish"}}</button>
     {{end}}
-    {{template "theme-toggle" .}}
   </div>
 </header>
 
@@ -92,7 +91,6 @@
     <input class="image-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-editor-image>
     <script type="application/json" data-editor-doc-json>{{.Write.Post.DocJSON}}</script>
     <textarea class="doc-fallback" name="doc" dir="ltr" spellcheck="false" data-editor-doc aria-hidden="true"></textarea>
-    <p class="word-count" data-editor-words></p>
   </form>
 
   {{if .Write.Local}}
@@ -104,17 +102,18 @@
     <form id="publish-form" method="post" action="/write/{{.Write.Post.ID}}/publish" data-publish-form></form>
   {{end}}
 
-  {{if not .Write.Local}}
-  <footer class="editor-delete">
-    <details class="confirm-delete">
-      <summary class="quiet-danger">{{if eq .Write.Post.Status "published"}}{{.T "editor.delete_post"}}{{else}}{{.T "editor.delete_draft"}}{{end}}</summary>
-      <p class="hint">{{.T "editor.delete_confirm"}}</p>
-      <form method="post" action="/write/{{.Write.Post.ID}}/delete">
-        <button class="quiet-danger" type="submit">{{.T "editor.delete_confirm_submit"}}</button>
-      </form>
-    </details>
+  <footer class="editor-foot">
+    <p class="word-count" data-editor-words></p>
+    {{if not .Write.Local}}
+      <details class="confirm-delete">
+        <summary class="quiet-danger">{{if eq .Write.Post.Status "published"}}{{.T "editor.delete_post"}}{{else}}{{.T "editor.delete_draft"}}{{end}}</summary>
+        <p class="hint">{{.T "editor.delete_confirm"}}</p>
+        <form method="post" action="/write/{{.Write.Post.ID}}/delete">
+          <button class="quiet-danger" type="submit">{{.T "editor.delete_confirm_submit"}}</button>
+        </form>
+      </details>
+    {{end}}
   </footer>
-  {{end}}
 </section>
 <script src="/static/js/editor.js?v={{assetVersion}}" defer></script>
 {{template "layout-end" .}}
