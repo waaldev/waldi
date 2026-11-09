@@ -228,11 +228,6 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
 .feed li:lang(fa) .feed-title   { font-size: 1.3125rem; line-height: 1.55; }
 .feed li:lang(fa) .feed-excerpt { line-height: 1.75; }
 
-.letter-unread .feed-title::after {
-  content: " •";
-  color: var(--accent);
-}
-
 .keep-form { display: inline; margin: 0; }
 
 /* the keep action sits below the feed-item, as its sibling, not inline in
@@ -1053,10 +1048,70 @@ a.quiet:hover { color: var(--ink); }
 
 /* ---------- letters: reading a letter / a correspondence ---------- */
 
+.letters { margin-block-start: var(--s6); }
+.letters-heading {
+  font-family: var(--font-serif);
+  font-size: var(--text-title);
+  font-weight: 500;
+  margin: 0 0 var(--s2);
+}
+.letters-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 var(--s7);
+}
+.letters-sub:lang(fa) { font-style: normal; }
+.letters-list { list-style: none; margin: 0; padding: 0; }
+.letter-row {
+  display: block;
+  padding-block: var(--s3);
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.letter-row + .letter-row,
+.letters-list li + li { margin-block-start: var(--s3); }
+.letter-row-meta {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  margin-block-end: var(--s1);
+}
+.letter-row-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: 1.6;
+}
+.letter-unread .letter-row-body { color: var(--ink); }
+.letter-row:hover .letter-row-body { color: var(--accent-ink); }
+.letters-stats {
+  margin-block-start: var(--s7);
+  font-family: var(--font-serif);
+}
+.letters-stats p { margin: 0 0 var(--s2); }
+.letters-stats strong { font-weight: 500; }
+.letters-caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+}
+
+.letter-thread { margin-block-start: var(--s5); }
+.letter-back {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  margin: 0 0 var(--s5);
+}
+.letter-back a { color: var(--ink-soft); text-decoration: none; }
+.letter-back a:hover { color: var(--ink); }
 .letter-context {
   font-size: var(--text-meta);
   color: var(--ink-soft);
-  text-align: center;
   margin-block-end: var(--s6);
 }
 
@@ -1081,9 +1136,28 @@ a.quiet:hover { color: var(--ink); }
 
 .letter-actions {
   margin-block-start: var(--s7);
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s3) var(--s5);
 }
-.letter-actions .quiet-danger { display: block; margin: var(--s4) auto 0; }
+.letter-actions-quiet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s5);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+}
+.letter-actions-quiet .keep,
+.letter-actions-quiet .quiet-danger {
+  font-size: var(--text-ui);
+  color: var(--ink-soft);
+  margin: 0;
+  padding: 0;
+  min-height: 44px;
+}
 
 .composer-to {
   font-size: var(--text-meta);

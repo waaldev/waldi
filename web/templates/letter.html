@@ -2,25 +2,41 @@
 {{template "layout-start" .}}
 {{template "app-bar" .}}
 
-<p class="letter-context">{{.Inbox.Letter.ContextLine}}</p>
+<main class="letter-thread">
+  <p class="letter-back"><a href="/inbox">{{.T "letter.back"}}</a></p>
+  <p class="letter-context">{{.Inbox.Letter.ContextLine}}</p>
 
-{{range $i, $entry := .Inbox.Letter.Thread}}
-{{if $i}}<hr class="letter-divider">{{end}}
-<article class="letter-entry" lang="{{$.Lang}}" dir="{{$.Dir}}">
-  <p class="letter-from"><span class="who">{{if eq $entry.FromUsername $.CurrentUser.Username}}{{$.T "letter.you"}}{{else}}{{$entry.FromWriterLabel}}{{end}}</span> · {{$entry.CreatedAt}}</p>
-  <div class="prose"><p>{{$entry.Body}}</p></div>
-</article>
-{{end}}
+  {{range $i, $entry := .Inbox.Letter.Thread}}
+    {{if $i}}<p class="letter-divider" aria-hidden="true"></p>{{end}}
+    <article class="letter-entry">
+      <p class="letter-from">{{if eq $entry.FromUsername $.CurrentUser.Username}}{{$.T "letter.you"}}{{else}}{{$entry.FromWriterLabel}}{{end}} · {{$entry.CreatedAt}}</p>
+      <div class="prose letter-body" dir="auto">{{$entry.Body}}</div>
+    </article>
+  {{end}}
 
-<p class="endmark" role="presentation"></p>
-
-{{if not .Inbox.Letter.Closed}}
-<footer class="letter-actions">
-  <a class="btn-follow" href="/inbox/{{.Inbox.Letter.ID}}/reply">{{.T "letter.reply.cta"}}</a>
-  <form class="inline-form" method="post" action="/inbox/{{.Inbox.Letter.ID}}/close">
-    <button class="quiet-danger" type="submit">{{.T "letter.close.cta"}}</button>
-  </form>
-</footer>
-{{end}}
+  <footer class="letter-actions">
+    {{if not .Inbox.Letter.Closed}}
+      <a class="btn-follow" href="/inbox/{{.Inbox.Letter.ID}}/reply">{{.T "letter.reply.cta"}}</a>
+    {{end}}
+    <span class="letter-actions-quiet">
+      {{if .Inbox.Letter.Kept}}
+        <form class="keep-form" method="post" action="/unkeep/{{.Inbox.Letter.PostID}}">
+          <input type="hidden" name="letter_id" value="{{.Inbox.Letter.ID}}">
+          <button class="keep kept" type="submit">{{.T "post.kept"}}</button>
+        </form>
+      {{else}}
+        <form class="keep-form" method="post" action="/keep/{{.Inbox.Letter.PostID}}">
+          <input type="hidden" name="letter_id" value="{{.Inbox.Letter.ID}}">
+          <button class="keep" type="submit">{{.T "post.keep"}}</button>
+        </form>
+      {{end}}
+      {{if not .Inbox.Letter.Closed}}
+        <form class="inline-form" method="post" action="/inbox/{{.Inbox.Letter.ID}}/close">
+          <button class="quiet-danger" type="submit">{{.T "letter.close.cta"}}</button>
+        </form>
+      {{end}}
+    </span>
+  </footer>
+</main>
 {{template "layout-end" .}}
 {{end}}

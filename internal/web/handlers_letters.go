@@ -106,6 +106,11 @@ func (s *Server) handleLetter(w http.ResponseWriter, r *http.Request) {
 	} else {
 		view.ContextLine = pd.T("letter.context.correspondence", view.OtherWriterLabel, anchor.PostTitle)
 	}
+	kept := []LetterView{view}
+	if err := s.markLettersKept(r, user.ID, kept); err != nil {
+		s.logger.Error("loading kept letter", "err", err)
+	}
+	view = kept[0]
 	pd.Title = pd.T("letter.page.title", view.OtherWriterLabel)
 	pd.SEO = noindexSEO()
 	pd.Inbox = &InboxView{Letter: &view}
@@ -370,7 +375,7 @@ func letterView(r *http.Request, baseDomain string, letter store.Letter, lang st
 		FromWriterLabel: writerLabel(letter.FromAuthorName, letter.FromDisplayName, letter.FromUsername),
 		FromBlogURL:     PublicBlogURL(r, baseDomain, letter.FromUsername, "/"),
 		Body:            letter.Body,
-		CreatedAt:       formatDate(letter.CreatedAt, lang),
+		CreatedAt:       deskDate(letter.CreatedAt, time.Now(), lang),
 		Read:            letter.ReadAt != nil,
 	}
 }

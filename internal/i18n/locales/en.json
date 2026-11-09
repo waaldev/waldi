@@ -263,7 +263,7 @@
   "you.post.date_error": "That date couldn't be used - check the format (YYYY/MM/DD) and that it isn't in the future.",
 
   "letter.page.title": "Letter from %s",
-  "letter.you": "you",
+  "letter.you": "You",
   "letter.context.single": "About \"%s\"",
   "letter.context.correspondence": "Correspondence with %s, about \"%s\"",
   "letter.reply.cta": "Write back",
@@ -450,6 +450,10 @@
 
   "inbox.title": "Letters",
   "inbox.heading": "Letters",
+  "inbox.sub": "Written to you, and read by no one else.",
+  "inbox.row": "%s, about %s. %s.",
+  "inbox.empty.sub": "When someone writes to you, it will wait here.",
+  "letter.back": "Back to letters",
   "inbox.daylabel": "Letters",
   "inbox.stats.daylabel": "Your posts, this morning",
   "inbox.stats.caption": "Numbers update each morning.",

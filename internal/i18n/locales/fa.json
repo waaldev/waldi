@@ -257,7 +257,7 @@
   "you.post.date_error": "این تاریخ پذیرفته نشد - قالب را (۱۴۰۵/۰۴/۰۹) و اینکه در آینده نباشد بررسی کنید.",
 
   "letter.page.title": "نامه از %s",
-  "letter.you": "تو",
+  "letter.you": "شما",
   "letter.context.single": "درباره‌ی «%s»",
   "letter.context.correspondence": "مکاتبه با %s، درباره‌ی «%s»",
   "letter.reply.cta": "نامه بنویس",
@@ -442,6 +442,10 @@
 
   "inbox.title": "نامه‌ها",
   "inbox.heading": "نامه‌ها",
+  "inbox.sub": "برای شما نوشته شده و کس دیگری آن را نمی‌خواند.",
+  "inbox.row": "%s، درباره‌ی «%s». %s.",
+  "inbox.empty.sub": "وقتی کسی برایتان بنویسد، همین‌جا منتظر می‌ماند.",
+  "letter.back": "بازگشت به نامه‌ها",
   "inbox.daylabel": "نامه‌ها",
   "inbox.stats.daylabel": "نوشته‌های شما، امروز صبح",
   "inbox.stats.caption": "این عددها هر صبح تازه می‌شوند.",
