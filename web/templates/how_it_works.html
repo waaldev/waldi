@@ -1,71 +1,54 @@
 {{define "how_it_works.html"}}
 {{template "layout-start" .}}
 {{template "platform-page-bar" .}}
-<main class="public-guide">
+<main class="public-guide house">
   <header class="public-essay-head">
-    <h1>{{.T "how.heading"}}</h1>
-    <p>{{.T "how.lead"}}</p>
+    <h1>{{.T "house.heading"}}</h1>
+    <p>{{.T "house.lead"}}</p>
   </header>
 
-  <nav class="how-toc" aria-label="{{.T "how.toc.aria"}}">
-    <a href="#reading">{{.T "how.reading.label"}}</a>
-    <a href="#stranger">{{.T "how.stranger.label"}}</a>
-    <a href="#letters">{{.T "how.letters.label"}}</a>
-    <a href="#hundred">{{.T "how.hundred.label"}}</a>
-    <a href="#writing">{{.T "how.writing.label"}}</a>
-    <a href="#never">{{.T "how.never.label"}}</a>
-  </nav>
-
-  <section class="how-section" id="reading" aria-labelledby="reading-heading">
-    <h2 id="reading-heading">{{.T "how.reading.label"}}</h2>
-    <div class="how-qa"><h3>{{.T "how.reading.account.q"}}</h3><p>{{.T "how.reading.account.a"}}</p></div>
-    <div class="how-qa"><h3>{{.T "how.reading.join.q"}}</h3><p>{{.T "how.reading.join.a"}}</p></div>
-    <div class="how-qa"><h3>{{.T "how.reading.write.q"}}</h3><p>{{.T "how.reading.write.a"}}</p></div>
+  <section class="house-section" aria-labelledby="reading-heading">
+    <h2 id="reading-heading">{{.T "house.reading.heading"}}</h2>
+    <p>{{.T "house.reading.1"}}</p>
+    <p>{{.T "house.reading.2"}}</p>
   </section>
 
-  <section class="how-section" id="stranger" aria-labelledby="stranger-heading">
-    <h2 id="stranger-heading">{{.T "how.stranger.label"}}</h2>
-    <div class="how-qa"><h3>{{.T "how.stranger.what.q"}}</h3><p>{{.T "how.stranger.what.a"}}</p></div>
-    <div class="how-qa"><h3>{{.T "how.stranger.who.q"}}</h3><p>{{.T "how.stranger.who.a"}}</p></div>
-    <div class="how-qa"><h3>{{.T "how.stranger.language.q"}}</h3><p>{{.T "how.stranger.language.a"}}</p></div>
+  <section class="house-section" aria-labelledby="stranger-heading">
+    <h2 id="stranger-heading">{{.T "house.stranger.heading"}}</h2>
+    <p>{{.T "house.stranger.1"}}</p>
+    <p>{{.T "house.stranger.2"}}</p>
   </section>
 
-  <section class="how-section" id="letters" aria-labelledby="letters-heading">
-    <h2 id="letters-heading">{{.T "how.letters.label"}}</h2>
-    <div class="how-qa"><h3>{{.T "how.letters.comments.q"}}</h3><p>{{.T "how.letters.comments.a"}}</p></div>
+  <section class="house-section" aria-labelledby="letters-heading">
+    <h2 id="letters-heading">{{.T "house.letters.heading"}}</h2>
+    <p>{{.T "house.letters.1"}}</p>
+    <p>{{.T "house.letters.2"}}</p>
   </section>
 
-  <section class="how-section" id="hundred" aria-labelledby="hundred-heading">
-    <h2 id="hundred-heading">{{.T "how.hundred.label"}}</h2>
-    <div class="how-note">
-      <h3>{{.T "how.hundred.heading"}}</h3>
-      <p>{{.T "how.hundred.body"}}</p>
-      <p>{{.T "how.hundred.body2"}}</p>
-    </div>
+  <section class="house-section" aria-labelledby="writing-heading">
+    <h2 id="writing-heading">{{.T "house.writing.heading"}}</h2>
+    <p>{{.T "house.writing.1"}}</p>
+    <p>{{.T "house.writing.2"}}</p>
+    <p>{{.T "house.writing.3"}}</p>
   </section>
 
-  <section class="how-section" id="writing" aria-labelledby="writing-heading">
-    <h2 id="writing-heading">{{.T "how.writing.label"}}</h2>
-    <div class="how-qa"><h3>{{.T "how.writing.can.q"}}</h3><p>{{.T "how.writing.can.a"}} <a href="/write">{{.T "how.writing.can.link"}}</a></p></div>
-    <div class="how-qa"><h3>{{.T "how.writing.numbers.q"}}</h3><p>{{.T "how.writing.numbers.a"}}</p></div>
-    <div class="how-qa"><h3>{{.T "how.writing.import.q"}}</h3><p>{{.T "how.writing.import.a"}} <a href="https://github.com/waaldev/waldi" dir="ltr">{{.T "landing.finish.github"}}</a></p></div>
-    <div class="how-qa"><h3>{{.T "how.writing.leave.q"}}</h3><p>{{.T "how.writing.leave.a"}}</p></div>
+  <section class="house-section" aria-labelledby="never-heading">
+    <h2 id="never-heading">{{.T "house.never.heading"}}</h2>
+    <p>{{.T "house.never.1"}}</p>
   </section>
 
-  <section class="how-section how-never" id="never" aria-labelledby="never-heading">
-    <h2 id="never-heading">{{.T "how.never.label"}}</h2>
-    <ul>
-      <li>{{.T "how.never.likes"}}</li>
-      <li>{{.T "how.never.comments"}}</li>
-      <li>{{.T "how.never.rank"}}</li>
-      <li>{{.T "how.never.ads"}}</li>
-    </ul>
+  <section class="house-section" aria-labelledby="gone-heading">
+    <h2 id="gone-heading">{{.T "house.gone.heading"}}</h2>
+    <p>{{.T "house.gone.1"}}</p>
+    <p>{{.T "house.gone.2"}}</p>
   </section>
 
-  <div class="landing-actions how-actions">
-    <a class="btn-primary" href="/read">{{.T "landing.hero.read"}}</a>
-    <a href="/signup">{{.T "landing.hero.join"}}</a>
-  </div>
+  <p class="house-sign">{{.T "house.sign"}}</p>
+
+  <footer class="house-end">
+    <p class="explore-end-line">{{.T "house.end"}}</p>
+    <p class="house-actions"><a href="/">{{.T "house.read"}}</a> <a href="/write">{{.T "landing.where.write"}}</a></p>
+  </footer>
 </main>
 {{template "platform-footer" .}}
 {{template "layout-end" .}}

@@ -730,88 +730,38 @@ a:hover:not(.btn-follow):not(.btn-primary):not(.btn-secondary):not(.quiet):not(.
   margin: 0;
 }
 .landing-end-sub:lang(fa) { font-style: normal; }
-.landing-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s3) var(--s5);
-  margin-block-start: var(--s5);
-  font-family: var(--font-sans);
-  font-size: var(--text-ui);
-}
-.landing-end .landing-actions { justify-content: center; }
-.landing-actions a { min-height: 44px; display: inline-flex; align-items: center; }
-.landing-actions a.btn-primary { margin: 0; }
 .landing + .platform-footer {
   justify-content: center;
   margin-block-start: var(--s7);
 }
 
-.how-toc {
+.house-section { margin-block-start: var(--s6); }
+.public-guide .house-section h2 { margin-block-end: var(--s3); }
+.public-guide .house-section p:last-child { margin-block-end: 0; }
+.public-guide .house-sign {
+  font-style: italic;
+  margin-block: var(--s6) 0;
+}
+.public-guide .house-sign:lang(fa) { font-style: normal; }
+.house-end {
+  text-align: center;
+  margin-block-start: var(--s7);
+}
+.public-guide .house-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--s4);
-  padding-block: var(--s2);
-  border-block: 1px solid var(--hairline);
+  justify-content: center;
+  gap: var(--s2) var(--s5);
   font-family: var(--font-sans);
-  font-size: var(--text-meta);
+  font-size: var(--text-ui);
+  margin: var(--s4) 0 0;
 }
-.public-guide .how-toc a {
+.public-guide .house-actions a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--ink-soft);
-  text-decoration: none;
 }
-.public-guide .how-toc a:hover { color: var(--ink); }
-.how-section {
-  margin-block-start: var(--s6);
-  scroll-margin-block-start: var(--s4);
-}
-.public-guide .how-section > h2 {
-  font-family: var(--font-sans);
-  font-size: var(--text-meta);
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0 var(--s4);
-  -webkit-text-stroke: 0;
-}
-.public-guide .how-section > h2:lang(fa) {
-  font-size: var(--text-ui);
-  letter-spacing: 0;
-}
-.how-qa { margin-block-end: var(--s5); }
-.how-qa:last-child { margin-block-end: 0; }
-.how-qa h3,
-.how-note h3 {
-  font-size: var(--text-feed);
-  font-weight: 500;
-  line-height: 1.35;
-  margin: 0 0 var(--s2);
-}
-.how-qa h3:lang(fa),
-.how-note h3:lang(fa) {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.6;
-  -webkit-text-stroke: 0.4px currentColor;
-}
-.public-guide .how-qa p { color: var(--ink-soft); margin: 0; }
-.how-note {
-  background: var(--paper-raised);
-  border-radius: var(--radius);
-  padding: var(--s5) var(--s4);
-}
-.public-guide .how-note p:last-child { color: var(--ink-soft); margin: 0; }
-.how-never ul {
-  margin: 0;
-  padding-inline-start: var(--s4);
-  color: var(--ink-soft);
-  line-height: 1.9;
-}
-.how-actions { margin-block-start: var(--s7); }
+.public-guide .house-actions a:first-child { color: var(--accent); text-decoration-color: currentColor; }
 
 /* ---------- article ---------- */
 
