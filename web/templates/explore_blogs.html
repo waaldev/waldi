@@ -1,21 +1,20 @@
 {{define "explore_blogs.html"}}
 {{template "layout-start" .}}
-{{template "platform-page-bar" .}}
+<header class="bar" aria-label="{{.T "nav.aria"}}">
+  {{template "wordmark" .}}
+  <nav>
+    <a href="{{.Local "/explore"}}">{{.T "explore.blogs.back"}}</a>
+    {{template "lang-toggle" .}}
+  </nav>
+</header>
 <main class="public-guide explore">
   <header class="public-essay-head">
     <h1>{{.T "explore.blogs.heading"}}</h1>
     <p>{{.T "explore.blogs.lead"}}</p>
+    {{if .Explore.Sample}}
+      <p class="explore-sample-line">{{.T "explore.blogs.sample"}} <a href="{{.Explore.Sample.URL}}">{{.T "explore.blogs.sample.link"}}</a>.</p>
+    {{end}}
   </header>
-
-  {{if .Explore.Sample}}
-  <section class="explore-sample" aria-labelledby="explore-sample-heading">
-    <h2 class="sample-label" id="explore-sample-heading"><span class="mark">※</span> {{.T "explore.blogs.sample"}}</h2>
-    <p class="feed-writer"><a href="{{.Explore.Sample.BlogURL}}">{{.Explore.Sample.WriterLabel}}</a></p>
-    <a class="feed-item" href="{{.Explore.Sample.URL}}" lang="{{.Explore.Sample.Lang}}" dir="{{.Explore.Sample.Dir}}">
-      <h3 class="feed-title">{{.Explore.Sample.Title}}</h3>
-    </a>
-  </section>
-  {{end}}
 
   {{if .Explore.Blogs}}
   <ul class="blog-list">
@@ -35,10 +34,11 @@
     {{if .Explore.Blogs}}
       <p class="explore-end-line">{{.T "explore.blogs.end"}}</p>
       <p class="explore-end-sub">{{.T "explore.blogs.end.sub"}}</p>
+      <p class="explore-end-link"><a href="/write">{{.T "landing.where.write"}}</a></p>
     {{else}}
       <p class="explore-end-line">{{.T "explore.blogs.empty"}}</p>
+      <p class="explore-end-link"><a href="/write">{{.T "explore.blogs.empty.link"}}</a></p>
     {{end}}
-    <p class="explore-end-link"><a href="/write">{{.T "how.writing.can.link"}}</a></p>
   </footer>
 </main>
 {{template "platform-footer" .}}

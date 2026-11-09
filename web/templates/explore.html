@@ -20,7 +20,7 @@
         <a class="feed-item" href="{{.URL}}">
           <p class="feed-writer">{{.WriterLabel}}{{if .FeedDate}} · {{.FeedDate}}{{end}}</p>
           <h2 class="feed-title">{{.Title}}</h2>
-          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{end}}
+          {{if .Excerpt}}<p class="feed-excerpt">{{.Excerpt}}</p>{{else}}<p class="feed-excerpt explore-images">{{$.T "explore.images"}}</p>{{end}}
         </a>
       </li>
     {{end}}
