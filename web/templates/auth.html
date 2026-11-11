@@ -78,7 +78,7 @@
           <label for="blog_name">{{.T "auth.join.name.before"}}</label>
           <input id="blog_name" name="blog_name" value="{{.Auth.BlogName}}" autocomplete="name" placeholder="{{.T "auth.join.name.example"}}" required maxlength="80" size="9"{{if eq .Auth.ErrorField "blog_name"}} aria-invalid="true" aria-describedby="join-error" autofocus{{else if not .Auth.ErrorField}} autofocus{{end}}>{{.T "auth.join.name.after"}}
           <label for="username">{{.T "auth.join.user.before"}}</label>
-          <span class="join-host" dir="ltr"><input id="username" name="username" value="{{.Auth.Username}}" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32" pattern="[a-z0-9\-]{3,32}" size="7"{{if eq .Auth.ErrorField "username"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>.{{.BaseDomain}}</span>{{.T "auth.join.user.after"}}
+          <span class="join-host" dir="ltr"><input id="username" name="username" value="{{.Auth.Username}}" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="{{.T "auth.field.username.example"}}" required minlength="3" maxlength="32" pattern="[a-z0-9\-]{3,32}" size="7"{{if eq .Auth.ErrorField "username"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>.{{.BaseDomain}}</span>{{.T "auth.join.user.after"}}
           <label for="email">{{.T "auth.join.email.before"}}</label>
           <input id="email" name="email" value="{{.Auth.Email}}" type="email" dir="ltr" autocomplete="email" placeholder="{{.T "auth.join.email.example"}}" required size="14"{{if eq .Auth.ErrorField "email"}} aria-invalid="true" aria-describedby="join-error" autofocus{{end}}>{{.T "auth.join.email.after"}}
           <label for="password">{{.T "auth.join.password.before"}}</label>
@@ -115,7 +115,7 @@
             });
             user.addEventListener("input", function () {
               userTouched = user.value !== "";
-              var clean = user.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+              var clean = user.value.split("@")[0].toLowerCase().replace(/[^a-z0-9-]/g, "");
               if (clean !== user.value) user.value = clean;
             });
             reveal.addEventListener("click", function () {
